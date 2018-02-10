@@ -13,15 +13,34 @@ namespace FAILang
         public static Dictionary<string, Function> functions = new Dictionary<string, Function>();
         public static Dictionary<string, IType> variables = new Dictionary<string, IType>();
 
-        public static readonly List<string> reservedNames = new List<string>
+        public static readonly string[] reservedNames = new string[]
         {
+            "i",
             "true",
             "false",
             "void",
             "lambda",
             "update",
             "memo",
-            "self"
+            "self",
+
+            "real",
+            "imaginary",
+            "floor",
+            "ceiling",
+            "round",
+            "abs",
+            "sqrt",
+            "conjugate",
+            "sin",
+            "cos",
+            "tan",
+            "acos",
+            "asin",
+            "atan",
+            "log10",
+            "ln",
+            "log"
         };
 
         public static void InitalizeGlobals()

@@ -25,12 +25,21 @@ namespace FAILang.Types
             {
                 if (value.Real != 0)
                 {
-                    if (value.Imaginary > 0)
+                    if (value.Imaginary == 1)
+                        return $"{value.Real}+i";
+                    else if (value.Imaginary == -1)
+                        return $"{value.Real}-i";
+                    else if (value.Imaginary > 0 && value.Imaginary != 1)
                         return $"{value.Real}+{value.Imaginary}i";
                     else
                         return $"{value.Real}{value.Imaginary}i";
                 }
-                return $"{value.Imaginary}i";
+                else if (value.Imaginary == 1)
+                    return $"i";
+                else if (value.Imaginary == -1)
+                    return $"-i";
+                else
+                    return $"{value.Imaginary}i";
             }
             return value.Real.ToString();
         }

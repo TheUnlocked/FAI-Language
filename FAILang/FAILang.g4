@@ -55,7 +55,6 @@ expression
 	| expression op=( MULTIPLY
 					| DIVIDE
 					| MODULO ) expression
-	| m_number=NUMBER expression
 	| expression op=( PLUS
 					| SUBTRACT ) expression
 	| expression op=( EQ
@@ -141,6 +140,10 @@ fragment ESC
 		| '"'
 		)
 	;
+fragment E
+	: 'e'
+	| 'E'
+	;
 
 PLUS
 	: '+'
@@ -183,13 +186,9 @@ NOT
 	: '~'
 	;
 
-fragment E
-	: 'e'
-	| 'E'
-	;
-
 NUMBER
 	: DIGIT* '.'? DIGIT+ (E '-'? DIGIT+)? 'i'?
+	| 'i'
 	;
 STRING
 	: '"'

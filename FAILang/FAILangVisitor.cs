@@ -84,7 +84,7 @@ namespace FAILang
             var type = context.type();
             var arg = context.arg();
             var op = context.op;
-            var m_number = context.m_number;
+            //var m_number = context.m_number;
             var prefix = context.prefix();
             var cond = context.cond();
             var callparams = context.callparams();
@@ -103,7 +103,9 @@ namespace FAILang
 
                 if (number != null)
                 {
-                    if (number.Text.EndsWith('i'))
+                    if (number.Text.Equals("i"))
+                        result = new Number(Complex.ImaginaryOne);
+                    else if (number.Text.EndsWith('i'))
                         result = new Number(Complex.ImaginaryOne * Convert.ToDouble(number.Text.TrimEnd('i')));
                     else
                         result = new Number(Convert.ToDouble(number.Text));
@@ -134,11 +136,11 @@ namespace FAILang
             {
                 return new Expression(new NamedArgument(arg.GetText()));
             }
-            else if (op != null || m_number != null)
+            else if (op != null /*|| m_number != null*/)
             {
                 var exprs = context.expression();
                 Operator oper = Operator.MULTIPLY;
-                if (m_number == null)
+                if (/*m_number == null*/ true)
                     switch (op.Text)
                     {
                         case "+":
@@ -181,7 +183,7 @@ namespace FAILang
                             oper = Operator.LE_EQUAL;
                             break;
                     }
-                result = new OperatorExpression(oper, VisitExpression(exprs[0]), m_number != null ? new Number(Convert.ToDouble(m_number.Text)) : VisitExpression(exprs[1]));
+                result = new OperatorExpression(oper, VisitExpression(exprs[0]), /*m_number != null ? new Number(Convert.ToDouble(m_number.Text)) :*/ VisitExpression(exprs[1]));
             }
             else if (prefix != null)
             {
