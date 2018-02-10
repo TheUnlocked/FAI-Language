@@ -26,7 +26,7 @@ namespace FAILang
                     FAILangVisitor visitor = new FAILangVisitor();
 
                     IType val = visitor.VisitCall(expressionContext);
-                    if (val is Expression e)
+                    if (val is IUnevaluated e)
                         Console.WriteLine(e.Evaluate(Global.variables));
                     else if (val != null)
                         Console.WriteLine(val);

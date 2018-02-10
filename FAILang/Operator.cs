@@ -101,31 +101,31 @@ namespace FAILang
                     return left.Equals(right) ? MathBool.FALSE : MathBool.TRUE;
                 case Operator.GREATER:
                     if (n1 != null && n2 != null)
-                        if (n1.IsReal && n1.IsReal)
+                        if (n1.value.Real != n2.value.Real)
                             return (n1.value.Real > n2.value.Real) ? MathBool.TRUE : MathBool.FALSE;
                         else
-                            return (n1.value.Magnitude > n2.value.Magnitude) ? MathBool.TRUE : MathBool.FALSE;
+                            return (n1.value.Imaginary > n2.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
                     return new Error("WrongType", $"The > comparison operator cannot be applied to types {left.TypeName} and {right.TypeName}");
                 case Operator.LESS:
                     if (n1 != null && n2 != null)
-                        if (n1.IsReal && n1.IsReal)
+                        if (n1.value.Real != n2.value.Real)
                             return (n1.value.Real < n2.value.Real) ? MathBool.TRUE : MathBool.FALSE;
                         else
-                            return (n1.value.Magnitude < n2.value.Magnitude) ? MathBool.TRUE : MathBool.FALSE;
+                            return (n1.value.Imaginary < n2.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
                     return new Error("WrongType", $"The < comparison operator cannot be applied to types {left.TypeName} and {right.TypeName}");
                 case Operator.GR_EQUAL:
                     if (n1 != null && n2 != null)
-                        if (n1.IsReal && n1.IsReal)
+                        if (n1.value.Real != n2.value.Real)
                             return (n1.value.Real >= n2.value.Real) ? MathBool.TRUE : MathBool.FALSE;
                         else
-                            return (n1.value.Magnitude >= n2.value.Magnitude) ? MathBool.TRUE : MathBool.FALSE;
+                            return (n1.value.Imaginary >= n2.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
                     return new Error("WrongType", $"The >= comparison operator cannot be applied to types {left.TypeName} and {right.TypeName}");
                 case Operator.LE_EQUAL:
                     if (n1 != null && n2 != null)
-                        if (n1.IsReal && n1.IsReal)
+                        if (n1.value.Real != n2.value.Real)
                             return (n1.value.Real <= n2.value.Real) ? MathBool.TRUE : MathBool.FALSE;
                         else
-                            return (n1.value.Magnitude <= n2.value.Magnitude) ? MathBool.TRUE : MathBool.FALSE;
+                            return (n1.value.Imaginary <= n2.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
                     return new Error("WrongType", $"The <= comparison operator cannot be applied to types {left.TypeName} and {right.TypeName}");
             }
             return new Error("UnexpectedError", "An unexpected error occured with an operator.");

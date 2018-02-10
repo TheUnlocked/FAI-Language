@@ -20,7 +20,7 @@ def
 	;
 
 lambda
-	: LAMBDA L_PAREN fparams COLON expression R_PAREN
+	: memoize=MEMO? LAMBDA L_PAREN fparams COLON expression R_PAREN
 	;
 
 fparams
@@ -48,14 +48,14 @@ expression
 	| union
 	| expression L_PAREN callparams R_PAREN
 	| prefix expression
-	| expression indexed_accessor
+	| expression indexer
 
 	// Operator expressions
 	| <assoc=right> expression op=EXPONENT expression
 	| expression op=( MULTIPLY
 					| DIVIDE
 					| MODULO ) expression
-	| expression expression
+	| m_number=NUMBER expression
 	| expression op=( PLUS
 					| SUBTRACT ) expression
 	| expression op=( EQ
@@ -83,10 +83,10 @@ prefix
 	| SUBTRACT
 	;
 
-indexed_accessor
+indexer
 	: L_BRAC
-		( expression (ELIPSIS expression?)?
-		| (expression? ELIPSIS)? expression
+		( l_index=expression (elipsis=ELIPSIS r_index=expression?)?
+		| (l_index=expression? elipsis=ELIPSIS)? r_index=expression
 		) R_BRAC
 	;
 

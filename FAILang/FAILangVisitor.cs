@@ -58,7 +58,7 @@ namespace FAILang
                 }
                 else
                 {
-                    Expression expr = VisitExpression(exp) as Expression;
+                    IType expr = VisitExpression(exp);
                     Function f = new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), expr, memoize);
 
                     Global.variables.Remove(fname);
@@ -74,7 +74,7 @@ namespace FAILang
                     return new Error("DefineFailed", "The update keyword is required to change the definition of a function or outer argument.");
                 }
                 Global.functions.Remove(vname);
-                Global.variables[vname] = VisitExpression(exp) as Expression;
+                Global.variables[vname] = VisitExpression(exp);
             }
             return null;
         }
@@ -84,12 +84,13 @@ namespace FAILang
             var type = context.type();
             var arg = context.arg();
             var op = context.op;
-            bool sideMultiply = context.expression().Length == 2 && op == null;
+            var m_number = context.m_number;
             var prefix = context.prefix();
             var cond = context.cond();
             var callparams = context.callparams();
             var lambda = context.lambda();
             var union = context.union();
+            var indexer = context.indexer();
 
             IType result = null;
 
@@ -124,7 +125,8 @@ namespace FAILang
                 {
                     result = boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
                 }
-                else if (void_type != null) {
+                else if (void_type != null)
+                {
                     result = Types.Void.instance;
                 }
             }
@@ -132,11 +134,11 @@ namespace FAILang
             {
                 return new Expression(new NamedArgument(arg.GetText()));
             }
-            else if (op != null || sideMultiply)
+            else if (op != null || m_number != null)
             {
                 var exprs = context.expression();
                 Operator oper = Operator.MULTIPLY;
-                if (!sideMultiply)
+                if (m_number == null)
                     switch (op.Text)
                     {
                         case "+":
@@ -179,7 +181,7 @@ namespace FAILang
                             oper = Operator.LE_EQUAL;
                             break;
                     }
-                result = new OperatorExpression(oper, VisitExpression(exprs[0]) as Expression, VisitExpression(exprs[1]) as Expression);
+                result = new OperatorExpression(oper, VisitExpression(exprs[0]), m_number != null ? new Number(Convert.ToDouble(m_number.Text)) : VisitExpression(exprs[1]));
             }
             else if (prefix != null)
             {
@@ -193,19 +195,19 @@ namespace FAILang
                         pre = Prefix.NEGATIVE;
                         break;
                 }
-                result = new PrefixExpression(pre, VisitExpression(context.expression(0)) as Expression);
+                result = new PrefixExpression(pre, VisitExpression(context.expression(0)));
             }
             else if (cond != null)
             {
                 var conditions = cond.condition();
-                Expression[] conds = new Expression[conditions.Length];
-                Expression[] exprs = new Expression[conditions.Length];
+                IType[] conds = new IType[conditions.Length];
+                IType[] exprs = new IType[conditions.Length];
                 for (int i = 0; i < conditions.Length; i++)
                 {
-                    conds[i] = VisitExpression(conditions[i].expression(0)) as Expression;
-                    exprs[i] = VisitExpression(conditions[i].expression(1)) as Expression;
+                    conds[i] = VisitExpression(conditions[i].expression(0));
+                    exprs[i] = VisitExpression(conditions[i].expression(1));
                 }
-                result = new CondExpression(conds, exprs, VisitExpression(cond.expression()) as Expression);
+                result = new CondExpression(conds, exprs, VisitExpression(cond.expression()));
             }
             else if (callparams != null)
             {
@@ -216,12 +218,12 @@ namespace FAILang
                     ins[i] = VisitExpression(exprs[i]);
                 }
 
-                result = new FunctionExpression(VisitExpression(context.expression(0)) as Expression, ins);
+                result = new FunctionExpression(VisitExpression(context.expression(0)), ins);
             }
             else if (lambda != null)
             {
-                Expression expr = VisitExpression(lambda.expression()) as Expression;
-                result = new Function(lambda.fparams().arg().Select(x => x.GetText()).ToArray(), expr);
+                IType expr = VisitExpression(lambda.expression());
+                result = new Function(lambda.fparams().arg().Select(x => x.GetText()).ToArray(), expr, lambda.memoize != null);
             }
             else if (union != null)
             {
@@ -231,12 +233,22 @@ namespace FAILang
                     vals[i] = VisitExpression(exprs[i]);
                 result = new Union(vals);
             }
+            else if (indexer != null)
+            {
+                IType l_expr = null;
+                if (indexer.l_index != null)
+                    l_expr = VisitExpression(indexer.l_index);
+                IType r_expr = null;
+                if (indexer.r_index != null)
+                    r_expr = VisitExpression(indexer.r_index);
+                result = new IndexerExpression(VisitExpression(context.expression(0)), l_expr, r_expr, indexer.elipsis != null);
+            }
             else
             {
-                return VisitExpression(context.expression(0)) as Expression;
+                return VisitExpression(context.expression(0));
             }
 
-            return new Expression(result);
+            return result;
         }
     }
 }

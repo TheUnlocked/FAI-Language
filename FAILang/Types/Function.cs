@@ -12,12 +12,12 @@ namespace FAILang.Types
         public string TypeName => "Function";
 
         public readonly string[] fparams;
-        public readonly Expression expression;
+        public readonly IType expression;
 
         public bool memoize;
         public Dictionary<int, IType> memos = new Dictionary<int, IType>();
 
-        public Function(string[] fparams, Expression expression, bool memoize = false)
+        public Function(string[] fparams, IType expression, bool memoize = false)
         {
             this.fparams = fparams.ToArray();
             this.expression = expression;
@@ -53,7 +53,9 @@ namespace FAILang.Types
                     lookup[fparams[i]] = args[i];
                 }
                 lookup["self"] = this;
-                var ret = expression.Evaluate(lookup);
+                var ret = expression;
+                if (ret is IUnevaluated u)
+                    ret = u.Evaluate(lookup);
                 if (memoize)
                     memos[GetArgListHashCode(args)] = ret;
                 return ret;
@@ -75,7 +77,7 @@ namespace FAILang.Types
         {
             var hashCode = 315160578;
             hashCode = hashCode * -1521134295 + EqualityComparer<string[]>.Default.GetHashCode(fparams);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Expression>.Default.GetHashCode(expression);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IType>.Default.GetHashCode(expression);
             return hashCode;
         }
 

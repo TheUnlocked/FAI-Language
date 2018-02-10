@@ -22,15 +22,15 @@ namespace FAILang
             switch (op)
             {
                 case Prefix.NOT:
-                    if (target is MathBool)
+                    if (target is MathBool b)
                     {
-                        return (target as MathBool).value ? MathBool.FALSE : MathBool.TRUE;
+                        return b.value ? MathBool.FALSE : MathBool.TRUE;
                     }
                     return new Error("WrongType", $"The ~ prefix cannot be applied to type {target.TypeName}");
                 case Prefix.NEGATIVE:
-                    if (target is Number)
+                    if (target is Number n)
                     {
-                        return new Number(-(target as Number).value);
+                        return new Number(-n.value);
                     }
                     return new Error("WrongType", $"The - prefix cannot be applied to type {target.TypeName}");
             }

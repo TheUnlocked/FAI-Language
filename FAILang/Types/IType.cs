@@ -10,6 +10,6 @@ namespace FAILang.Types
 {
     public interface IType
     {
-        string TypeName { get; }   
+        string TypeName { get; }
     }
 }

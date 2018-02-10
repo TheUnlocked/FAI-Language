@@ -12,9 +12,9 @@ namespace FAILang.Types.Unevaluated
 
         public string fname = null;
         public IType[] args;
-        public Expression func_expr = null;
+        public IType func_expr = null;
 
-        public FunctionExpression(Expression func_expr, IType[] args)
+        public FunctionExpression(IType func_expr, IType[] args)
         {
             this.func_expr = func_expr;
             this.args = args;
@@ -22,7 +22,9 @@ namespace FAILang.Types.Unevaluated
 
         public IType Evaluate(Dictionary<string, IType> lookups)
         {
-            IType func = func_expr.Evaluate(lookups);
+            IType func = func_expr;
+            if (func is IUnevaluated u)
+                func  = u.Evaluate(lookups);
             if (func is Error)
                 return func;
 

@@ -10,11 +10,11 @@ namespace FAILang.Types.Unevaluated
     {
         public string TypeName => "CondExpression";
 
-        public Expression[] conds;
-        public Expression[] exprs;
-        public Expression default_expr;
+        public IType[] conds;
+        public IType[] exprs;
+        public IType default_expr;
 
-        public CondExpression(Expression[] conds, Expression[] exprs, Expression default_expr)
+        public CondExpression(IType[] conds, IType[] exprs, IType default_expr)
         {
             this.conds = conds;
             this.exprs = exprs;
@@ -25,12 +25,12 @@ namespace FAILang.Types.Unevaluated
         {
             for (int i = 0; i < conds.Length; i++)
             {
-                if (conds[i].Evaluate(lookups) == MathBool.TRUE)
+                if ((conds[i] is IUnevaluated u ? u.Evaluate(lookups) : conds[i]) == MathBool.TRUE)
                 {
-                    return exprs[i].Evaluate(lookups);
+                    return exprs[i] is IUnevaluated retu ? retu.Evaluate(lookups) : exprs[i];
                 }
             }
-            return default_expr.Evaluate(lookups);
+            return default_expr is IUnevaluated retd ? retd.Evaluate(lookups) : default_expr;
         }
     }
 }

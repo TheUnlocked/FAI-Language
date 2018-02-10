@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    class MathString : IType
+    class MathString : IType, IIndexable
     {
         public string TypeName => "String";
+        public int Length => value.Length;
+
         public string value;
 
         public MathString(string value)
@@ -33,5 +35,9 @@ namespace FAILang.Types
         {
             return -1584136870 + EqualityComparer<string>.Default.GetHashCode(value);
         }
+
+        public IType IndexRange(int left_b, int right_b) => new MathString(value.Substring(left_b, right_b - left_b + 1));
+
+        public IType Index(int index) => new MathString(value[index].ToString());
     }
 }
