@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace FAILang.Types.Unevaluated
 {
@@ -28,7 +29,11 @@ namespace FAILang.Types.Unevaluated
             {
                 expr = u.Evaluate(lookups);
             }
-            if (expr is IIndexable item)
+            if (expr is Union union)
+            {
+                return new Union(union.values.Select(x => new IndexerExpression(x, leftIndex, rightIndex, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
+            }
+            else if (expr is IIndexable item)
             {
                 int left = 0;
                 int right = item.Length - 1;

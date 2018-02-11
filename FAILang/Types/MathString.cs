@@ -11,7 +11,7 @@ namespace FAILang.Types
         public string TypeName => "String";
         public int Length => value.Length;
 
-        public string value;
+        public readonly string value;
 
         public MathString(string value)
         {

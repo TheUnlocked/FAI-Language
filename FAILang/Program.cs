@@ -21,6 +21,7 @@ namespace FAILang
                     FAILangLexer lexer = new FAILangLexer(inputStream);
                     CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
                     FAILangParser parser = new FAILangParser(commonTokenStream);
+                    parser.ErrorHandler = new BailErrorStrategy();
 
                     FAILangParser.CallContext expressionContext = parser.call();
                     FAILangVisitor visitor = new FAILangVisitor();
@@ -34,6 +35,10 @@ namespace FAILang
                 catch (StackOverflowException)
                 {
                     Console.WriteLine(new Error("StackOverflow", "The call stack has overflowed"));
+                }
+                catch (Antlr4.Runtime.Misc.ParseCanceledException)
+                {
+                    Console.WriteLine(new Error("ParseError", "The input failed to parse."));
                 }
                 catch (Exception e)
                 {
