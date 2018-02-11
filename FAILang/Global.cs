@@ -80,10 +80,13 @@ namespace FAILang
                 x => new Error("WrongType", $"{x} is not a valid input to round")),
                 "c");
 
-            functions["abs"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(x.value.Magnitude),
-                x => new Error("WrongType", $"{x} has no absolute value")),
-                "n");
+            functions["abs"] = new ExternFunction(x => {
+                if (x[0] is Number n)
+                    return new Number(n.value.Magnitude);
+                else if (x[0] is Types.Vector v)
+                    return functions["sqrt"].Evaluate(new IType[] { v.items.Select(a => Operator.MULTIPLY.Operate(a, a)).Aggregate((a, b) => Operator.ADD.Operate(a, b)) });
+                return new Error("WrongType", $"{x[0]} has no absolute value");
+                }, "n");
 
             functions["sqrt"] = new ExternFunction(ValidateType<Number>(
                 x => new Number(Complex.Sqrt(x.value)),

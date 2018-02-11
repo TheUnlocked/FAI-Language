@@ -13,7 +13,6 @@ namespace FAILang
     {
         ADD,
         SUBTRACT,
-        PLUS_MINUS,
         MULTIPLY,
         DIVIDE,
         MODULO,
@@ -40,6 +39,9 @@ namespace FAILang
             Number n1 = left as Number;
             Number n2 = right as Number;
 
+            Types.Vector v1 = left as Types.Vector;
+            Types.Vector v2 = right as Types.Vector;
+
             MathString s1 = left as MathString;
             MathString s2 = right as MathString;
 
@@ -51,6 +53,8 @@ namespace FAILang
                 case Operator.ADD:
                     if (n1 != null && n2 != null)
                         return new Number(n1.value + n2.value);
+                    if (v1 != null && v2 != null)
+                        return new Types.Vector(v1.items.Combine(v2.items, (x, y) => Operator.ADD.Operate(x, y)));
                     else if (s1 != null && s2 != null)
                         return new MathString(s1.value + s2.value);
                     else if (b1 != null && b2 != null)
@@ -60,21 +64,27 @@ namespace FAILang
                     if (n1 != null && n2 != null)
                         return new Number(n1.value - n2.value);
                     return new Error("WrongType", $"The - operator cannot be applied to types {left.TypeName} and {right.TypeName}");
-                case Operator.PLUS_MINUS:
-                    if (n1 != null && n2 != null)
-                        return new Union(new IType[]{
-                        new Number(n1.value + n2.value),
-                        new Number(n1.value - n2.value) } );
-                    return new Error("WrongType", $"The +- operator cannot be applied to types {left.TypeName} and {right.TypeName}");
                 case Operator.MULTIPLY:
                     if (n1 != null && n2 != null)
                         return new Number(n1.value * n2.value);
+                    else if (v1 != null && v2 != null)
+                    {
+                        return v1.items.Combine(v2.items, (x, y) => Operator.MULTIPLY.Operate(x, y)).Aggregate((x, y) => Operator.ADD.Operate(x, y));
+                    }
+                    else if ((v1 ?? v2) != null && (n1 ?? n2) != null)
+                    {
+                        return new Types.Vector((v1 ?? v2).items.Select((x, y) => Operator.MULTIPLY.Operate(x, n1 ?? n2)).ToArray());
+                    }
                     else if (b1 != null && b2 != null)
                         return b1.value && b2.value ? MathBool.TRUE : MathBool.FALSE;
                     return new Error("WrongType", $"The * operator cannot be applied to types {left.TypeName} and {right.TypeName}");
                 case Operator.DIVIDE:
                     if (n1 != null && n2 != null)
                         return new Number(n1.value / n2.value);
+                    else if ((v1 ?? v2) != null && (n1 ?? n2) != null)
+                    {
+                        return new Types.Vector((v1 ?? v2).items.Select((x, y) => Operator.DIVIDE.Operate(x, n1 ?? n2)).ToArray());
+                    }
                     return new Error("WrongType", $"The / operator cannot be applied to types {left.TypeName} and {right.TypeName}");
                 case Operator.MODULO:
                     if (n1 != null && n2 != null)
@@ -129,6 +139,17 @@ namespace FAILang
                     return new Error("WrongType", $"The <= comparison operator cannot be applied to types {left.TypeName} and {right.TypeName}");
             }
             return new Error("UnexpectedError", "An unexpected error occured with an operator.");
+        }
+
+        private static T[] Combine<T>(this T[] l1, T[] l2, Func<T, T, T> f) where T : IType {
+            if (l1.Length == l2.Length)
+            {
+                T[] newL = new T[l1.Length];
+                for (int i = 0; i < l1.Length; i++)
+                    newL[i] = f.Invoke(l1[i], l2[i]);
+                return newL;
+            }
+            return null;
         }
     }
 }
