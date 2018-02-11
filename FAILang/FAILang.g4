@@ -59,8 +59,8 @@ expression
 					| SUBTRACT ) expression
 	| expression op=( EQ
 					| NE
-					| GT
-					| LT
+					| R_ARR
+					| L_ARR
 					| GE
 					| LE ) expression
 
@@ -75,6 +75,11 @@ type
 	| t_string=STRING
 	| t_boolean=BOOLEAN
 	| t_void=VOID
+	| vector
+	;
+
+vector
+	: L_ARR (expression COMMA)* expression R_ARR
 	;
 
 prefix
@@ -169,10 +174,10 @@ EQ
 NE
 	: '~='
 	;
-GT
+R_ARR
 	: '>'
 	;
-LT
+L_ARR
 	: '<'
 	;
 GE
@@ -184,34 +189,6 @@ LE
 
 NOT
 	: '~'
-	;
-
-NUMBER
-	: DIGIT* '.'? DIGIT+ (E '-'? DIGIT+)? 'i'?
-	| 'i'
-	;
-STRING
-	: '"'
-		( ESC
-		| STRING_CHAR
-		)*? '"'
-	;
-BOOLEAN
-	: 'true'
-	| 'false'
-	;
-VOID
-	: 'void'
-	;
-
-LAMBDA
-	: 'lambda'
-	;
-UPDATE
-	: 'update'
-	;
-MEMO
-	: 'memo'
 	;
 
 L_PAREN
@@ -246,6 +223,36 @@ VERT_LINE
 	;
 ELIPSIS
 	: '...'
+	| '..'
+	;
+
+NUMBER
+	: DIGIT* '.' DIGIT+ (E '-'? DIGIT+)? 'i'?
+	| DIGIT+ ('.' DIGIT+)? (E '-'? DIGIT+)? 'i'?
+	| 'i'
+	;
+STRING
+	: '"'
+		( ESC
+		| STRING_CHAR
+		)*? '"'
+	;
+BOOLEAN
+	: 'true'
+	| 'false'
+	;
+VOID
+	: 'void'
+	;
+
+LAMBDA
+	: 'lambda'
+	;
+UPDATE
+	: 'update'
+	;
+MEMO
+	: 'memo'
 	;
 
 NAME

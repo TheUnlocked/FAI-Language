@@ -11,7 +11,7 @@ namespace FAILang.Types
     {
         public string TypeName => "Number";
 
-        public Complex value;
+        public readonly Complex value;
         public bool IsReal => value.Imaginary == 0;
 
         public Number(Complex value)
