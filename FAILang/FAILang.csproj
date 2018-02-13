@@ -25,7 +25,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Antlr4 Include="FAILang.g4">
+    <Antlr4 Include="Grammar\FAILang.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>FAILang</CustomToolNamespace>
       <Listener>True</Listener>
