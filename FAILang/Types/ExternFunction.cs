@@ -7,7 +7,7 @@ namespace FAILang.Types
 {
     public delegate IType ExternalFunction(params IType[] ins);
 
-    class ExternFunction : Function
+    public class ExternFunction : Function
     {
         ExternalFunction func;
 

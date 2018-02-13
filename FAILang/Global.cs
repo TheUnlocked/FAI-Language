@@ -1,4 +1,5 @@
-﻿using FAILang.Types;
+﻿using FAILang.Builtins;
+using FAILang.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace FAILang
         public static Dictionary<string, Function> functions = new Dictionary<string, Function>();
         public static Dictionary<string, IType> variables = new Dictionary<string, IType>();
 
-        public static readonly string[] reservedNames = new string[]
+        public static readonly List<string> reservedNames = new List<string>
         {
             "i",
             "true",
@@ -22,124 +23,19 @@ namespace FAILang
             "lambda",
             "update",
             "memo",
-            "self",
-
-            "real",
-            "imaginary",
-            "floor",
-            "ceiling",
-            "round",
-            "abs",
-            "sqrt",
-            "conjugate",
-            "sin",
-            "cos",
-            "tan",
-            "acos",
-            "asin",
-            "atan",
-            "log10",
-            "ln",
-            "log"
+            "self"
         };
 
-        public static void InitalizeGlobals()
+        public static void LoadBuiltins(IBuiltinProvider builtinProvider)
         {
-            ExternalFunction ValidateType<T>(Func<T, IType> f, Func<IType, IType> fail) where T : IType
+            foreach (var pair in builtinProvider.GetBuiltins())
             {
-                return x =>
-                {
-                    if (x[0] is T t)
-                    {
-                        return f.Invoke(t);
-                    }
-                    return fail.Invoke(x[0]);
-                };
+                functions[pair.Item1] = pair.Item2;
             }
-
-            // Number functions
-            functions["real"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(x.value.Real),
-                x => new Error("WrongType", $"{x} has no real component")),
-                "c");
-            functions["imaginary"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(x.value.Imaginary * Complex.ImaginaryOne),
-                x => new Error("WrongType", $"{x} has no imaginary component")),
-                "c");
-
-            functions["floor"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(new Complex(Math.Floor(x.value.Real), Math.Floor(x.value.Imaginary))),
-                x => new Error("WrongType", $"{x} is not a valid input to floor")),
-                "c");
-            functions["ceiling"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(new Complex(Math.Ceiling(x.value.Real), Math.Ceiling(x.value.Imaginary))),
-                x => new Error("WrongType", $"{x} is not a valid input to ceiling")),
-                "c");
-            functions["round"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(new Complex(Math.Round(x.value.Real), Math.Round(x.value.Imaginary))),
-                x => new Error("WrongType", $"{x} is not a valid input to round")),
-                "c");
-
-            functions["abs"] = new ExternFunction(x => {
-                if (x[0] is Number n)
-                    return new Number(n.value.Magnitude);
-                else if (x[0] is Types.Vector v)
-                    return functions["sqrt"].Evaluate(new IType[] { v.items.Select(a => Operator.MULTIPLY.Operate(a, a)).Aggregate((a, b) => Operator.ADD.Operate(a, b)) });
-                return new Error("WrongType", $"{x[0]} has no absolute value");
-                }, "n");
-
-            functions["sqrt"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Sqrt(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to sqrt")),
-                "a");
-            functions["conjugate"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Conjugate(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to conjugate")),
-                "c");
-
-            functions["sin"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Sin(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to sin")),
-                "theta");
-            functions["cos"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Cos(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to cos")),
-                "theta");
-            functions["tan"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Tan(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to tan")),
-                "theta");
-
-            functions["acos"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Acos(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to cos^-1 (acos)")),
-                "s");
-            functions["asin"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Asin(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to sin^-1 (asin)")),
-                "s");
-            functions["atan"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Atan(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to tan^-1 (atan)")),
-                "s");
-
-            functions["log10"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Log10(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to log10")),
-                "a");
-            functions["ln"] = new ExternFunction(ValidateType<Number>(
-                x => new Number(Complex.Log(x.value)),
-                x => new Error("WrongType", $"{x} is not a valid input to ln")),
-                "a");
-            functions["log"] = new ExternFunction(xs =>
-                {
-                    if (xs[0] is Number a && xs[1] is Number b)
-                    {
-                        return new Number(Complex.Log(a.value, b.value.Magnitude));
-                    }
-                    return new Error("WrongType", $"{xs[0]} and {xs[1]} are not valid inputs to log");
-                },
-                "a", "b");
+            foreach (string name in builtinProvider.GetReservedNames())
+            {
+                reservedNames.Add(name);
+            }
         }
     }
 }

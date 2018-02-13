@@ -1,5 +1,6 @@
 ﻿using System;
 using Antlr4.Runtime;
+using FAILang.Builtins;
 using FAILang.Types;
 using FAILang.Types.Unevaluated;
 
@@ -9,7 +10,7 @@ namespace FAILang
     {
         static void Main(string[] args)
         {
-            Global.InitalizeGlobals();
+            Global.LoadBuiltins(new NumberBuiltinProvider());
 
             // Read-eval-print loop
             while (true) {
