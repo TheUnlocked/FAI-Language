@@ -26,15 +26,18 @@ namespace FAILang
             "self"
         };
 
-        public static void LoadBuiltins(IBuiltinProvider builtinProvider)
+        public static void LoadBuiltins(params IBuiltinProvider[] builtinProviders)
         {
-            foreach (var pair in builtinProvider.GetBuiltins())
+            foreach (var builtinProvider in builtinProviders)
             {
-                functions[pair.Item1] = pair.Item2;
-            }
-            foreach (string name in builtinProvider.GetReservedNames())
-            {
-                reservedNames.Add(name);
+                foreach (var pair in builtinProvider.GetBuiltins())
+                {
+                    functions[pair.Item1] = pair.Item2;
+                }
+                foreach (string name in builtinProvider.GetReservedNames())
+                {
+                    reservedNames.Add(name);
+                }
             }
         }
     }

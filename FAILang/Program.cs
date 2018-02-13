@@ -17,6 +17,9 @@ namespace FAILang
                 try
                 {
                     string input = Console.ReadLine();
+                    while (input.EndsWith("  "))
+                        input += Console.ReadLine();
+
                     AntlrInputStream inputStream = new AntlrInputStream(input);
 
                     FAILangLexer lexer = new FAILangLexer(inputStream);
