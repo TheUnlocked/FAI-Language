@@ -30,6 +30,25 @@ namespace FAILang.Types
         }
 
         public override string ToString() => $"<{String.Join(", ", (object[])items)}>";
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Vector v)
+            {
+                if (v.Length != Length)
+                    return false;
+                for (int i = 0; i < v.Length; i++)
+                    if (!items[i].Equals(v.items[i]))
+                        return false;
+                return true;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return -1319053796 + EqualityComparer<IType[]>.Default.GetHashCode(items);
+        }
     }
 
     class UnevaluatedVector : IUnevaluated
