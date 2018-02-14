@@ -48,7 +48,7 @@ namespace FAILang.Types.Unevaluated
                 return new Union(result, lookups);
             }
             if (left is IUnevaluated || right is IUnevaluated)
-                return new OperatorExpression(op, left, right);
+                return new BakedExpression(new OperatorExpression(op, left, right), lookups);
             return op.Operate(left, right);
         }
     }

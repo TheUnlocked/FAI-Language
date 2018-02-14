@@ -32,7 +32,7 @@ namespace FAILang.Types.Unevaluated
                 {
                     var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
                     nexpr.conds[0] = t;
-                    return nexpr;
+                    return new BakedExpression(nexpr, lookups);
                 }
                 if (t == MathBool.TRUE)
                 {
@@ -43,7 +43,7 @@ namespace FAILang.Types.Unevaluated
                     {
                         var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
                         nexpr.exprs[0] = ret;
-                        return nexpr;
+                        return new BakedExpression(nexpr, lookups);
                     }
                     return ret;
                 }

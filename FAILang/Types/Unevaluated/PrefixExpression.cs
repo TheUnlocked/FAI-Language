@@ -36,7 +36,7 @@ namespace FAILang.Types.Unevaluated
                 return new Union(result, lookups);
             }
             if (t is IUnevaluated)
-                return new PrefixExpression(pre, t);
+                return new BakedExpression(new PrefixExpression(pre, t), lookups);
 
             return pre.Operate(t);
         }
