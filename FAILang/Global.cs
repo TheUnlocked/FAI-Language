@@ -1,5 +1,6 @@
 ﻿using FAILang.Builtins;
 using FAILang.Types;
+using FAILang.Types.Unevaluated;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,13 @@ namespace FAILang
                     reservedNames.Add(name);
                 }
             }
+        }
+
+        public static IType Evaluate(IType expr)
+        {
+            while (expr is IUnevaluated u)
+                expr = u.Evaluate(variables);
+            return expr;
         }
     }
 }

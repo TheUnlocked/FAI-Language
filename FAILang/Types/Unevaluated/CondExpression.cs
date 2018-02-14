@@ -25,9 +25,27 @@ namespace FAILang.Types.Unevaluated
         {
             for (int i = 0; i < conds.Length; i++)
             {
-                if ((conds[i] is IUnevaluated u ? u.Evaluate(lookups) : conds[i]) == MathBool.TRUE)
+                IType t = conds[i];
+                if (t is IUnevaluated u)
+                    t = u.Evaluate(lookups);
+                if (t is IUnevaluated)
                 {
-                    return exprs[i] is IUnevaluated retu ? retu.Evaluate(lookups) : exprs[i];
+                    var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
+                    nexpr.conds[0] = t;
+                    return nexpr;
+                }
+                if (t == MathBool.TRUE)
+                {
+                    IType ret = exprs[i];
+                    if (ret is IUnevaluated uexpr)
+                        ret = uexpr.Evaluate(lookups);
+                    if (ret is IUnevaluated)
+                    {
+                        var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
+                        nexpr.exprs[0] = ret;
+                        return nexpr;
+                    }
+                    return ret;
                 }
             }
             return default_expr is IUnevaluated retd ? retd.Evaluate(lookups) : default_expr;

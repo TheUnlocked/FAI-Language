@@ -25,7 +25,7 @@ namespace FAILang.Types.Unevaluated
             IType func = func_expr;
             if (func is IUnevaluated u)
                 func  = u.Evaluate(lookups);
-            if (func is Error)
+            if (func is IPopup)
                 return func;
 
             IType[] args = new IType[this.args.Length];
@@ -48,6 +48,27 @@ namespace FAILang.Types.Unevaluated
                 else
                     return new Error("WrongType", $"The * operator cannot be applied to types {func.TypeName} and {args[0].TypeName}");
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
+        }
+    }
+
+    public class BakedExpression : IUnevaluated
+    {
+        public string TypeName => "BakedExpression";
+
+        IType expression;
+        Dictionary<string, IType> lookups;
+
+        public BakedExpression(IType expression, Dictionary<string, IType> lookups)
+        {
+            this.expression = expression;
+            this.lookups = lookups;
+        }
+
+        public IType Evaluate(Dictionary<string, IType> _)
+        {
+            if (expression is IUnevaluated u)
+                return u.Evaluate(lookups);
+            return expression;
         }
     }
 }

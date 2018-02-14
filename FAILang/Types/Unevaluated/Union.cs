@@ -69,7 +69,7 @@ namespace FAILang.Types.Unevaluated
                 return Void.instance;
             foreach (IType e in evaled)
             {
-                if (e is Error)
+                if (e is IPopup)
                     return e;
             }
             return new Union(evaled);

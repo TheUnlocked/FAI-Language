@@ -55,7 +55,7 @@ namespace FAILang.Types
                 lookup["self"] = this;
                 var ret = expression;
                 if (ret is IUnevaluated u)
-                    ret = u.Evaluate(lookup);
+                    ret = new BakedExpression(u, lookup);
                 if (memoize)
                     memos[GetArgListHashCode(args)] = ret;
                 return ret;

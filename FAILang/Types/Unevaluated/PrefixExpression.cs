@@ -25,16 +25,19 @@ namespace FAILang.Types.Unevaluated
             if (target is IUnevaluated utarget)
             {
                 t = utarget.Evaluate(lookups);
-                if (t is Union union)
-                {
-                    IType[] result = new IType[union.values.Length];
-                    for (int i = 0; i < result.Length; i++)
-                    {
-                        result[i] = new PrefixExpression(pre, union.values[i]).Evaluate(lookups);
-                    }
-                    return new Union(result, lookups);
-                }
             }
+            if (t is Union union)
+            {
+                IType[] result = new IType[union.values.Length];
+                for (int i = 0; i < result.Length; i++)
+                {
+                    result[i] = new PrefixExpression(pre, union.values[i]).Evaluate(lookups);
+                }
+                return new Union(result, lookups);
+            }
+            if (t is IUnevaluated)
+                return new PrefixExpression(pre, t);
+
             return pre.Operate(t);
         }
     }
