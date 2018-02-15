@@ -13,7 +13,9 @@ namespace FAILang.Types.Unevaluated
 
         public Union(IType[] values, Dictionary<string, IType> lookups = null)
         {
-            this.values = values;
+            this.values = values.Where(x => x != Void.instance).ToArray();
+            if (this.values.Length == 0)
+                this.values = new IType[] { Void.instance };
             if (lookups != null)
                 this.values = Flatten(lookups);
         }

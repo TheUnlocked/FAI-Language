@@ -28,6 +28,17 @@ namespace FAILang.Types.Unevaluated
                 IType t = conds[i];
                 if (t is IUnevaluated u)
                     t = u.Evaluate(lookups);
+                if (t is Union tu)
+                {
+                    IType[] result = new IType[tu.values.Length];
+                    for (int j = 0; j < result.Length; j++)
+                    {
+                        var ncond = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
+                        ncond.conds[0] = tu.values[j];
+                        result[j] = ncond.Evaluate(lookups);
+                    }
+                    return new Union(result, lookups);
+                }
                 if (t is IUnevaluated)
                 {
                     var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
@@ -39,7 +50,7 @@ namespace FAILang.Types.Unevaluated
                     IType ret = exprs[i];
                     if (ret is IUnevaluated uexpr)
                         ret = uexpr.Evaluate(lookups);
-                    if (ret is IUnevaluated)
+                    if (ret is IUnevaluated && !(ret is Union))
                     {
                         var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
                         nexpr.exprs[0] = ret;

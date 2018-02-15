@@ -50,6 +50,8 @@ namespace FAILang.Types
                         }
                         return new Union(results).Evaluate(lookup);
                     }
+                    if (args[i] is Error)
+                        return args[i];
                     lookup[fparams[i]] = args[i];
                 }
                 lookup["self"] = this;

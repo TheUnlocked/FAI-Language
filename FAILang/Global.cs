@@ -45,7 +45,17 @@ namespace FAILang
         public static IType Evaluate(IType expr)
         {
             while (expr is IUnevaluated u)
+            {
+                if (u is Union un)
+                {
+                    if (!un.values.Any(x => x is IUnevaluated))
+                    {
+                        expr = un.Evaluate(variables);
+                        break;
+                    }
+                }
                 expr = u.Evaluate(variables);
+            }
             return expr;
         }
     }
