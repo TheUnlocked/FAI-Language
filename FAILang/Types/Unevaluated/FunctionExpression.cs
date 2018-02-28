@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +23,7 @@ namespace FAILang.Types.Unevaluated
             IType func = func_expr;
             if (func is IUnevaluated u)
                 func  = u.Evaluate(lookups);
-            if (func is Error)
+            if (func is IPopup)
                 return func;
 
             IType[] args = new IType[this.args.Length];

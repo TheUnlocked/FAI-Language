@@ -29,10 +29,10 @@ namespace FAILang
     {
         public static IType Operate(this Operator op, IType left, IType right)
         {
-            if (left is Error)
+            if (left is IPopup)
                 if (!(left is Types.Void && (op == Operator.EQUALS || op == Operator.NOT_EQUALS)))
                     return left;
-            if (right is Error)
+            if (right is IPopup)
                 if (!(right is Types.Void && (op == Operator.EQUALS || op == Operator.NOT_EQUALS)))
                     return right;
 

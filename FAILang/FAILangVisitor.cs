@@ -74,7 +74,10 @@ namespace FAILang
                     return new Error("DefineFailed", "The update keyword is required to change the definition of a function or outer argument.");
                 }
                 Global.functions.Remove(vname);
-                Global.variables[vname] = VisitExpression(exp);
+                var v = Global.Evaluate(VisitExpression(exp));
+                if (v is Error)
+                    return v;
+                Global.variables[vname] = v;
             }
             return null;
         }

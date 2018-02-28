@@ -17,7 +17,7 @@ namespace FAILang
     {
         public static IType Operate(this Prefix op, IType target)
         {
-            if (target is Error)
+            if (target is IPopup)
                 return target;
             switch (op)
             {

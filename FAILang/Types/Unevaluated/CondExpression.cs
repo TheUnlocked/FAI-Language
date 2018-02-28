@@ -25,9 +25,38 @@ namespace FAILang.Types.Unevaluated
         {
             for (int i = 0; i < conds.Length; i++)
             {
-                if ((conds[i] is IUnevaluated u ? u.Evaluate(lookups) : conds[i]) == MathBool.TRUE)
+                IType t = conds[i];
+                if (t is IUnevaluated u)
+                    t = u.Evaluate(lookups);
+                if (t is Union tu)
                 {
-                    return exprs[i] is IUnevaluated retu ? retu.Evaluate(lookups) : exprs[i];
+                    IType[] result = new IType[tu.values.Length];
+                    for (int j = 0; j < result.Length; j++)
+                    {
+                        var ncond = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
+                        ncond.conds[0] = tu.values[j];
+                        result[j] = ncond.Evaluate(lookups);
+                    }
+                    return new Union(result, lookups);
+                }
+                if (t is IUnevaluated)
+                {
+                    var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
+                    nexpr.conds[0] = t;
+                    return new BakedExpression(nexpr, lookups);
+                }
+                if (t == MathBool.TRUE)
+                {
+                    IType ret = exprs[i];
+                    if (ret is IUnevaluated uexpr)
+                        ret = uexpr.Evaluate(lookups);
+                    if (ret is IUnevaluated && !(ret is Union))
+                    {
+                        var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
+                        nexpr.exprs[0] = ret;
+                        return new BakedExpression(nexpr, lookups);
+                    }
+                    return ret;
                 }
             }
             return default_expr is IUnevaluated retd ? retd.Evaluate(lookups) : default_expr;

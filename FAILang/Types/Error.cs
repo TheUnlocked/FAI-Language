@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    public class Error : IType
+    public class Error : IPopup
     {
-        public virtual string TypeName => "Error";
+        public string TypeName => "Error";
 
         public string name;
         public string message;

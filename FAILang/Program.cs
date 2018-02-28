@@ -30,10 +30,8 @@ namespace FAILang
                     FAILangParser.CallContext expressionContext = parser.call();
                     FAILangVisitor visitor = new FAILangVisitor();
 
-                    IType val = visitor.VisitCall(expressionContext);
-                    if (val is IUnevaluated e)
-                        Console.WriteLine(e.Evaluate(Global.variables));
-                    else if (val != null)
+                    IType val = Global.Evaluate(visitor.VisitCall(expressionContext));
+                    if (val != null)
                         Console.WriteLine(val);
                 }
                 catch (StackOverflowException)

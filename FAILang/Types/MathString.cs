@@ -36,7 +36,7 @@ namespace FAILang.Types
             return -1584136870 + EqualityComparer<string>.Default.GetHashCode(value);
         }
 
-        public IType IndexRange(int left_b, int right_b) => new MathString(value.Substring(left_b, right_b - left_b + 1));
+        public IType IndexRange(int left_b, int right_b) => new MathString(new String(value.Skip(left_b).SkipLast(Length-right_b-1).ToArray()));
 
         public IType Index(int index) => new MathString(value[index].ToString());
     }

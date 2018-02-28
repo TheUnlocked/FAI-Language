@@ -50,14 +50,16 @@ namespace FAILang.Types
                         }
                         return new Union(results).Evaluate(lookup);
                     }
+                    if (args[i] is Error)
+                        return args[i];
                     lookup[fparams[i]] = args[i];
                 }
                 lookup["self"] = this;
                 var ret = expression;
                 if (ret is IUnevaluated u)
-                    ret = u.Evaluate(lookup);
+                    ret = new BakedExpression(u, lookup);
                 if (memoize)
-                    memos[GetArgListHashCode(args)] = ret;
+                    return new CallbackWrapper(ret, x => memos[GetArgListHashCode(args)] = x);
                 return ret;
             }
             return new Error("BadArguments", $"The function lambda({string.Join(", ", fparams)}: <expression>) can't fit {args.Length} arguments.");
