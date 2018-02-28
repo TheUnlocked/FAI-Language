@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,27 +46,6 @@ namespace FAILang.Types.Unevaluated
                 else
                     return new Error("WrongType", $"The * operator cannot be applied to types {func.TypeName} and {args[0].TypeName}");
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
-        }
-    }
-
-    public class BakedExpression : IUnevaluated
-    {
-        public string TypeName => "BakedExpression";
-
-        IType expression;
-        Dictionary<string, IType> lookups;
-
-        public BakedExpression(IType expression, Dictionary<string, IType> lookups)
-        {
-            this.expression = expression;
-            this.lookups = lookups;
-        }
-
-        public IType Evaluate(Dictionary<string, IType> _)
-        {
-            if (expression is IUnevaluated u)
-                return u.Evaluate(lookups);
-            return expression;
         }
     }
 }

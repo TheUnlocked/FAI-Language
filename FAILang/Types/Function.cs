@@ -59,7 +59,7 @@ namespace FAILang.Types
                 if (ret is IUnevaluated u)
                     ret = new BakedExpression(u, lookup);
                 if (memoize)
-                    memos[GetArgListHashCode(args)] = ret;
+                    return new CallbackWrapper(ret, x => memos[GetArgListHashCode(args)] = x);
                 return ret;
             }
             return new Error("BadArguments", $"The function lambda({string.Join(", ", fparams)}: <expression>) can't fit {args.Length} arguments.");
