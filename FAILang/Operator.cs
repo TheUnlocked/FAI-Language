@@ -101,6 +101,25 @@ namespace FAILang
                         {
                             return new Number(Math.Pow(n1.value.Real, n2.value.Real));
                         }
+                        else if (n1.value.Real == 0 && !n1.IsReal && n2.IsReal && n2.value.Real % 1 == 0)
+                        {
+                            Complex c;
+                            switch (((n2.value.Real % 4) + 4) % 4){
+                                case 1:
+                                    c = new Complex(0, 1);
+                                    break;
+                                case 2:
+                                    c = new Complex(-1, 0);
+                                    break;
+                                case 3:
+                                    c = new Complex(0, -1);
+                                    break;
+                                case 0:
+                                    c = new Complex(1, 0);
+                                    break;
+                            }
+                            return new Number(c * Math.Pow(n1.value.Imaginary, n2.value.Real));
+                        }
                         return new Number(Complex.Pow(n1.value, n2.value));
                     }
                     return new Error("WrongType", $"The / operator cannot be applied to types {left.TypeName} and {right.TypeName}");
