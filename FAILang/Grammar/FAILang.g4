@@ -24,11 +24,11 @@ lambda
 	;
 
 fparams
-	: ((arg COMMA)* arg)?
+	: ((arg COMMA)* arg elipsis=ELIPSIS?)?
 	;
 
 callparams
-	: ((expression COMMA)* expression)?
+	: ((expression elipsis=ELIPSIS? COMMA)* expression elipsis=ELIPSIS?)?
 	;
 
 name
@@ -70,7 +70,12 @@ type
 	| t_string=STRING
 	| t_boolean=BOOLEAN
 	| t_void=VOID
+	| tuple
 	| vector
+	;
+
+tuple
+	: L_PAREN (expression COMMA)* expression R_PAREN
 	;
 
 vector

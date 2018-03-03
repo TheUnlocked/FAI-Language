@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace FAILang.Types
 {
@@ -68,7 +69,24 @@ namespace FAILang.Types
             for(int i = 0; i < items.Length; i++)
             {
                 if (items[i] is IUnevaluated u)
+                {
                     evalVector[i] = u.Evaluate(lookups);
+                    if (evalVector[i] is Union un)
+                    {
+                        for (int k = i; k < items.Length; k++)
+                        {
+                            evalVector[k] = items[k];
+                        }
+                        IType[] vectors = new IType[un.values.Length];
+                        for (int j = 0; j < vectors.Length; j++)
+                        {
+                            var unVector = evalVector.ToArray();
+                            unVector[i] = un.values[j];
+                            vectors[j] = new UnevaluatedVector(unVector).Evaluate(lookups);
+                        }
+                        return new Union(vectors);
+                    }
+                }
                 else
                     evalVector[i] = items[i];
             }
