@@ -32,53 +32,47 @@ namespace FAILang
 
         public override IType VisitDef([NotNull] FAILangParser.DefContext context)
         {
-            var fname = context.fname()?.GetText();
-            var vname = context.vname()?.GetText();
+            var name = context.name().GetText();
             var update = context.update;
             var exp = context.expression();
 
-            if (fname != null)
+            if (Global.reservedNames.Contains(name))
+                return new Error("DefineFailed", $"{name} is a reserved name.");
+            if (update == null && Global.globalVariables.ContainsKey(name))
+                return new Error("DefineFailed", "The update keyword is required to change a function or variable.");
+
+            bool memoize = context.memoize != null;
+
+            // `update memo name` pattern
+            if (exp == null && memoize)
             {
-                if (Global.reservedNames.Contains(fname))
-                    return new Error("DefineFailed", $"{fname} is a reserved name.");
-                if (update == null && (Global.functions.ContainsKey(fname) || Global.variables.ContainsKey(fname)))
+                if (!Global.globalVariables.ContainsKey(name))
+                    return new Error("UpdateFailed", $"{name} is not defined");
+                if (Global.globalVariables.TryGetValue(name, out var val) && val is Function func)
                 {
-                    return new Error("DefineFailed", "The update keyword is required to change the definition of a function or outer argument.");
-                }
-
-                bool memoize = context.memoize != null;
-
-                if (Global.functions.ContainsKey(fname) && exp == null && memoize)
-                {
-                    var f = Global.functions[fname];
-                    if (f.memoize)
-                        f.memos.Clear();
+                    if (func.memoize)
+                        func.memos.Clear();
                     else
-                        return new Error("UpdateFailed", $"{fname} is not memoized");
+                        func.memoize = true;
                 }
                 else
-                {
-                    IType expr = VisitExpression(exp);
-                    Function f = new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), expr, memoize);
-
-                    Global.variables.Remove(fname);
-                    Global.functions[fname] = f;
-                }
+                    return new Error("UpdateFailed", $"{name} is not a function");
             }
-            else if (vname != null)
+            else if (context.fparams() != null)
             {
-                if (Global.reservedNames.Contains(vname))
-                    return new Error("DefineFailed", $"{vname} is a reserved name.");
-                if (update == null && (Global.functions.ContainsKey(vname) || Global.variables.ContainsKey(vname)))
-                {
-                    return new Error("DefineFailed", "The update keyword is required to change the definition of a function or outer argument.");
-                }
-                Global.functions.Remove(vname);
+                IType expr = VisitExpression(exp);
+                Function f = new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), expr, memoize);
+
+                Global.globalVariables[name] = f;
+            }
+            else
+            {
                 var v = Global.Evaluate(VisitExpression(exp));
                 if (v is Error)
                     return v;
-                Global.variables[vname] = v;
+                Global.globalVariables[name] = v;
             }
+
             return null;
         }
 

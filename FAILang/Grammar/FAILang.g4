@@ -14,9 +14,9 @@ call
 	;
 
 def
-	: update=UPDATE? memoize=MEMO? fname L_PAREN fparams R_PAREN EQ expression
-	| update=UPDATE? vname EQ expression
-	| update=UPDATE memoize=MEMO fname
+	: update=UPDATE? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
+	| update=UPDATE? name EQ expression
+	| update=UPDATE memoize=MEMO name
 	;
 
 lambda
@@ -31,11 +31,7 @@ callparams
 	: ((expression COMMA)* expression)?
 	;
 
-fname
-	: NAME
-	;
-
-vname
+name
 	: NAME
 	;
 

@@ -12,8 +12,9 @@ namespace FAILang
 {
     public static class Global
     {
-        public static Dictionary<string, Function> functions = new Dictionary<string, Function>();
-        public static Dictionary<string, IType> variables = new Dictionary<string, IType>();
+        public static Dictionary<string, IType> globalVariables = new Dictionary<string, IType>();
+
+        public static readonly Dictionary<string, IType> noVariables = new Dictionary<string, IType>();
 
         public static readonly List<string> reservedNames = new List<string>
         {
@@ -33,7 +34,7 @@ namespace FAILang
             {
                 foreach (var pair in builtinProvider.GetBuiltins())
                 {
-                    functions[pair.Item1] = pair.Item2;
+                    globalVariables[pair.Item1] = pair.Item2;
                 }
                 foreach (string name in builtinProvider.GetReservedNames())
                 {
@@ -50,11 +51,11 @@ namespace FAILang
                 {
                     if (!un.values.Any(x => x is IUnevaluated))
                     {
-                        expr = un.Evaluate(variables);
+                        expr = un.Evaluate(noVariables);
                         break;
                     }
                 }
-                expr = u.Evaluate(variables);
+                expr = u.Evaluate(noVariables);
             }
             return expr;
         }

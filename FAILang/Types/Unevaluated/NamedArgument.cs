@@ -25,9 +25,9 @@ namespace FAILang.Types.Unevaluated
                     return (val as IUnevaluated).Evaluate(lookups);
                 return val;
             }
-            else if (Global.functions.ContainsKey(name))
-                return Global.functions[name];
-            return new Error("InvalidName", $"The name {name} is neither a named function nor an argument.");
+            else if (Global.globalVariables.ContainsKey(name))
+                return Global.globalVariables[name];
+            return new Error("InvalidName", $"The name {name} is neither globally defined nor an argument.");
         }
     }
 }
