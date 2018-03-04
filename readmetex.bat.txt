@@ -1,0 +1,1 @@
+python -m readme2tex --usepackage amsmath --svgdir svgs/ --output README.md README_TeX.md

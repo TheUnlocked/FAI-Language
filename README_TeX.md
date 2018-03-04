@@ -1,12 +1,12 @@
 # About FAI
 FAI (or FAI lang) stands for **F**unctional **A**legbraic, and **I**nterpreted language, and that's what it strives to be. **FAI is a purely functional language with algebraic syntax.** That said, FAI is not just a functional calculator. While FAI borrows syntax from algebra, it in itself is not algebra, and the user must implement any non-basic algebraic functions. For example, if one wanted to solve a trinomial, they could implement the quadratic formula.
 
-<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/master/svgs//aaf78c77fd22cac9c585c960351835ef.svg?invert_in_darkmode" align=middle width=145.45792469999998pt height=36.7526973pt/></p>
+$$ x = \frac{-b \pm \sqrt{b^{2}-4ac}}{2a} $$
 ```fai
 plus_minus(a, b) = (a + b | a - b)
 quadratic(a, b, c) = plus_minus(-b, sqrt(b^2 - 4*a*c)) / 2*a
 ```
-<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/master/svgs//969a4afec608b081de4df21cda2729d0.svg?invert_in_darkmode" align=middle width=395.32508564999995pt height=36.7526973pt/></p>
+$$ \text{for} \;\; x^2-x-2=0, \;\; x=\frac{-1 \pm \sqrt{1^{2}-4\cdot 1\cdot -2}}{2\cdot 1}=2,-1 $$
 ```fai
 quadratic(1, -1, -2)
 > (2 | -1)
@@ -22,7 +22,10 @@ A programmer familiar with Scheme (or another LISP-like language) might have no 
 factorial(x) = {x = 1: 1; x * factorial(x - 1)}
 ```
 Perhaps you don't see how that's any easier to read, but after being processed through a yet-to-be-written FAI to TeX "transpiler," that function could be automatically represented like this:
-<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/master/svgs//06c8ecf6c4b5051a5a15600f042a1487.svg?invert_in_darkmode" align=middle width=335.7193587pt height=49.315569599999996pt/></p>
+$$ \text{factorial}(x)= \begin{cases}
+\text{for} \; x = 1, & 1\\ 
+\text{otherwise}, & x \cdot \text{factorial}(x-1)
+\end{cases} $$
 Once someone sees the TeXed variant, it's very easy to connect the syntax to the mathematical definition. While this isn't true piecewise notation, it helps connect the code to the mathematical function better, and it's more intuitive, both of which are arguably more important than having the exact correct notation.
 
 So as a complete answer to what the purpose of FAI is, **FAI exists to serve as a programming language that allows for teaching a functional paradigm within the comfort of algebraic syntax.**
