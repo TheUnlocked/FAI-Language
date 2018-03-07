@@ -65,9 +65,15 @@ namespace FAILang.Types
             return new Error("BadArguments", $"The function lambda({string.Join(", ", fparams)}: <expression>) can't fit {args.Length} arguments.");
         }
 
+        protected virtual string ExpressionString => "<expression>";
+
         public override string ToString()
         {
-            return $"lambda({string.Join(", ", fparams)}: <expression>)";
+            string memo = memoize ? (fparams.Length == 0 ? "memo" : "memo ") : "";
+            if (fparams.Length == 1 && !memoize)
+                return $"{fparams[0]} -> {ExpressionString}";
+            else
+                return $"({memo}{string.Join(", ", fparams)}) -> {ExpressionString}";
         }
 
         public override bool Equals(object obj)
