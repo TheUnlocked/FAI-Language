@@ -5,7 +5,7 @@ grammar FAILang;
  */
 
 calls
-	: call* end
+	: (call end)*
 	;
 
 call

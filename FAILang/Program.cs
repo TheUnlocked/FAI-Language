@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using Antlr4.Runtime;
 using FAILang.Builtins;
@@ -30,12 +31,13 @@ namespace FAILang
                     FAILangParser parser = new FAILangParser(commonTokenStream);
                     parser.ErrorHandler = new BailErrorStrategy();
 
-                    FAILangParser.CallContext expressionContext = parser.call();
+                    FAILangParser.CallsContext expressionContext = parser.calls();
                     FAILangVisitor visitor = new FAILangVisitor();
 
-                    IType val = Global.Evaluate(visitor.VisitCall(expressionContext));
-                    if (val != null)
-                        Console.WriteLine(val);
+                    var vals = visitor.VisitCalls(expressionContext).Select(x => Global.Evaluate(x));
+                    foreach (var val in vals)
+                        if (val != null)
+                            Console.WriteLine(val);
                 }
                 catch (StackOverflowException)
                 {

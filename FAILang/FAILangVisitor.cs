@@ -13,10 +13,9 @@ namespace FAILang
 {
     public class FAILangVisitor : FAILangBaseVisitor<IType>
     {
-        public override IType VisitCalls([NotNull] FAILangParser.CallsContext context)
+        public new IType[] VisitCalls([NotNull] FAILangParser.CallsContext context)
         {
-            foreach (var call in context.call()) VisitCall(call);
-            return null;
+            return context.call().Select(call => VisitCall(call)).ToArray();
         }
 
         public override IType VisitCall([NotNull] FAILangParser.CallContext context)
