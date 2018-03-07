@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Antlr4.Runtime;
 using FAILang.Builtins;
 using FAILang.Types;
@@ -11,6 +12,8 @@ namespace FAILang
         static void Main(string[] args)
         {
             Global.LoadBuiltins(new NumberBuiltinProvider());
+            Console.InputEncoding = Encoding.Unicode;
+            Console.OutputEncoding = Encoding.Unicode;
 
             // Read-eval-print loop
             while (true) {

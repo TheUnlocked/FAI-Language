@@ -237,8 +237,13 @@ namespace FAILang
             return new CondExpression(conds, exprs, VisitExpression(context.expression()));
         }
 
-        public override IType VisitLambda([NotNull] FAILangParser.LambdaContext context) =>
-            new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), VisitExpression(context.expression()), context.memoize != null);
+        public override IType VisitLambda([NotNull] FAILangParser.LambdaContext context)
+        {
+            if (context.fparams() != null)
+                return new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), VisitExpression(context.expression()), context.memoize != null);
+            else
+                return new Function(new string[] { context.arg().GetText() }, VisitExpression(context.expression()), false);
+        }
 
         public override IType VisitUnion([NotNull] FAILangParser.UnionContext context)
         {

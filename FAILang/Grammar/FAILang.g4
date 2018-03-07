@@ -20,7 +20,8 @@ def
 	;
 
 lambda
-	: memoize=MEMO? LAMBDA L_PAREN fparams COLON expression R_PAREN
+	: L_PAREN memoize=MEMO? fparams R_PAREN ARROW expression
+	| arg elipsis=ELIPSIS? ARROW expression
 	;
 
 fparams
@@ -224,6 +225,9 @@ VERT_LINE
 ELIPSIS
 	: '...'
 	| '..'
+	;
+ARROW
+	: '->'
 	;
 
 NUMBER
