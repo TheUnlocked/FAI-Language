@@ -8,11 +8,10 @@ namespace FAILang.Types.Unevaluated
     {
         public string TypeName => "FunctionExpression";
 
-        public string fname = null;
-        public IType[] args;
+        public (IType, bool)[] args;
         public IType func_expr = null;
 
-        public FunctionExpression(IType func_expr, IType[] args)
+        public FunctionExpression(IType func_expr, (IType, bool)[] args)
         {
             this.func_expr = func_expr;
             this.args = args;
@@ -22,29 +21,45 @@ namespace FAILang.Types.Unevaluated
         {
             IType func = func_expr;
             if (func is IUnevaluated u)
-                func  = u.Evaluate(lookups);
+                func = u.Evaluate(lookups);
             if (func is IPopup)
                 return func;
 
-            IType[] args = new IType[this.args.Length];
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (this.args[i] is IUnevaluated)
+            if (func is Function f) {
+                List<IType> args = new List<IType>();
+                for (int i = 0; i < this.args.Length; i++)
                 {
-                    args[i] = (this.args[i] as IUnevaluated).Evaluate(lookups);
+                    var arg = this.args[i].Item1;
+                    if (arg is IUnevaluated uneval)
+                    {
+                        arg = uneval.Evaluate(lookups);
+                    }
+                    if (this.args[i].Item2)
+                    {
+                        if(arg is Tuple tu)
+                        {
+                            for (int j = 0; j < tu.items.Length; j++)
+                            {
+                                args.Add(tu.items[j]);
+                            }
+                        }
+                        else
+                        {
+                            return new Error("NotExpandable", $"An object of type {arg.TypeName} cannot be expanded into arguments via tuple expansion.");
+                        }
+                    }
+                    else
+                    {
+                        args.Add(arg);
+                    }
                 }
-                else
-                {
-                    args[i] = this.args[i];
-                }
+                return f.Evaluate(args.ToArray());
             }
-            if (func is Function f)
-                return f.Evaluate(args);
             else if (func is Number n1 && args.Length == 1)
-                if (args[0] is Number n2)
+                if (args[0].Item1 is Number n2)
                     return new Number(n1.value * n2.value);
                 else
-                    return new Error("WrongType", $"The * operator cannot be applied to types {func.TypeName} and {args[0].TypeName}");
+                    return new Error("WrongType", $"The * operator cannot be applied to types {func.TypeName} and {args[0].Item1.TypeName}");
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }
     }

@@ -42,7 +42,7 @@ namespace FAILang.Types
                 }
                 return func(args);
             }
-            return new Error("BadArguments", $"The function lambda({string.Join(", ", fparams)}: <external>) can't fit {args.Length} arguments.");
+            return new Error("BadArguments", $"The function {this} can't fit {args.Length} arguments.");
         }
 
         protected override string ExpressionString => "<external>";

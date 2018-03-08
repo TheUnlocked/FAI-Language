@@ -60,7 +60,7 @@ namespace FAILang
             else if (context.fparams() != null)
             {
                 IType expr = VisitExpression(exp);
-                Function f = new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), expr, memoize);
+                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, memoize);
 
                 Global.globalVariables[name] = f;
             }
@@ -78,7 +78,7 @@ namespace FAILang
         public override IType VisitExpression([NotNull] FAILangParser.ExpressionContext context)
         {
             var type = context.type();
-            var arg = context.arg();
+            var name = context.name();
             var op = context.op;
             var prefix = context.prefix();
             var cond = context.cond();
@@ -87,8 +87,10 @@ namespace FAILang
             var union = context.union();
             var indexer = context.indexer();
 
-            if      (type != null)      return VisitType(type);
-            else if (arg != null)       return VisitArg(arg);
+            if      (type != null)
+                return VisitType(type);
+            else if (name != null)
+                return VisitName(name);
             else if (op != null)
             {
                 var exprs = context.expression();
@@ -154,14 +156,9 @@ namespace FAILang
             else if (cond != null)      return VisitCond(cond);
             else if (callparams != null)    
             {
-                var exprs = callparams.expression();
-                IType[] ins = new IType[exprs.Length];
-                for (int i = 0; i < ins.Length; i++)
-                {
-                    ins[i] = VisitExpression(exprs[i]);
-                }
-
-                return new FunctionExpression(VisitExpression(context.expression(0)), ins);
+                return new FunctionExpression(VisitExpression(context.expression(0)),
+                    callparams.arg()
+                        .Select(x => (VisitExpression(x.expression()), x.elipsis != null)).ToArray());
             }
             else if (lambda != null)    return VisitLambda(lambda);
             else if (union != null)     return VisitUnion(union);
@@ -179,7 +176,7 @@ namespace FAILang
             return VisitExpression(context.expression(0));
         }
 
-        public override IType VisitArg([NotNull] FAILangParser.ArgContext context) =>
+        public override IType VisitName([NotNull] FAILangParser.NameContext context) =>
             new NamedArgument(context.GetText());
 
         public override IType VisitType([NotNull] FAILangParser.TypeContext context)
@@ -189,6 +186,7 @@ namespace FAILang
             var boolean = context.t_boolean;
             var void_type = context.t_void;
             var vector = context.vector();
+            var tuple = context.tuple();
 
             if (number != null)
             {
@@ -216,12 +214,17 @@ namespace FAILang
                 return boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
             else if (vector != null)
                 return VisitVector(vector);
+            else if (tuple != null)
+                return VisitTuple(tuple);
             else
                 return Types.Void.instance;
         }
 
         public override IType VisitVector([NotNull] FAILangParser.VectorContext context) =>
             new UnevaluatedVector(context.expression().Select(x => VisitExpression(x)).ToArray());
+
+        public override IType VisitTuple([NotNull] FAILangParser.TupleContext context) =>
+            new UnevaluatedTuple(context.expression().Select(x => VisitExpression(x)).ToArray());
 
         public override IType VisitCond([NotNull] FAILangParser.CondContext context)
         {
@@ -239,9 +242,9 @@ namespace FAILang
         public override IType VisitLambda([NotNull] FAILangParser.LambdaContext context)
         {
             if (context.fparams() != null)
-                return new Function(context.fparams().arg().Select(x => x.GetText()).ToArray(), VisitExpression(context.expression()), context.memoize != null);
+                return new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), VisitExpression(context.expression()), context.memoize != null);
             else
-                return new Function(new string[] { context.arg().GetText() }, VisitExpression(context.expression()), false);
+                return new Function(new string[] { context.param().GetText() }, VisitExpression(context.expression()), false);
         }
 
         public override IType VisitUnion([NotNull] FAILangParser.UnionContext context)

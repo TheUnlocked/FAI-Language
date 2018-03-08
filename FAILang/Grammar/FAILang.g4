@@ -21,22 +21,26 @@ def
 
 lambda
 	: L_PAREN memoize=MEMO? fparams R_PAREN ARROW expression
-	| arg elipsis=ELIPSIS? ARROW expression
+	| param elipsis=ELIPSIS? ARROW expression
 	;
 
 fparams
-	: ((arg COMMA)* arg elipsis=ELIPSIS?)?
+	: ((param COMMA)* param elipsis=ELIPSIS?)?
 	;
 
 callparams
-	: ((expression elipsis=ELIPSIS? COMMA)* expression elipsis=ELIPSIS?)?
+	: ((arg COMMA)* arg)?
+	;
+
+arg
+	: expression elipsis=ELIPSIS?
 	;
 
 name
 	: NAME
 	;
 
-arg
+param
 	: NAME
 	;
 
@@ -63,7 +67,7 @@ expression
 	| lambda
 	| cond
 	| type
-	| arg
+	| name
 	;
 
 type
@@ -76,7 +80,8 @@ type
 	;
 
 tuple
-	: L_PAREN (expression COMMA)* expression R_PAREN
+	: L_PAREN (expression COMMA)* expression COMMA? R_PAREN
+	| L_PAREN COMMA R_PAREN
 	;
 
 vector

@@ -62,7 +62,7 @@ namespace FAILang.Types
                     return new CallbackWrapper(ret, x => memos[GetArgListHashCode(args)] = x);
                 return ret;
             }
-            return new Error("BadArguments", $"The function lambda({string.Join(", ", fparams)}: <expression>) can't fit {args.Length} arguments.");
+            return new Error("BadArguments", $"The function {this} can't fit {args.Length} arguments.");
         }
 
         protected virtual string ExpressionString => "<expression>";
@@ -73,7 +73,7 @@ namespace FAILang.Types
             if (fparams.Length == 1 && !memoize)
                 return $"{fparams[0]} -> {ExpressionString}";
             else
-                return $"({memo}{string.Join(", ", fparams)}) -> {ExpressionString}";
+                return $"({memo}{string.Join(", ", fparams)})-> {ExpressionString}";
         }
 
         public override bool Equals(object obj)
