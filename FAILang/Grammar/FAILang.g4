@@ -65,7 +65,7 @@ expression
 					| GE
 					| LE ) expression
 	| lambda
-	| cond
+	| piecewise
 	| type
 	| name
 	;
@@ -100,12 +100,12 @@ indexer
 		) R_BRAC
 	;
 
-cond
-	: L_CURL condition+ expression R_CURL
+piecewise
+	: L_CURL condition+ expression OTHERWISE SEMI_COLON
 	;
 
 condition
-	: expression COLON expression SEMI_COLON
+	: expr=expression IF cond=expression SEMI_COLON
 	;
 
 union
@@ -262,6 +262,13 @@ UPDATE
 	;
 MEMO
 	: 'memo'
+	;
+
+IF
+	: 'if'
+	;
+OTHERWISE
+	: 'otherwise'
 	;
 
 NAME
