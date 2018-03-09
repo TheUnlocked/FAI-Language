@@ -1,14 +1,14 @@
 # About FAI
 FAI (or FAI lang) stands for **F**unctional **A**legbraic, and **I**nterpreted language, and that's what it strives to be. **FAI is a purely functional language with algebraic syntax.** That said, FAI is not just a functional calculator. While FAI borrows syntax from algebra, it in itself is not algebra, and the user must implement any non-basic algebraic functions. For example, if one wanted to solve a trinomial, they could implement the quadratic formula.
 
-<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/altered-piecewise/svgs//aaf78c77fd22cac9c585c960351835ef.svg?invert_in_darkmode" align=middle width=145.45792469999998pt height=36.7526973pt/></p>
+<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/master/svgs//aaf78c77fd22cac9c585c960351835ef.svg?invert_in_darkmode" align=middle width=145.45792469999998pt height=36.7526973pt/></p>
 
 ```fai
 plus_minus(a, b) = (a + b | a - b)
 quadratic(a, b, c) = plus_minus(-b, sqrt(b^2 - 4*a*c)) / 2*a
 ```
 
-<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/altered-piecewise/svgs//969a4afec608b081de4df21cda2729d0.svg?invert_in_darkmode" align=middle width=395.32508564999995pt height=36.7526973pt/></p>
+<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/master/svgs//969a4afec608b081de4df21cda2729d0.svg?invert_in_darkmode" align=middle width=395.32508564999995pt height=36.7526973pt/></p>
 
 ```fai
 quadratic(1, -1, -2)
@@ -31,7 +31,7 @@ factorial(x) = {1 if x = 1; x * factorial(x - 1) otherwise;
 
 That's already much more readable to someone who knows algebra but after being processed through a yet-to-be-written FAI TeXer, that function could be automatically represented like this:
 
-<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/altered-piecewise/svgs//cd9c1c25bd8c66552c6358ed2b7a70d1.svg?invert_in_darkmode" align=middle width=335.719296pt height=49.315569599999996pt/></p>
+<p align="center"><img src="https://rawgit.com/TheUnlocked/FAI-Language/master/svgs//cd9c1c25bd8c66552c6358ed2b7a70d1.svg?invert_in_darkmode" align=middle width=335.719296pt height=49.315569599999996pt/></p>
 
 Connecting that to the algebraic notation isn't hard, because it _is_ the algebraic notation.
 
