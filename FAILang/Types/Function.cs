@@ -12,26 +12,29 @@ namespace FAILang.Types
         public string TypeName => "Function";
 
         public readonly string[] fparams;
+        public readonly bool elipsis;
         public readonly IType expression;
 
         public bool memoize;
         public Dictionary<int, IType> memos = new Dictionary<int, IType>();
 
-        public Function(string[] fparams, IType expression, bool memoize = false)
+        public Function(string[] fparams, IType expression, bool memoize = false, bool elipsis = false)
         {
             this.fparams = fparams.ToArray();
             this.expression = expression;
             this.memoize = memoize;
+            this.elipsis = elipsis;
         }
 
         public virtual IType Evaluate(IType[] args)
         {
-            if (args.Length == fparams.Length)
+            if (args.Length == fparams.Length || (elipsis && args.Length >= fparams.Length - 1))
             {
                 if (memoize && memos.TryGetValue(GetArgListHashCode(args), out IType v))
                     return v;
                 Dictionary<string, IType> lookup = new Dictionary<string, IType>();
-                for (int i = 0; i < fparams.Length; i++)
+                IType[] extra = new IType[args.Length - fparams.Length + 1];
+                for (int i = 0; i < args.Length; i++)
                 {
                     if (args[i] is Union un)
                     {
@@ -52,8 +55,13 @@ namespace FAILang.Types
                     }
                     if (args[i] is Error)
                         return args[i];
-                    lookup[fparams[i]] = args[i];
+                    if (elipsis && i >= fparams.Length - 1)
+                        extra[i - fparams.Length + 1] = args[i];
+                    else
+                        lookup[fparams[i]] = args[i];
                 }
+                if (elipsis)
+                    lookup[fparams[fparams.Length - 1]] = new UnevaluatedTuple(extra);
                 lookup["self"] = this;
                 var ret = expression;
                 if (ret is IUnevaluated u)
@@ -70,10 +78,11 @@ namespace FAILang.Types
         public override string ToString()
         {
             string memo = memoize ? (fparams.Length == 0 ? "memo" : "memo ") : "";
+            string elipses = elipsis ? "..." : "";
             if (fparams.Length == 1 && !memoize)
-                return $"{fparams[0]} -> {ExpressionString}";
+                return $"{fparams[0]}{elipses} -> {ExpressionString}";
             else
-                return $"({memo}{string.Join(", ", fparams)})-> {ExpressionString}";
+                return $"({memo}{string.Join(", ", fparams)}{elipses}) -> {ExpressionString}";
         }
 
         public override bool Equals(object obj)
