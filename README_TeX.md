@@ -26,22 +26,22 @@ Other programming languages, especially functional ones, may look intimidating o
 A programmer familiar with Scheme (or another LISP-like language) might have no problem reading that, but to someone with no exposure to programming, how would they know what's going on there? Compare that to the FAI code:
 
 ```fai
-factorial(x) = {x = 1: 1; x * factorial(x - 1)}
+factorial(x) = {1 if x = 1; x * factorial(x - 1) otherwise;
 ```
 
-Perhaps you don't see how that's any easier to read, but after being processed through a yet-to-be-written FAI to TeX "transpiler," that function could be automatically represented like this:
+That's already much more readable to someone who knows algebra but after being processed through a yet-to-be-written FAI TeXer, that function could be automatically represented like this:
 
 $$ \text{factorial}(x)= \begin{cases}
-\text{for} \; x = 1, & 1\\ 
-\text{otherwise}, & x \cdot \text{factorial}(x-1)
+1 & \text{if} \; x = 1; \\ 
+x \cdot \text{factorial}(x-1) & \text{otherwise};
 \end{cases} $$
 
-Once someone sees the TeXed variant, it's very easy to connect the syntax to the mathematical definition. While this isn't true piecewise notation, it helps connect the code to the mathematical function better, and it's more intuitive, both of which are arguably more important than having the exact correct notation.
+Connecting that to the algebraic notation isn't hard, because it _is_ the algebraic notation.
 
 So as a complete answer to what the purpose of FAI is, **FAI exists to serve as a programming language that allows for teaching a functional paradigm within the comfort of algebraic syntax.**
 
 # Specification
-Because FAI is still early in its development, a complete spec is not currently avaliable, and will not be made right now due to the high volitility of FAI features. Once FAI gets closer to the v1.0 release, a specification will be drafted.
+A draft specification is currently being worked on at the [wiki page](https://github.com/TheUnlocked/FAI-Language/wiki).
 
 # Plans
 For plans with language features, look in the [issues](https://github.com/TheUnlocked/FAI-Language/issues) tab. If you have an idea, feel free to open up a new issue with your proposal.

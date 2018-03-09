@@ -81,7 +81,7 @@ namespace FAILang
             var name = context.name();
             var op = context.op;
             var prefix = context.prefix();
-            var cond = context.cond();
+            var piecewise = context.piecewise();
             var callparams = context.callparams();
             var lambda = context.lambda();
             var union = context.union();
@@ -153,7 +153,8 @@ namespace FAILang
                 }
                 return new PrefixExpression(pre, VisitExpression(context.expression(0)));
             }
-            else if (cond != null)      return VisitCond(cond);
+            else if (piecewise != null)
+                return VisitPiecewise(piecewise);
             else if (callparams != null)    
             {
                 return new FunctionExpression(VisitExpression(context.expression(0)),
@@ -226,15 +227,15 @@ namespace FAILang
         public override IType VisitTuple([NotNull] FAILangParser.TupleContext context) =>
             new UnevaluatedTuple(context.expression().Select(x => VisitExpression(x)).ToArray());
 
-        public override IType VisitCond([NotNull] FAILangParser.CondContext context)
+        public override IType VisitPiecewise([NotNull] FAILangParser.PiecewiseContext context)
         {
             var conditions = context.condition();
             IType[] conds = new IType[conditions.Length];
             IType[] exprs = new IType[conditions.Length];
             for (int i = 0; i < conditions.Length; i++)
             {
-                conds[i] = VisitExpression(conditions[i].expression(0));
-                exprs[i] = VisitExpression(conditions[i].expression(1));
+                conds[i] = VisitExpression(conditions[i].cond);
+                exprs[i] = VisitExpression(conditions[i].expr);
             }
             return new CondExpression(conds, exprs, VisitExpression(context.expression()));
         }
