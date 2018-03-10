@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Antlr4.Runtime;
 using FAILang.Builtins;
+using FAILang.Tests;
 using FAILang.Types;
 using FAILang.Types.Unevaluated;
 
@@ -16,43 +18,53 @@ namespace FAILang
             Console.InputEncoding = Encoding.Unicode;
             Console.OutputEncoding = Encoding.Unicode;
 
-            // Read-eval-print loop
-            while (true) {
-                try
+            foreach (ITest testPackage in new ITest[] { new LanguageTests() })
+            {
+                object firstIfOnly(IType[] list) => list.Length == 0 ? null : (list.Length == 1 ? list[0] : (object)list);
+                foreach (var assertion in testPackage.Assertions)
                 {
-                    string input = Console.ReadLine();
-                    while (input.EndsWith("  "))
-                        input += Console.ReadLine();
-
-                    AntlrInputStream inputStream = new AntlrInputStream(input);
-
-                    FAILangLexer lexer = new FAILangLexer(inputStream);
-                    CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-                    FAILangParser parser = new FAILangParser(commonTokenStream);
-                    parser.ErrorHandler = new BailErrorStrategy();
-
-                    FAILangParser.CallsContext expressionContext = parser.calls();
-                    FAILangVisitor visitor = new FAILangVisitor();
-
-                    var vals = visitor.VisitCalls(expressionContext).Select(x => Global.Evaluate(x));
-                    foreach (var val in vals)
-                        if (val != null)
-                            Console.WriteLine(val);
-                }
-                catch (StackOverflowException)
-                {
-                    Console.WriteLine(new Error("StackOverflow", "The call stack has overflowed"));
-                }
-                catch (Antlr4.Runtime.Misc.ParseCanceledException)
-                {
-                    Console.WriteLine(new Error("ParseError", "The input failed to parse."));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
+                    Debug.Assert(firstIfOnly(RunLine(assertion.Item1)).Equals(assertion.Item2));
                 }
             }
+
+            // Read-eval-print loop
+            while (true) {
+                string input = Console.ReadLine();
+                while (input.EndsWith("  "))
+                    input += Console.ReadLine();
+                RunLine(input);
+                foreach (var val in RunLine(input))
+                    if (val != null)
+                        Console.WriteLine(val);
+            }
+        }
+
+        public static IType[] RunLine(string input)
+        {
+            try
+            {
+                AntlrInputStream inputStream = new AntlrInputStream(input);
+
+                FAILangLexer lexer = new FAILangLexer(inputStream);
+                CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+                FAILangParser parser = new FAILangParser(commonTokenStream);
+                parser.ErrorHandler = new BailErrorStrategy();
+
+                FAILangParser.CallsContext expressionContext = parser.calls();
+                FAILangVisitor visitor = new FAILangVisitor();
+
+                return visitor.VisitCalls(expressionContext).Select(x => Global.Evaluate(x)).ToArray();
+            }
+            catch (Antlr4.Runtime.Misc.ParseCanceledException)
+            {
+                Console.WriteLine(new Error("ParseError", "The input failed to parse."));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+            }
+            return new IType[] { };
         }
     }
 
