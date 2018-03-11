@@ -57,10 +57,11 @@ namespace FAILang.Types.Unevaluated
                 {
                     IType ret = lac.Invoke(rop);
                     if (ret == null)
-                        return new Error("WrongType", $"The {op} operator cannot be applied to types {left.TypeName} and {right.TypeName}");
+                        return new Error("WrongType", $"The {op.ToDisplayString()} operator cannot be applied to types {left.TypeName} and {right.TypeName}");
+                    return ret;
                 }
             }
-            return new Error("WrongType", $"The {op} operator cannot be applied to types {left.TypeName} and {right.TypeName}");
+            return new Error("WrongType", $"The {op.ToDisplayString()} operator cannot be applied to types {left.TypeName} and {right.TypeName}");
         }
     }
 }

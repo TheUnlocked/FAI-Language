@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    struct MathString : IType, IIndexable
+    struct MathString : IOperable, IIndexable
     {
         public string TypeName => "String";
         public int Length => value.Length;
@@ -16,6 +16,22 @@ namespace FAILang.Types
         public MathString(string value)
         {
             this.value = value;
+        }
+
+        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>()
+        {
+            {Operator.ADD, OpConcat}
+        };
+
+        private IType OpConcat(IOperable other)
+        {
+            switch (other)
+            {
+                case MathString str:
+                    return new MathString(value + str.value);
+                default:
+                    return null;
+            }
         }
 
         public override string ToString()
