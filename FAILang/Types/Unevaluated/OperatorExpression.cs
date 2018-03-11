@@ -49,7 +49,18 @@ namespace FAILang.Types.Unevaluated
             }
             if (left is IUnevaluated || right is IUnevaluated)
                 return new BakedExpression(new OperatorExpression(op, left, right), lookups);
-            return op.Operate(left, right);
+
+            // Operate
+            if (left is IOperable lop && right is IOperable rop)
+            {
+                if (lop.Operators.TryGetValue(op, out var lac) && rop.Operators.ContainsKey(op))
+                {
+                    IType ret = lac.Invoke(rop);
+                    if (ret == null)
+                        return new Error("WrongType", $"The {op} operator cannot be applied to types {left.TypeName} and {right.TypeName}");
+                }
+            }
+            return new Error("WrongType", $"The {op} operator cannot be applied to types {left.TypeName} and {right.TypeName}");
         }
     }
 }

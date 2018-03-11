@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FAILang.Types
 {
-    class Vector : IType, IIndexable
+    struct Vector : IType, IIndexable
     {
         public string TypeName => "Vector";
         public readonly IType[] items;

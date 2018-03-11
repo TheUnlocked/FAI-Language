@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    class MathString : IType, IIndexable
+    struct MathString : IType, IIndexable
     {
         public string TypeName => "String";
         public int Length => value.Length;
@@ -25,10 +25,9 @@ namespace FAILang.Types
 
         public override bool Equals(object obj)
         {
-            MathString str = obj as MathString;
-            if (str == null)
-                return false;
-            return value.Equals(str.value);
+            if (obj is MathString str)
+                return value.Equals(str.value);
+            return false;
         }
 
         public override int GetHashCode()
