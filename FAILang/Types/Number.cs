@@ -13,27 +13,27 @@ namespace FAILang.Types
 
         public readonly Complex value;
         public bool IsReal => value.Imaginary == 0;
-
-        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>() {
-            {Operator.ADD, Add},
-            {Operator.SUBTRACT, Subtract},
-            {Operator.MULTIPLY, Multiply},
-            {Operator.DIVIDE, Divide},
-            {Operator.MODULO, Modulo},
-            {Operator.EXPONENT, Exponent},
-
-            {Operator.GREATER, GreaterThan},
-            {Operator.LESS, LessThan},
-            {Operator.GR_EQUAL, GreaterEqual},
-            {Operator.LE_EQUAL, LessEqual}
-        };
-
+        
         public Number(Complex value)
         {
             this.value = value;
         }
 
-        public IType Add(IOperable other)
+        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>() {
+            {Operator.ADD, OpAdd},
+            {Operator.SUBTRACT, OpSubtract},
+            {Operator.MULTIPLY, OpMultiply},
+            {Operator.DIVIDE, OpDivide},
+            {Operator.MODULO, OpModulo},
+            {Operator.EXPONENT, OpExponent},
+
+            {Operator.GREATER, OpGreaterThan},
+            {Operator.LESS, OpLessThan},
+            {Operator.GR_EQUAL, OpGreaterEqual},
+            {Operator.LE_EQUAL, OpLessEqual}
+        };
+
+        private IType OpAdd(IOperable other)
         {
             switch (other)
             {
@@ -43,7 +43,7 @@ namespace FAILang.Types
                     return null;
             }
         }
-        public IType Subtract(IOperable other)
+        private IType OpSubtract(IOperable other)
         {
             switch (other)
             {
@@ -53,7 +53,7 @@ namespace FAILang.Types
                     return null;
             }
         }
-        public IType Multiply(IOperable other)
+        private IType OpMultiply(IOperable other)
         {
             switch (other)
             {
@@ -63,7 +63,7 @@ namespace FAILang.Types
                     return null;
             }
         }
-        public IType Divide(IOperable other)
+        private IType OpDivide(IOperable other)
         {
             switch (other)
             {
@@ -75,7 +75,7 @@ namespace FAILang.Types
                     return null;
             }
         }
-        public IType Modulo(IOperable other)
+        private IType OpModulo(IOperable other)
         {
             switch (other)
             {
@@ -88,12 +88,89 @@ namespace FAILang.Types
                     return null;
             }
         }
-        public IType Exponent(IOperable other)
+        private IType OpExponent(IOperable other)
         {
             switch (other)
             {
                 case Number num:
-                    return new Number(value / num.value);
+                    if (IsReal && num.IsReal)
+                    {
+                        return new Number(Math.Pow(value.Real, num.value.Real));
+                    }
+                    else if (value.Real == 0 && !IsReal && num.IsReal && num.value.Real % 1 == 0)
+                    {
+                        Complex c;
+                        switch (((num.value.Real % 4) + 4) % 4)
+                        {
+                            case 1:
+                                c = new Complex(0, 1);
+                                break;
+                            case 2:
+                                c = new Complex(-1, 0);
+                                break;
+                            case 3:
+                                c = new Complex(0, -1);
+                                break;
+                            case 0:
+                                c = new Complex(1, 0);
+                                break;
+                        }
+                        return new Number(c * Math.Pow(value.Imaginary, num.value.Real));
+                    }
+                    return new Number(Complex.Pow(value, num.value));
+                default:
+                    return null;
+            }
+        }
+
+        private IType OpGreaterThan(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real > num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary > num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private IType OpLessThan(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real < num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary < num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private IType OpGreaterEqual(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real >= num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary >= num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private IType OpLessEqual(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real <= num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary <= num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
                 default:
                     return null;
             }

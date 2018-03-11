@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    public struct Error : IPopup
+    public struct Error : IType
     {
         public string TypeName => "Error";
 
