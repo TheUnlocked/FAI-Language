@@ -23,7 +23,7 @@ namespace FAILang
                 object firstIfOnly(IType[] list) => list.Length == 0 ? null : (list.Length == 1 ? list[0] : (object)list);
                 foreach (var assertion in testPackage.Assertions)
                 {
-                    Debug.Assert(firstIfOnly(RunLine(assertion.Item1)).Equals(assertion.Item2));
+                    Debug.Assert(firstIfOnly(RunLines(assertion.Item1)).Equals(assertion.Item2));
                 }
             }
 
@@ -32,14 +32,13 @@ namespace FAILang
                 string input = Console.ReadLine();
                 while (input.EndsWith("  "))
                     input += Console.ReadLine();
-                RunLine(input);
-                foreach (var val in RunLine(input))
+                foreach (var val in RunLines(input))
                     if (val != null)
                         Console.WriteLine(val);
             }
         }
 
-        public static IType[] RunLine(string input)
+        public static IType[] RunLines(string input)
         {
             try
             {

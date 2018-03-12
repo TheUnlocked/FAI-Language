@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Numerics;
 
 namespace FAILang.Types
 {
-    struct Vector : IType, IIndexable
+    struct Vector : IOperable, IIndexable
     {
         public string TypeName => "Vector";
         public readonly IType[] items;
@@ -16,6 +17,83 @@ namespace FAILang.Types
         public Vector(IType[] items)
         {
             this.items = items;
+        }
+
+        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>() {
+            {Operator.ADD, OpAdd},
+            {Operator.SUBTRACT, OpSubtract},
+            {Operator.MULTIPLY, OpMultiply}
+        };
+
+        private IType OpAdd(IOperable other)
+        {
+            switch (other)
+            {
+                case Vector vec:
+                    if (Length != vec.Length)
+                        return new Error("DimensionMismatch", "Vectors of different sizes cannot be added");
+                    IType[] ret = new IType[Length];
+                    for (int i = 0; i < Length; i++) {
+                        ret[i] = new OperatorExpression(Operator.ADD, items[i], vec.items[i]).Evaluate(null);
+                        if (ret[i] is Error)
+                            return ret[i];
+                    }
+                    return new Vector(ret);
+                default:
+                    return null;
+            }
+        }
+        private IType OpSubtract(IOperable other)
+        {
+            switch (other)
+            {
+                case Vector vec:
+                    if (Length != vec.Length)
+                        return new Error("DimensionMismatch", "Vectors of different sizes cannot be subtracted");
+                    IType[] ret = new IType[Length];
+                    for (int i = 0; i < Length; i++)
+                    {
+                        ret[i] = new OperatorExpression(Operator.SUBTRACT, items[i], vec.items[i]).Evaluate(null);
+                        if (ret[i] is Error)
+                            return ret[i];
+                    }
+                    return new Vector(ret);
+                default:
+                    return null;
+            }
+        }
+        private IType OpMultiply(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    IType[] ret = new IType[Length];
+                    for (int i = 0; i < Length; i++)
+                    {
+                        ret[i] = new OperatorExpression(Operator.MULTIPLY, items[i], num).Evaluate(null);
+                        if (ret[i] is Error)
+                            return ret[i];
+                    }
+                    return new Vector(ret);
+
+                case Vector vec:
+                    if (Length != vec.Length)
+                        return new Error("DimensionMismatch", "Vectors of different sizes cannot be added");
+                    IType total = null;
+                    for (int i = 0; i < Length; i++)
+                    {
+                        var res = new OperatorExpression(Operator.MULTIPLY, items[i], vec.items[i]).Evaluate(null);
+                        if (res is Error)
+                            return res;
+                        if (total == null)
+                            total = res;
+                        else
+                            total = new OperatorExpression(Operator.ADD, total, res).Evaluate(null);
+                    }
+                    return total;
+                default:
+                    return null;
+            }
         }
 
         public IType Index(int index) => items[index];

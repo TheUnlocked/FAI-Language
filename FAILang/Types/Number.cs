@@ -59,6 +59,8 @@ namespace FAILang.Types
             {
                 case Number num:
                     return new Number(value * num.value);
+                case Vector vec:
+                    return vec.Operators[Operator.MULTIPLY].Invoke(this);
                 default:
                     return null;
             }
