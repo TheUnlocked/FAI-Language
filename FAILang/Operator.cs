@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FAILang
 {
-    public enum Operator
+    public enum BinaryOperator
     {
         ADD,
         SUBTRACT,
@@ -25,32 +25,56 @@ namespace FAILang
         GR_EQUAL,
         LE_EQUAL
     }
-    public static class OperatorExtension { public static string ToDisplayString(this Operator op) { switch(op) {
-                case Operator.ADD:
+    public enum UnaryOperator
+    {
+        NOT,
+        NEGATIVE
+    }
+
+    public static class OperatorExtension {
+        public static string ToDisplayString(this BinaryOperator op)
+        {
+            switch (op)
+            {
+                case BinaryOperator.ADD:
                     return "+";
-                case Operator.SUBTRACT:
+                case BinaryOperator.SUBTRACT:
                     return "-";
-                case Operator.MULTIPLY:
+                case BinaryOperator.MULTIPLY:
                     return "*";
-                case Operator.DIVIDE:
+                case BinaryOperator.DIVIDE:
                     return "/";
-                case Operator.MODULO:
+                case BinaryOperator.MODULO:
                     return "%";
-                case Operator.EXPONENT:
+                case BinaryOperator.EXPONENT:
                     return "^";
-                case Operator.EQUALS:
+                case BinaryOperator.EQUALS:
                     return "=";
-                case Operator.NOT_EQUALS:
+                case BinaryOperator.NOT_EQUALS:
                     return "~=";
-                case Operator.GREATER:
+                case BinaryOperator.GREATER:
                     return ">";
-                case Operator.LESS:
+                case BinaryOperator.LESS:
                     return "<";
-                case Operator.GR_EQUAL:
+                case BinaryOperator.GR_EQUAL:
                     return ">=";
-                case Operator.LE_EQUAL:
+                case BinaryOperator.LE_EQUAL:
                     return "<=";
                 default:
                     return "";
-            } } }
+            }
+        }
+        public static string ToDisplayString(this UnaryOperator op)
+        {
+            switch (op)
+            {
+                case UnaryOperator.NEGATIVE:
+                    return "-";
+                case UnaryOperator.NOT:
+                    return "~";
+                default:
+                    return "";
+            }
+        }
+    }
 }

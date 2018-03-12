@@ -19,11 +19,13 @@ namespace FAILang.Types
             this.items = items;
         }
 
-        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>() {
-            {Operator.ADD, OpAdd},
-            {Operator.SUBTRACT, OpSubtract},
-            {Operator.MULTIPLY, OpMultiply}
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
+            {BinaryOperator.ADD, OpAdd},
+            {BinaryOperator.SUBTRACT, OpSubtract},
+            {BinaryOperator.MULTIPLY, OpMultiply}
         };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
 
         private IType OpAdd(IOperable other)
         {
@@ -34,7 +36,7 @@ namespace FAILang.Types
                         return new Error("DimensionMismatch", "Vectors of different sizes cannot be added");
                     IType[] ret = new IType[Length];
                     for (int i = 0; i < Length; i++) {
-                        ret[i] = new OperatorExpression(Operator.ADD, items[i], vec.items[i]).Evaluate(null);
+                        ret[i] = new BinaryOperatorExpression(BinaryOperator.ADD, items[i], vec.items[i]).Evaluate(null);
                         if (ret[i] is Error)
                             return ret[i];
                     }
@@ -53,7 +55,7 @@ namespace FAILang.Types
                     IType[] ret = new IType[Length];
                     for (int i = 0; i < Length; i++)
                     {
-                        ret[i] = new OperatorExpression(Operator.SUBTRACT, items[i], vec.items[i]).Evaluate(null);
+                        ret[i] = new BinaryOperatorExpression(BinaryOperator.SUBTRACT, items[i], vec.items[i]).Evaluate(null);
                         if (ret[i] is Error)
                             return ret[i];
                     }
@@ -70,7 +72,7 @@ namespace FAILang.Types
                     IType[] ret = new IType[Length];
                     for (int i = 0; i < Length; i++)
                     {
-                        ret[i] = new OperatorExpression(Operator.MULTIPLY, items[i], num).Evaluate(null);
+                        ret[i] = new BinaryOperatorExpression(BinaryOperator.MULTIPLY, items[i], num).Evaluate(null);
                         if (ret[i] is Error)
                             return ret[i];
                     }
@@ -82,13 +84,13 @@ namespace FAILang.Types
                     IType total = null;
                     for (int i = 0; i < Length; i++)
                     {
-                        var res = new OperatorExpression(Operator.MULTIPLY, items[i], vec.items[i]).Evaluate(null);
+                        var res = new BinaryOperatorExpression(BinaryOperator.MULTIPLY, items[i], vec.items[i]).Evaluate(null);
                         if (res is Error)
                             return res;
                         if (total == null)
                             total = res;
                         else
-                            total = new OperatorExpression(Operator.ADD, total, res).Evaluate(null);
+                            total = new BinaryOperatorExpression(BinaryOperator.ADD, total, res).Evaluate(null);
                     }
                     return total;
                 default:

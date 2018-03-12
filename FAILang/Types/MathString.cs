@@ -18,10 +18,12 @@ namespace FAILang.Types
             this.value = value;
         }
 
-        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>()
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>()
         {
-            {Operator.ADD, OpConcat}
+            {BinaryOperator.ADD, OpConcat}
         };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
 
         private IType OpConcat(IOperable other)
         {

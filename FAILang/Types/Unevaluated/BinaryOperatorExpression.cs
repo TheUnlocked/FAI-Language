@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types.Unevaluated
 {
-    class OperatorExpression : IUnevaluated
+    class BinaryOperatorExpression : IUnevaluated
     {
         public string TypeName => "OperatorExpression";
 
-        public Operator op;
+        public BinaryOperator op;
         public IType left;
         public IType right;
 
-        public OperatorExpression(Operator op, IType left, IType right)
+        public BinaryOperatorExpression(BinaryOperator op, IType left, IType right)
         {
             this.op = op;
             this.left = left;
@@ -34,7 +34,7 @@ namespace FAILang.Types.Unevaluated
                 IType[] result = new IType[unionLeft.values.Length];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    result[i] = new OperatorExpression(op, unionLeft.values[i], right).Evaluate(lookups);
+                    result[i] = new BinaryOperatorExpression(op, unionLeft.values[i], right).Evaluate(lookups);
                 }
                 return new Union(result, lookups);
             }
@@ -43,17 +43,17 @@ namespace FAILang.Types.Unevaluated
                 IType[] result = new IType[unionRight.values.Length];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    result[i] = new OperatorExpression(op, left, unionRight.values[i]).Evaluate(lookups);
+                    result[i] = new BinaryOperatorExpression(op, left, unionRight.values[i]).Evaluate(lookups);
                 }
                 return new Union(result, lookups);
             }
             if (left is IUnevaluated || right is IUnevaluated)
-                return new BakedExpression(new OperatorExpression(op, left, right), lookups);
+                return new BakedExpression(new BinaryOperatorExpression(op, left, right), lookups);
 
             // Operate
             if (left is IOperable lop && right is IOperable rop)
             {
-                if (lop.Operators.TryGetValue(op, out var lac) && rop.Operators.ContainsKey(op))
+                if (lop.BinaryOperators != null && rop.BinaryOperators != null && lop.BinaryOperators.TryGetValue(op, out var lac) && rop.BinaryOperators.ContainsKey(op))
                 {
                     IType ret = lac.Invoke(rop);
                     if (ret == null)

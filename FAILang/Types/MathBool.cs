@@ -19,10 +19,15 @@ namespace FAILang.Types
             this.value = value;
         }
 
-        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>() {
-            {Operator.ADD, OpOr},
-            {Operator.MULTIPLY, OpAnd},
-            {Operator.EXPONENT, OpXor}
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
+            {BinaryOperator.ADD, OpOr},
+            {BinaryOperator.MULTIPLY, OpAnd},
+            {BinaryOperator.EXPONENT, OpXor}
+        };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
+        {
+            {UnaryOperator.NOT, OpNot}
         };
 
         private IType OpOr(IOperable other)
@@ -54,6 +59,11 @@ namespace FAILang.Types
                 default:
                     return null;
             }
+        }
+
+        private IType OpNot()
+        {
+            return value ? FALSE : TRUE;
         }
 
         public override string ToString()

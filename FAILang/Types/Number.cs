@@ -19,18 +19,23 @@ namespace FAILang.Types
             this.value = value;
         }
 
-        public Dictionary<Operator, Func<IOperable, IType>> Operators => new Dictionary<Operator, Func<IOperable, IType>>() {
-            {Operator.ADD, OpAdd},
-            {Operator.SUBTRACT, OpSubtract},
-            {Operator.MULTIPLY, OpMultiply},
-            {Operator.DIVIDE, OpDivide},
-            {Operator.MODULO, OpModulo},
-            {Operator.EXPONENT, OpExponent},
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
+            {BinaryOperator.ADD, OpAdd},
+            {BinaryOperator.SUBTRACT, OpSubtract},
+            {BinaryOperator.MULTIPLY, OpMultiply},
+            {BinaryOperator.DIVIDE, OpDivide},
+            {BinaryOperator.MODULO, OpModulo},
+            {BinaryOperator.EXPONENT, OpExponent},
 
-            {Operator.GREATER, OpGreaterThan},
-            {Operator.LESS, OpLessThan},
-            {Operator.GR_EQUAL, OpGreaterEqual},
-            {Operator.LE_EQUAL, OpLessEqual}
+            {BinaryOperator.GREATER, OpGreaterThan},
+            {BinaryOperator.LESS, OpLessThan},
+            {BinaryOperator.GR_EQUAL, OpGreaterEqual},
+            {BinaryOperator.LE_EQUAL, OpLessEqual}
+        };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
+        {
+            {UnaryOperator.NEGATIVE, OpNegate}
         };
 
         private IType OpAdd(IOperable other)
@@ -60,7 +65,7 @@ namespace FAILang.Types
                 case Number num:
                     return new Number(value * num.value);
                 case Vector vec:
-                    return vec.Operators[Operator.MULTIPLY].Invoke(this);
+                    return vec.BinaryOperators[BinaryOperator.MULTIPLY].Invoke(this);
                 default:
                     return null;
             }
@@ -124,7 +129,6 @@ namespace FAILang.Types
                     return null;
             }
         }
-
         private IType OpGreaterThan(IOperable other)
         {
             switch (other)
@@ -176,6 +180,11 @@ namespace FAILang.Types
                 default:
                     return null;
             }
+        }
+
+        private IType OpNegate()
+        {
+            return new Number(-value);
         }
 
 

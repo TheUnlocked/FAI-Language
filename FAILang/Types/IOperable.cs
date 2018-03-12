@@ -6,6 +6,7 @@ namespace FAILang.Types
 {
     public interface IOperable : IType
     {
-        Dictionary<Operator, Func<IOperable, IType>> Operators { get; }
+        Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators { get; }
+        Dictionary<UnaryOperator, Func<IType>> UnaryOperators { get; }
     }
 }
