@@ -7,17 +7,186 @@ using System.Numerics;
 
 namespace FAILang.Types
 {
-    public class Number : IType
+    public struct Number : IOperable
     {
         public string TypeName => "Number";
 
         public readonly Complex value;
         public bool IsReal => value.Imaginary == 0;
-
+        
         public Number(Complex value)
         {
             this.value = value;
         }
+
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
+            {BinaryOperator.ADD, OpAdd},
+            {BinaryOperator.SUBTRACT, OpSubtract},
+            {BinaryOperator.MULTIPLY, OpMultiply},
+            {BinaryOperator.DIVIDE, OpDivide},
+            {BinaryOperator.MODULO, OpModulo},
+            {BinaryOperator.EXPONENT, OpExponent},
+
+            {BinaryOperator.GREATER, OpGreaterThan},
+            {BinaryOperator.LESS, OpLessThan},
+            {BinaryOperator.GR_EQUAL, OpGreaterEqual},
+            {BinaryOperator.LE_EQUAL, OpLessEqual}
+        };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
+        {
+            {UnaryOperator.NEGATIVE, OpNegate}
+        };
+
+        private IType OpAdd(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    return new Number(value + num.value);
+                default:
+                    return null;
+            }
+        }
+        private IType OpSubtract(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    return new Number(value - num.value);
+                default:
+                    return null;
+            }
+        }
+        private IType OpMultiply(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    return new Number(value * num.value);
+                case Vector vec:
+                    return vec.BinaryOperators[BinaryOperator.MULTIPLY].Invoke(this);
+                default:
+                    return null;
+            }
+        }
+        private IType OpDivide(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (num.IsReal && num.value.Real == 0)
+                        return Void.instance;
+                    return new Number(value / num.value);
+                default:
+                    return null;
+            }
+        }
+        private IType OpModulo(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (num.value.Real == 0 || !num.IsReal)
+                        return Void.instance;
+                    return new Number(new Complex(((value.Real % num.value.Real) + num.value.Real) % num.value.Real,
+                                             ((value.Imaginary % num.value.Real) + num.value.Real) % num.value.Real));
+                default:
+                    return null;
+            }
+        }
+        private IType OpExponent(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (IsReal && num.IsReal)
+                    {
+                        return new Number(Math.Pow(value.Real, num.value.Real));
+                    }
+                    else if (value.Real == 0 && !IsReal && num.IsReal && num.value.Real % 1 == 0)
+                    {
+                        Complex c;
+                        switch (((num.value.Real % 4) + 4) % 4)
+                        {
+                            case 1:
+                                c = new Complex(0, 1);
+                                break;
+                            case 2:
+                                c = new Complex(-1, 0);
+                                break;
+                            case 3:
+                                c = new Complex(0, -1);
+                                break;
+                            case 0:
+                                c = new Complex(1, 0);
+                                break;
+                        }
+                        return new Number(c * Math.Pow(value.Imaginary, num.value.Real));
+                    }
+                    return new Number(Complex.Pow(value, num.value));
+                default:
+                    return null;
+            }
+        }
+        private IType OpGreaterThan(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real > num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary > num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private IType OpLessThan(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real < num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary < num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private IType OpGreaterEqual(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real >= num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary >= num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private IType OpLessEqual(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real <= num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary <= num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+
+        private IType OpNegate()
+        {
+            return new Number(-value);
+        }
+
 
         public override string ToString()
         {
@@ -46,10 +215,9 @@ namespace FAILang.Types
 
         public override bool Equals(object obj)
         {
-            Number num = obj as Number;
-            if (num == null)
-                return false;
-            return value.Equals(num.value);
+            if (obj is Number num)
+                return value.Equals(num.value);
+            return false;
         }
 
         public override int GetHashCode()

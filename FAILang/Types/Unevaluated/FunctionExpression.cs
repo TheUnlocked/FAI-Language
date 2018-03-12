@@ -22,7 +22,7 @@ namespace FAILang.Types.Unevaluated
             IType func = func_expr;
             if (func is IUnevaluated u)
                 func = u.Evaluate(lookups);
-            if (func is IPopup)
+            if (func is Error)
                 return func;
 
             if (func is Function f) {

@@ -94,64 +94,64 @@ namespace FAILang
             else if (op != null)
             {
                 var exprs = context.expression();
-                Operator oper = Operator.MULTIPLY;
+                BinaryOperator oper = BinaryOperator.MULTIPLY;
                 switch (op.Text)
                 {
                     case "+":
-                        oper = Operator.ADD;
+                        oper = BinaryOperator.ADD;
                         break;
                     case "-":
-                        oper = Operator.SUBTRACT;
+                        oper = BinaryOperator.SUBTRACT;
                         break;
                     case "*":
-                        oper = Operator.MULTIPLY;
+                        oper = BinaryOperator.MULTIPLY;
                         break;
                     case "":
-                        oper = Operator.MULTIPLY;
+                        oper = BinaryOperator.MULTIPLY;
                         break;
                     case "/":
-                        oper = Operator.DIVIDE;
+                        oper = BinaryOperator.DIVIDE;
                         break;
                     case "%":
-                        oper = Operator.MODULO;
+                        oper = BinaryOperator.MODULO;
                         break;
                     case "^":
-                        oper = Operator.EXPONENT;
+                        oper = BinaryOperator.EXPONENT;
                         break;
                     case "=":
-                        oper = Operator.EQUALS;
+                        oper = BinaryOperator.EQUALS;
                         break;
                     case "~=":
-                        oper = Operator.NOT_EQUALS;
+                        oper = BinaryOperator.NOT_EQUALS;
                         break;
                     case ">":
-                        oper = Operator.GREATER;
+                        oper = BinaryOperator.GREATER;
                         break;
                     case "<":
-                        oper = Operator.LESS;
+                        oper = BinaryOperator.LESS;
                         break;
                     case ">=":
-                        oper = Operator.GR_EQUAL;
+                        oper = BinaryOperator.GR_EQUAL;
                         break;
                     case "<=":
-                        oper = Operator.LE_EQUAL;
+                        oper = BinaryOperator.LE_EQUAL;
                         break;
                 }
-                return new OperatorExpression(oper, VisitExpression(exprs[0]), VisitExpression(exprs[1]));
+                return new BinaryOperatorExpression(oper, VisitExpression(exprs[0]), VisitExpression(exprs[1]));
             }
             else if (prefix != null)    
             {
-                Prefix pre = Prefix.NOT;
+                UnaryOperator pre = UnaryOperator.NOT;
                 switch (prefix.GetText())
                 {
                     case "~":
-                        pre = Prefix.NOT;
+                        pre = UnaryOperator.NOT;
                         break;
                     case "-":
-                        pre = Prefix.NEGATIVE;
+                        pre = UnaryOperator.NEGATIVE;
                         break;
                 }
-                return new PrefixExpression(pre, VisitExpression(context.expression(0)));
+                return new UnaryOperatorExpression(pre, VisitExpression(context.expression(0)));
             }
             else if (piecewise != null)
                 return VisitPiecewise(piecewise);

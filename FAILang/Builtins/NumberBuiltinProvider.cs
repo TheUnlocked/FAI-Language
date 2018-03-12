@@ -40,11 +40,23 @@ namespace FAILang.Builtins
                 x => new Error("WrongType", $"{x} is not a valid input to round")),
                 "c");
         private static ExternFunction ABS = new ExternFunction(x => {
-                    if (x[0] is Number n)
-                        return new Number(n.value.Magnitude);
-                    else if (x[0] is Types.Vector v)
-                        return SQRT.Evaluate(new IType[] { v.items.Select(a => Operator.MULTIPLY.Operate(a, a)).Aggregate((a, b) => Operator.ADD.Operate(a, b)) });
-                    return new Error("WrongType", $"{x[0]} has no absolute value");
+                if (x[0] is Number n)
+                    return new Number(n.value.Magnitude);
+                else if (x[0] is Types.Vector v)
+                {
+                    Complex sum = 0;
+                    foreach (var t in v.items)
+                    {
+                        if (t is Number num)
+                        {
+                            sum += num.value * num.value;
+                        }
+                        else
+                            return new Error("WrongType", $"abs only works on a purely numeric vector");
+                    }
+                    return new Number(Complex.Sqrt(sum));
+                }
+                return new Error("WrongType", $"{x[0]} has no absolute value");
                 }, "n");
         private static ExternFunction SQRT = new ExternFunction(ValidateType<Number>(
                 x => new Number(Complex.Sqrt(x.value)),

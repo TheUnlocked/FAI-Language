@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FAILang.Types
 {
-    class Tuple : IType, IIndexable
+    struct Tuple : IType, IIndexable
     {
         public string TypeName => "Tuple";
         public readonly IType[] items;
@@ -43,12 +43,12 @@ namespace FAILang.Types
 
         public override bool Equals(object obj)
         {
-            if (obj is Tuple v)
+            if (obj is Tuple t)
             {
-                if (v.Length != Length)
+                if (t.Length != Length)
                     return false;
-                for (int i = 0; i < v.Length; i++)
-                    if (!items[i].Equals(v.items[i]))
+                for (int i = 0; i < t.Length; i++)
+                    if (!items[i].Equals(t.items[i]))
                         return false;
                 return true;
             }

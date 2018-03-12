@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    class MathString : IType, IIndexable
+    struct MathString : IOperable, IIndexable
     {
         public string TypeName => "String";
         public int Length => value.Length;
@@ -18,6 +18,24 @@ namespace FAILang.Types
             this.value = value;
         }
 
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>()
+        {
+            {BinaryOperator.ADD, OpConcat}
+        };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
+
+        private IType OpConcat(IOperable other)
+        {
+            switch (other)
+            {
+                case MathString str:
+                    return new MathString(value + str.value);
+                default:
+                    return null;
+            }
+        }
+
         public override string ToString()
         {
             return $"\"{value.ToString()}\"";
@@ -25,10 +43,9 @@ namespace FAILang.Types
 
         public override bool Equals(object obj)
         {
-            MathString str = obj as MathString;
-            if (str == null)
-                return false;
-            return value.Equals(str.value);
+            if (obj is MathString str)
+                return value.Equals(str.value);
+            return false;
         }
 
         public override int GetHashCode()

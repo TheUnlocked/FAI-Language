@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Numerics;
 
 namespace FAILang.Types
 {
-    class Vector : IType, IIndexable
+    struct Vector : IOperable, IIndexable
     {
         public string TypeName => "Vector";
         public readonly IType[] items;
@@ -16,6 +17,85 @@ namespace FAILang.Types
         public Vector(IType[] items)
         {
             this.items = items;
+        }
+
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
+            {BinaryOperator.ADD, OpAdd},
+            {BinaryOperator.SUBTRACT, OpSubtract},
+            {BinaryOperator.MULTIPLY, OpMultiply}
+        };
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
+
+        private IType OpAdd(IOperable other)
+        {
+            switch (other)
+            {
+                case Vector vec:
+                    if (Length != vec.Length)
+                        return new Error("DimensionMismatch", "Vectors of different sizes cannot be added");
+                    IType[] ret = new IType[Length];
+                    for (int i = 0; i < Length; i++) {
+                        ret[i] = new BinaryOperatorExpression(BinaryOperator.ADD, items[i], vec.items[i]).Evaluate(null);
+                        if (ret[i] is Error)
+                            return ret[i];
+                    }
+                    return new Vector(ret);
+                default:
+                    return null;
+            }
+        }
+        private IType OpSubtract(IOperable other)
+        {
+            switch (other)
+            {
+                case Vector vec:
+                    if (Length != vec.Length)
+                        return new Error("DimensionMismatch", "Vectors of different sizes cannot be subtracted");
+                    IType[] ret = new IType[Length];
+                    for (int i = 0; i < Length; i++)
+                    {
+                        ret[i] = new BinaryOperatorExpression(BinaryOperator.SUBTRACT, items[i], vec.items[i]).Evaluate(null);
+                        if (ret[i] is Error)
+                            return ret[i];
+                    }
+                    return new Vector(ret);
+                default:
+                    return null;
+            }
+        }
+        private IType OpMultiply(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    IType[] ret = new IType[Length];
+                    for (int i = 0; i < Length; i++)
+                    {
+                        ret[i] = new BinaryOperatorExpression(BinaryOperator.MULTIPLY, items[i], num).Evaluate(null);
+                        if (ret[i] is Error)
+                            return ret[i];
+                    }
+                    return new Vector(ret);
+
+                case Vector vec:
+                    if (Length != vec.Length)
+                        return new Error("DimensionMismatch", "Vectors of different sizes cannot be added");
+                    IType total = null;
+                    for (int i = 0; i < Length; i++)
+                    {
+                        var res = new BinaryOperatorExpression(BinaryOperator.MULTIPLY, items[i], vec.items[i]).Evaluate(null);
+                        if (res is Error)
+                            return res;
+                        if (total == null)
+                            total = res;
+                        else
+                            total = new BinaryOperatorExpression(BinaryOperator.ADD, total, res).Evaluate(null);
+                    }
+                    return total;
+                default:
+                    return null;
+            }
         }
 
         public IType Index(int index) => items[index];
