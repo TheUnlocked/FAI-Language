@@ -25,10 +25,10 @@ namespace FAILang.Types.Unevaluated
         {
             for (int i = 0; i < conds.Length; i++)
             {
-                IType t = conds[i];
-                if (t is IUnevaluated u)
-                    t = u.Evaluate(lookups);
-                if (t is Union tu)
+                IType tCond = conds[i];
+                if (tCond is IUnevaluated u)
+                    tCond = u.Evaluate(lookups);
+                if (tCond is Union tu)
                 {
                     IType[] result = new IType[tu.values.Length];
                     for (int j = 0; j < result.Length; j++)
@@ -39,13 +39,13 @@ namespace FAILang.Types.Unevaluated
                     }
                     return new Union(result, lookups);
                 }
-                if (t is IUnevaluated)
+                if (tCond is IUnevaluated)
                 {
                     var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
-                    nexpr.conds[0] = t;
+                    nexpr.conds[0] = tCond;
                     return new BakedExpression(nexpr, lookups);
                 }
-                if (t == MathBool.TRUE)
+                if (tCond == MathBool.TRUE)
                 {
                     IType ret = exprs[i];
                     if (ret is IUnevaluated uexpr)
@@ -58,6 +58,8 @@ namespace FAILang.Types.Unevaluated
                     }
                     return ret;
                 }
+                if (tCond is Error)
+                    return tCond;
             }
             return default_expr is IUnevaluated retd ? retd.Evaluate(lookups) : default_expr;
         }

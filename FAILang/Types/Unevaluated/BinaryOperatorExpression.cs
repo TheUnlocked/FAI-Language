@@ -50,7 +50,26 @@ namespace FAILang.Types.Unevaluated
             if (left is IUnevaluated || right is IUnevaluated)
                 return new BakedExpression(new BinaryOperatorExpression(op, left, right), lookups);
 
+            if (left is Error eLeft)
+                return eLeft;
+            if (right is Error eRight)
+                return eRight;
+
             // Operate
+            if (op == BinaryOperator.EQUALS)
+            {
+                return left.Equals(right) ? MathBool.TRUE : MathBool.FALSE;
+            }
+            else if (op == BinaryOperator.NOT_EQUALS)
+            {
+                return left.Equals(right) ? MathBool.FALSE : MathBool.TRUE;
+            }
+            else
+            {
+                if (left == Void.instance || right == Void.instance)
+                    return Void.instance;
+            }
+
             if (left is IOperable lop && right is IOperable rop)
             {
                 if (lop.BinaryOperators != null && rop.BinaryOperators != null && lop.BinaryOperators.TryGetValue(op, out var lac) && rop.BinaryOperators.ContainsKey(op))

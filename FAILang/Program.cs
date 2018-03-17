@@ -14,7 +14,7 @@ namespace FAILang
     {
         static void Main(string[] args)
         {
-            Global.LoadBuiltins(new NumberBuiltinProvider());
+            Global.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
             Console.InputEncoding = Encoding.Unicode;
             Console.OutputEncoding = Encoding.Unicode;
 

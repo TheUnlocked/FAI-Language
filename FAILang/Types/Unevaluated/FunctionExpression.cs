@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace FAILang.Types.Unevaluated
 {
@@ -53,6 +54,8 @@ namespace FAILang.Types.Unevaluated
                         args.Add(arg);
                     }
                 }
+                if (args.Any(x => x is IUnevaluated))
+                    return new BakedExpression(new FunctionExpression(func_expr, args.Select(x => (x, false)).ToArray()), lookups);
                 return f.Evaluate(args.ToArray());
             }
             else if (func is Number n1 && args.Length == 1)

@@ -76,6 +76,8 @@ namespace FAILang.Types.Unevaluated
             }
             else
             {
+                if (expr is Error)
+                    return expr;
                 return new Error("TypeError", $"The type {expr.TypeName} cannot be indexed");
             }
         }
