@@ -26,7 +26,8 @@ namespace FAILang.Types.Unevaluated
             if (func is Error)
                 return func;
 
-            if (func is Function f) {
+            if (func is Function f)
+            {
                 List<IType> args = new List<IType>();
                 for (int i = 0; i < this.args.Length; i++)
                 {
@@ -37,7 +38,7 @@ namespace FAILang.Types.Unevaluated
                     }
                     if (this.args[i].Item2)
                     {
-                        if(arg is Tuple tu)
+                        if (arg is Tuple tu)
                         {
                             for (int j = 0; j < tu.items.Length; j++)
                             {
@@ -58,11 +59,8 @@ namespace FAILang.Types.Unevaluated
                     return new BakedExpression(new FunctionExpression(func_expr, args.Select(x => (x, false)).ToArray()), lookups);
                 return f.Evaluate(args.ToArray());
             }
-            else if (func is Number n1 && args.Length == 1)
-                if (args[0].Item1 is Number n2)
-                    return new Number(n1.value * n2.value);
-                else
-                    return new Error("WrongType", $"The * operator cannot be applied to types {func.TypeName} and {args[0].Item1.TypeName}");
+            else if (func is IOperable n1 && args.Length == 1)
+                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(lookups);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }
     }

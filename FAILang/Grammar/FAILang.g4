@@ -5,8 +5,7 @@ grammar FAILang;
  */
 
 calls
-	: (call end)+ compileUnit
-	| compileUnit
+	: (call end?)* compileUnit
 	;
 
 call
