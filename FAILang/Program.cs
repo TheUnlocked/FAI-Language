@@ -10,11 +10,18 @@ using FAILang.Types.Unevaluated;
 
 namespace FAILang
 {
-    class Program
+    public class FAI
     {
+        public FAI()
+        {
+            Global.ResetGlobals();
+        }
+
         static void Main(string[] args)
         {
-            Global.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
+            FAI fai = new FAI();
+
+            Global.Instance.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
             Console.InputEncoding = Encoding.Unicode;
             Console.OutputEncoding = Encoding.Unicode;
 
@@ -23,7 +30,7 @@ namespace FAILang
                 object firstIfOnly(IType[] list) => list.Length == 0 ? null : (list.Length == 1 ? list[0] : (object)list);
                 foreach (var assertion in testPackage.Assertions)
                 {
-                    Debug.Assert(firstIfOnly(RunLines(assertion.Item1)).Equals(assertion.Item2));
+                    Debug.Assert(firstIfOnly(fai.RunLines(assertion.Item1)).Equals(assertion.Item2));
                 }
             }
 
@@ -32,14 +39,17 @@ namespace FAILang
                 string input = Console.ReadLine();
                 while (input.EndsWith("  "))
                     input += Console.ReadLine();
-                foreach (var val in RunLines(input))
+                
+                foreach (var val in fai.RunLines(input))
                     if (val != null)
                         Console.WriteLine(val);
             }
         }
 
-        public static IType[] RunLines(string input)
+        public IType[] RunLines(string input)
         {
+            if (input == null)
+                return new IType[] { };
             try
             {
                 AntlrInputStream inputStream = new AntlrInputStream(input);
@@ -52,11 +62,11 @@ namespace FAILang
                 FAILangParser.CallsContext expressionContext = parser.calls();
                 FAILangVisitor visitor = new FAILangVisitor();
 
-                return visitor.VisitCalls(expressionContext).Select(x => Global.Evaluate(x)).ToArray();
+                return visitor.VisitCalls(expressionContext).Select(x => Global.Instance.Evaluate(x)).ToArray();
             }
             catch (Antlr4.Runtime.Misc.ParseCanceledException)
             {
-                Console.WriteLine(new Error("ParseError", "The input failed to parse."));
+                return new IType[] { new Error("ParseError", "The input failed to parse.") };
             }
             catch (Exception e)
             {

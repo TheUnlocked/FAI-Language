@@ -35,9 +35,9 @@ namespace FAILang
             var update = context.update;
             var exp = context.expression();
 
-            if (Global.reservedNames.Contains(name))
+            if (Global.Instance.reservedNames.Contains(name))
                 return new Error("DefineFailed", $"{name} is a reserved name.");
-            if (update == null && Global.globalVariables.ContainsKey(name))
+            if (update == null && Global.Instance.globalVariables.ContainsKey(name))
                 return new Error("DefineFailed", "The update keyword is required to change a function or variable.");
 
             bool memoize = context.memoize != null;
@@ -45,9 +45,9 @@ namespace FAILang
             // `update memo name` pattern
             if (exp == null && memoize)
             {
-                if (!Global.globalVariables.ContainsKey(name))
+                if (!Global.Instance.globalVariables.ContainsKey(name))
                     return new Error("UpdateFailed", $"{name} is not defined");
-                if (Global.globalVariables.TryGetValue(name, out var val) && val is Function func)
+                if (Global.Instance.globalVariables.TryGetValue(name, out var val) && val is Function func)
                 {
                     if (func.memoize)
                         func.memos.Clear();
@@ -62,14 +62,14 @@ namespace FAILang
                 IType expr = VisitExpression(exp);
                 Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, memoize: memoize, elipsis: context.fparams().elipsis != null);
 
-                Global.globalVariables[name] = f;
+                Global.Instance.globalVariables[name] = f;
             }
             else
             {
-                var v = Global.Evaluate(VisitExpression(exp));
+                var v = Global.Instance.Evaluate(VisitExpression(exp));
                 if (v is Error)
                     return v;
-                Global.globalVariables[name] = v;
+                Global.Instance.globalVariables[name] = v;
             }
 
             return null;

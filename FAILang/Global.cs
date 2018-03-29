@@ -10,13 +10,27 @@ using System.Threading.Tasks;
 
 namespace FAILang
 {
-    public static class Global
+    public class Global
     {
-        public static Dictionary<string, IType> globalVariables = new Dictionary<string, IType>();
+        private static Global _instance;
+        public static Global Instance {
+            get {
+                if (_instance == null)
+                    _instance = new Global();
+                return _instance;
+            }
+        }
 
-        public static readonly Dictionary<string, IType> noVariables = new Dictionary<string, IType>();
+        public static void ResetGlobals()
+        {
+            _instance = new Global();
+        }
 
-        public static readonly List<string> reservedNames = new List<string>
+        public Dictionary<string, IType> globalVariables = new Dictionary<string, IType>();
+
+        public readonly Dictionary<string, IType> noVariables = new Dictionary<string, IType>();
+
+        public readonly List<string> reservedNames = new List<string>
         {
             "i",
             "true",
@@ -25,10 +39,12 @@ namespace FAILang
             "lambda",
             "update",
             "memo",
-            "self"
+            "self",
+            "if",
+            "otherwise"
         };
 
-        public static void LoadBuiltins(params IBuiltinProvider[] builtinProviders)
+        public void LoadBuiltins(params IBuiltinProvider[] builtinProviders)
         {
             foreach (var builtinProvider in builtinProviders)
             {
@@ -43,7 +59,7 @@ namespace FAILang
             }
         }
 
-        public static IType Evaluate(IType expr)
+        public IType Evaluate(IType expr)
         {
             while (expr is IUnevaluated u)
             {

@@ -56,10 +56,14 @@ namespace FAILang.Types.Unevaluated
                     }
                 }
                 if (args.Any(x => x is IUnevaluated))
-                    return new BakedExpression(new FunctionExpression(func_expr, args.Select(x => (x, false)).ToArray()), lookups);
+                    return new BakedExpression(new FunctionExpression(func, args.Select(x => (x, false)).ToArray()), lookups);
                 return f.Evaluate(args.ToArray());
             }
-            else if (func is IOperable n1 && args.Length == 1)
+            if (func is IUnevaluated)
+            {
+                return new BakedExpression(new FunctionExpression(func, args), lookups);
+            }
+            if (func is IOperable n1 && args.Length == 1)
                 return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(lookups);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }

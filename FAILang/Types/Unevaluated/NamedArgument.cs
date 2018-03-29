@@ -25,8 +25,8 @@ namespace FAILang.Types.Unevaluated
                     return (val as IUnevaluated).Evaluate(lookups);
                 return val;
             }
-            else if (Global.globalVariables.ContainsKey(name))
-                return Global.globalVariables[name];
+            else if (Global.Instance.globalVariables.ContainsKey(name))
+                return Global.Instance.globalVariables[name];
             return new Error("InvalidName", $"The name {name} is neither globally defined nor an argument.");
         }
     }

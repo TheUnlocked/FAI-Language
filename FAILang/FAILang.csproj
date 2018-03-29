@@ -5,12 +5,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <StartupObject>FAILang.Program</StartupObject>
-    <AssemblyName>FAIrepl</AssemblyName>
+    <StartupObject>FAILang.FAI</StartupObject>
+    <AssemblyName>FAILang</AssemblyName>
     <Authors>Unlocked</Authors>
     <Company />
     <Product />
-    <Version>0.2.0</Version>
+    <Version>0.4.0</Version>
+    <AssemblyVersion>0.4.0.0</AssemblyVersion>
+    <FileVersion>0.4.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,7 +33,6 @@
       <Listener>True</Listener>
       <Visitor>True</Visitor>
     </Antlr4>
-    <None Include="app.config" />
   </ItemGroup>
 
   <Import Project="..\packages\Antlr4.CodeGenerator.4.6.5-beta001\build\Antlr4.CodeGenerator.targets" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.5-beta001\build\Antlr4.CodeGenerator.targets')" />
