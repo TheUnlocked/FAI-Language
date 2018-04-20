@@ -13,9 +13,9 @@ namespace FAILang.Types.Unevaluated
 
         public Union(IType[] values, Dictionary<string, IType> lookups = null)
         {
-            this.values = values.Where(x => x != Void.instance).ToArray();
+            this.values = values.Where(x => x != Undefined.instance).ToArray();
             if (this.values.Length == 0)
-                this.values = new IType[] { Void.instance };
+                this.values = new IType[] { Undefined.instance };
             if (lookups != null)
                 this.values = Flatten(lookups);
         }
@@ -64,11 +64,11 @@ namespace FAILang.Types.Unevaluated
                 }
             }
             IType[] evaled = new Union(newVals).Flatten(lookups);
-            evaled = evaled.Where(x => x != Void.instance).ToArray();
+            evaled = evaled.Where(x => x != Undefined.instance).ToArray();
             if (evaled.Length == 1)
                 return evaled[0];
             if (evaled.Length == 0)
-                return Void.instance;
+                return Undefined.instance;
             foreach (IType e in evaled)
             {
                 if (e is Error)

@@ -56,19 +56,8 @@ namespace FAILang.Types.Unevaluated
                 return eRight;
 
             // Operate
-            if (op == BinaryOperator.EQUALS)
-            {
-                return left.Equals(right) ? MathBool.TRUE : MathBool.FALSE;
-            }
-            else if (op == BinaryOperator.NOT_EQUALS)
-            {
-                return left.Equals(right) ? MathBool.FALSE : MathBool.TRUE;
-            }
-            else
-            {
-                if (left == Void.instance || right == Void.instance)
-                    return Void.instance;
-            }
+            if (left == Undefined.instance || right == Undefined.instance)
+                    return Undefined.instance;
 
             if (left is IOperable lop && right is IOperable rop)
             {

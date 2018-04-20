@@ -25,12 +25,16 @@ namespace FAILang.Types
             {BinaryOperator.MULTIPLY, OpMultiply},
             {BinaryOperator.DIVIDE, OpDivide},
             {BinaryOperator.MODULO, OpModulo},
-            {BinaryOperator.EXPONENT, OpExponent},
+            {BinaryOperator.EXPONENT, OpExponent}
+        };
 
-            {BinaryOperator.GREATER, OpGreaterThan},
-            {BinaryOperator.LESS, OpLessThan},
-            {BinaryOperator.GR_EQUAL, OpGreaterEqual},
-            {BinaryOperator.LE_EQUAL, OpLessEqual}
+        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => new Dictionary<RelationalOperator, Func<IOperable, MathBool>>() {
+            {RelationalOperator.EQUALS, OpEquals},
+            {RelationalOperator.NOT_EQUALS, OpNotEquals},
+            {RelationalOperator.GREATER, OpGreaterThan},
+            {RelationalOperator.GR_EQUAL, OpGreaterEqual},
+            {RelationalOperator.LESS, OpLessThan},
+            {RelationalOperator.LE_EQUAL, OpLessEqual}
         };
 
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
@@ -76,7 +80,7 @@ namespace FAILang.Types
             {
                 case Number num:
                     if (num.IsReal && num.value.Real == 0)
-                        return Void.instance;
+                        return Undefined.instance;
                     return new Number(value / num.value);
                 default:
                     return null;
@@ -88,7 +92,7 @@ namespace FAILang.Types
             {
                 case Number num:
                     if (num.value.Real == 0 || !num.IsReal)
-                        return Void.instance;
+                        return Undefined.instance;
                     return new Number(new Complex(((value.Real % num.value.Real) + num.value.Real) % num.value.Real,
                                              ((value.Imaginary % num.value.Real) + num.value.Real) % num.value.Real));
                 default:
@@ -129,7 +133,27 @@ namespace FAILang.Types
                     return null;
             }
         }
-        private IType OpGreaterThan(IOperable other)
+        private MathBool OpEquals(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                        return Equals(num) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private MathBool OpNotEquals(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    return !Equals(num) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private MathBool OpGreaterThan(IOperable other)
         {
             switch (other)
             {
@@ -142,20 +166,7 @@ namespace FAILang.Types
                     return null;
             }
         }
-        private IType OpLessThan(IOperable other)
-        {
-            switch (other)
-            {
-                case Number num:
-                    if (value.Real != num.value.Real)
-                        return (value.Real < num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
-                    else
-                        return (value.Imaginary < num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
-                default:
-                    return null;
-            }
-        }
-        private IType OpGreaterEqual(IOperable other)
+        private MathBool OpGreaterEqual(IOperable other)
         {
             switch (other)
             {
@@ -168,7 +179,20 @@ namespace FAILang.Types
                     return null;
             }
         }
-        private IType OpLessEqual(IOperable other)
+        private MathBool OpLessThan(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    if (value.Real != num.value.Real)
+                        return (value.Real < num.value.Real) ? MathBool.TRUE : MathBool.FALSE;
+                    else
+                        return (value.Imaginary < num.value.Imaginary) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return null;
+            }
+        }
+        private MathBool OpLessEqual(IOperable other)
         {
             switch (other)
             {

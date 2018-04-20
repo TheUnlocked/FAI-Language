@@ -4,8 +4,12 @@ grammar FAILang;
  * Parser Rules
  */
 
+compileUnit
+	: calls EOF
+	;
+
 calls
-	: (call end?)* compileUnit
+	: (call end)*
 	;
 
 call
@@ -17,11 +21,6 @@ def
 	: update=UPDATE? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
 	| update=UPDATE? name EQ expression
 	| update=UPDATE memoize=MEMO name
-	;
-
-lambda
-	: L_PAREN memoize=MEMO? fparams R_PAREN ARROW expression
-	| param elipsis=ELIPSIS? ARROW expression
 	;
 
 fparams
@@ -45,38 +44,46 @@ param
 	;
 
 expression
-	: L_PAREN expression R_PAREN
-	| union
-	| expression L_PAREN callparams R_PAREN
-	| prefix expression
-	| expression indexer
-
-	// Operator expressions
-	| <assoc=right> expression op=EXPONENT expression
-	| expression op=( MULTIPLY
-					| DIVIDE
-					| MODULO ) expression
-	| expression op=( PLUS
-					| SUBTRACT ) expression
-	| expression op=( EQ
-					| NE
-					| R_ARR
-					| L_ARR
-					| GE
-					| LE ) expression
-	| lambda
-	| piecewise
-	| type
-	| name
+	: relational
 	;
 
-type
-	: t_number=NUMBER
+relational
+	: binary ( op=(EQ | NE | R_ARR | L_ARR | GE | LE) binary)*
+	;
+
+binary
+	: prefix
+	| <assoc=right> binary op=EXPONENT binary
+	| binary op=( MULTIPLY | DIVIDE | MODULO ) binary
+	| binary op=( PLUS | SUBTRACT ) binary
+	;
+
+prefix
+	: op=( NOT | SUBTRACT )? postfix
+	;
+
+postfix
+	: atom indexer?
+	;
+
+atom
+	: L_PAREN expression R_PAREN
+	| name
+	| atom L_PAREN callparams R_PAREN
+	| union
+	| lambda
+	| piecewise
+	| t_number=NUMBER
 	| t_string=STRING
 	| t_boolean=BOOLEAN
-	| t_void=VOID
+	| t_undefined=UNDEFINED
 	| tuple
 	| vector
+	;
+
+lambda
+	: L_PAREN memoize=MEMO? fparams R_PAREN ARROW expression
+	| param elipsis=ELIPSIS? ARROW expression
 	;
 
 tuple
@@ -86,11 +93,6 @@ tuple
 
 vector
 	: L_ARR (expression COMMA)* expression R_ARR
-	;
-
-prefix
-	: NOT
-	| SUBTRACT
 	;
 
 indexer
@@ -114,13 +116,8 @@ union
 
 end
 	: SEMI_COLON
-	| EOF
+	| 
 	;
-
-compileUnit
-	: EOF
-	;
-
 
 
 /*
@@ -250,8 +247,8 @@ BOOLEAN
 	: 'true'
 	| 'false'
 	;
-VOID
-	: 'void'
+UNDEFINED
+	: 'undefined'
 	;
 
 LAMBDA

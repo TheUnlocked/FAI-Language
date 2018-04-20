@@ -23,6 +23,7 @@ namespace FAILang.Types
             {BinaryOperator.ADD, OpConcat}
         };
 
+        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
 
         private IType OpConcat(IOperable other)

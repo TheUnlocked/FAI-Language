@@ -77,120 +77,145 @@ namespace FAILang
 
         public override IType VisitExpression([NotNull] FAILangParser.ExpressionContext context)
         {
-            var type = context.type();
-            var name = context.name();
-            var op = context.op;
-            var prefix = context.prefix();
-            var piecewise = context.piecewise();
-            var callparams = context.callparams();
-            var lambda = context.lambda();
-            var union = context.union();
-            var indexer = context.indexer();
-
-            if      (type != null)
-                return VisitType(type);
-            else if (name != null)
-                return VisitName(name);
-            else if (op != null)
-            {
-                var exprs = context.expression();
-                BinaryOperator oper = BinaryOperator.MULTIPLY;
-                switch (op.Text)
-                {
-                    case "+":
-                        oper = BinaryOperator.ADD;
-                        break;
-                    case "-":
-                        oper = BinaryOperator.SUBTRACT;
-                        break;
-                    case "*":
-                        oper = BinaryOperator.MULTIPLY;
-                        break;
-                    case "":
-                        oper = BinaryOperator.MULTIPLY;
-                        break;
-                    case "/":
-                        oper = BinaryOperator.DIVIDE;
-                        break;
-                    case "%":
-                        oper = BinaryOperator.MODULO;
-                        break;
-                    case "^":
-                        oper = BinaryOperator.EXPONENT;
-                        break;
-                    case "=":
-                        oper = BinaryOperator.EQUALS;
-                        break;
-                    case "~=":
-                        oper = BinaryOperator.NOT_EQUALS;
-                        break;
-                    case ">":
-                        oper = BinaryOperator.GREATER;
-                        break;
-                    case "<":
-                        oper = BinaryOperator.LESS;
-                        break;
-                    case ">=":
-                        oper = BinaryOperator.GR_EQUAL;
-                        break;
-                    case "<=":
-                        oper = BinaryOperator.LE_EQUAL;
-                        break;
-                }
-                return new BinaryOperatorExpression(oper, VisitExpression(exprs[0]), VisitExpression(exprs[1]));
-            }
-            else if (prefix != null)    
-            {
-                UnaryOperator pre = UnaryOperator.NOT;
-                switch (prefix.GetText())
-                {
-                    case "~":
-                        pre = UnaryOperator.NOT;
-                        break;
-                    case "-":
-                        pre = UnaryOperator.NEGATIVE;
-                        break;
-                }
-                return new UnaryOperatorExpression(pre, VisitExpression(context.expression(0)));
-            }
-            else if (piecewise != null)
-                return VisitPiecewise(piecewise);
-            else if (callparams != null)    
-            {
-                return new FunctionExpression(VisitExpression(context.expression(0)),
-                    callparams.arg()
-                        .Select(x => (VisitExpression(x.expression()), x.elipsis != null)).ToArray());
-            }
-            else if (lambda != null)    return VisitLambda(lambda);
-            else if (union != null)     return VisitUnion(union);
-            else if (indexer != null)   
-            {
-                IType l_expr = null;
-                if (indexer.l_index != null)
-                    l_expr = VisitExpression(indexer.l_index);
-                IType r_expr = null;
-                if (indexer.r_index != null)
-                    r_expr = VisitExpression(indexer.r_index);
-                return new IndexerExpression(VisitExpression(context.expression(0)), l_expr, r_expr, indexer.elipsis != null);
-            }
-
-            return VisitExpression(context.expression(0));
+            return VisitRelational(context.relational());
         }
 
-        public override IType VisitName([NotNull] FAILangParser.NameContext context) =>
-            new NamedArgument(context.GetText());
-
-        public override IType VisitType([NotNull] FAILangParser.TypeContext context)
+        public override IType VisitRelational([NotNull] FAILangParser.RelationalContext context)
         {
-            var number = context.t_number;
-            var str = context.t_string;
-            var boolean = context.t_boolean;
-            var void_type = context.t_void;
-            var vector = context.vector();
-            var tuple = context.tuple();
-
-            if (number != null)
+            if (context.binary().Length == 1)
             {
+                return VisitBinary(context.binary(0));
+            }
+            var binaryNodes = context.binary();
+            var ops = context.GetTokens(context.op.Type);
+
+            RelationalOperator[] opers = new RelationalOperator[ops.Length];
+            for (int i = 0; i < opers.Length; i++)
+            {
+                switch (ops[i].GetText())
+                {
+                    case "=":
+                        opers[i] = RelationalOperator.EQUALS;
+                        break;
+                    case "~=":
+                        opers[i] = RelationalOperator.NOT_EQUALS;
+                        break;
+                    case ">":
+                        opers[i] = RelationalOperator.GREATER;
+                        break;
+                    case "<":
+                        opers[i] = RelationalOperator.LESS;
+                        break;
+                    case ">=":
+                        opers[i] = RelationalOperator.GR_EQUAL;
+                        break;
+                    case "<=":
+                        opers[i] = RelationalOperator.LE_EQUAL;
+                        break;
+                }
+            }
+            return new RelationalOperatorExpression(opers, binaryNodes.Select(x => VisitBinary(x)).ToArray());
+        }
+
+        public override IType VisitBinary([NotNull] FAILangParser.BinaryContext context)
+        {
+            if (context.prefix() != null)
+            {
+                return VisitPrefix(context.prefix());
+            }
+
+            var binaryNodes = context.binary();
+            BinaryOperator oper = BinaryOperator.MULTIPLY;
+            switch (context.op.Text)
+            {
+                case "+":
+                    oper = BinaryOperator.ADD;
+                    break;
+                case "-":
+                    oper = BinaryOperator.SUBTRACT;
+                    break;
+                case "*":
+                    oper = BinaryOperator.MULTIPLY;
+                    break;
+                case "":
+                    oper = BinaryOperator.MULTIPLY;
+                    break;
+                case "/":
+                    oper = BinaryOperator.DIVIDE;
+                    break;
+                case "%":
+                    oper = BinaryOperator.MODULO;
+                    break;
+                case "^":
+                    oper = BinaryOperator.EXPONENT;
+                    break;
+            }
+            return new BinaryOperatorExpression(oper, VisitBinary(binaryNodes[0]), VisitBinary(binaryNodes[1]));
+        }
+
+        public override IType VisitPrefix([NotNull] FAILangParser.PrefixContext context)
+        {
+            if (context.op == null)
+            {
+                return VisitPostfix(context.postfix());
+            }
+            else
+            {
+                UnaryOperator prefix = UnaryOperator.NOT;
+                switch (context.op.Text)
+                {
+                    case "~":
+                        prefix = UnaryOperator.NOT;
+                        break;
+                    case "-":
+                        prefix = UnaryOperator.NEGATIVE;
+                        break;
+                }
+                return new UnaryOperatorExpression(prefix, VisitPostfix(context.postfix()));
+            }
+        }
+
+        public override IType VisitPostfix([NotNull] FAILangParser.PostfixContext context)
+        {
+            if (context.indexer() == null)
+            {
+                return VisitAtom(context.atom());
+            }
+            else
+            {
+                var indexer = context.indexer();
+                IType leftIndex = null;
+                if (indexer.l_index != null)
+                    leftIndex = VisitExpression(indexer.l_index);
+                IType rightIndex = null;
+                if (indexer.r_index != null)
+                    rightIndex = VisitExpression(indexer.r_index);
+                return new IndexerExpression(VisitAtom(context.atom()), leftIndex, rightIndex, indexer.elipsis != null);
+            }
+        }
+
+        public override IType VisitAtom([NotNull] FAILangParser.AtomContext context)
+        {
+            if (context.expression() != null)
+                return VisitExpression(context.expression());
+            else if (context.name() != null)
+                return VisitName(context.name());
+            else if (context.callparams() != null)    
+            {
+                return new FunctionExpression(
+                    VisitAtom(context.atom()),
+                    context.callparams().arg()
+                        .Select(x => (VisitExpression(x.expression()), x.elipsis != null)).ToArray());
+            }
+            else if (context.union() != null)
+                return VisitUnion(context.union());
+            else if (context.lambda() != null)
+                return VisitLambda(context.lambda());
+            else if (context.piecewise() != null)
+                return VisitPiecewise(context.piecewise());
+            else if (context.t_number != null)
+            {
+                var number = context.t_number;
                 if (number.Text.Equals("i"))
                     return new Number(Complex.ImaginaryOne);
                 else if (number.Text.EndsWith('i'))
@@ -198,8 +223,9 @@ namespace FAILang
                 else
                     return new Number(Convert.ToDouble(number.Text));
             }
-            else if (str != null)
+            else if (context.t_string != null)
             {
+                var str = context.t_string;
                 string processed = str.Text.Substring(1, str.Text.Length - 2)
                     .Replace("\\\\", "\\")
                     .Replace("\\b", "\b")
@@ -211,15 +237,20 @@ namespace FAILang
                     .Replace("\\\"", "\"");
                 return new MathString(processed);
             }
-            else if (boolean != null)
-                return boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
-            else if (vector != null)
-                return VisitVector(vector);
-            else if (tuple != null)
-                return VisitTuple(tuple);
-            else
-                return Types.Void.instance;
+            else if (context.t_boolean != null)
+                return context.t_boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
+            else if (context.t_undefined != null)
+                return Types.Undefined.instance;
+            else if (context.vector() != null)
+                return VisitVector(context.vector());
+            else if (context.tuple() != null)
+                return VisitTuple(context.tuple());
+
+            return null;
         }
+
+        public override IType VisitName([NotNull] FAILangParser.NameContext context) =>
+            new NamedArgument(context.GetText());
 
         public override IType VisitVector([NotNull] FAILangParser.VectorContext context) =>
             new UnevaluatedVector(context.expression().Select(x => VisitExpression(x)).ToArray());

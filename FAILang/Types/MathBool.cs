@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FAILang.Types
 {
-    class MathBool : IOperable
+    public class MathBool : IOperable
     {
         public static readonly MathBool TRUE = new MathBool(true);
         public static readonly MathBool FALSE = new MathBool(false);
@@ -24,6 +24,8 @@ namespace FAILang.Types
             {BinaryOperator.MULTIPLY, OpAnd},
             {BinaryOperator.EXPONENT, OpXor}
         };
+
+        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;
 
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
         {

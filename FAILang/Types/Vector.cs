@@ -25,7 +25,12 @@ namespace FAILang.Types
             {BinaryOperator.MULTIPLY, OpMultiply}
         };
 
-        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
+        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;
+
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
+        {
+            {UnaryOperator.NEGATIVE, null}
+        };
 
         private IType OpAdd(IOperable other)
         {

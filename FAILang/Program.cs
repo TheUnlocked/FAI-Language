@@ -30,7 +30,14 @@ namespace FAILang
                 object firstIfOnly(IType[] list) => list.Length == 0 ? null : (list.Length == 1 ? list[0] : (object)list);
                 foreach (var assertion in testPackage.Assertions)
                 {
-                    Debug.Assert(firstIfOnly(fai.RunLines(assertion.Item1)).Equals(assertion.Item2));
+                    try
+                    {
+                        Debug.Assert(firstIfOnly(fai.RunLines(assertion.Item1)).Equals(assertion.Item2));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
                 }
             }
 
