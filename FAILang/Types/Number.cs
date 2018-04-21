@@ -32,9 +32,9 @@ namespace FAILang.Types
             {RelationalOperator.EQUALS, OpEquals},
             {RelationalOperator.NOT_EQUALS, OpNotEquals},
             {RelationalOperator.GREATER, OpGreaterThan},
-            {RelationalOperator.GR_EQUAL, OpGreaterEqual},
+            {RelationalOperator.GREATER_EQUAL, OpGreaterEqual},
             {RelationalOperator.LESS, OpLessThan},
-            {RelationalOperator.LE_EQUAL, OpLessEqual}
+            {RelationalOperator.LESS_EQUAL, OpLessEqual}
         };
 
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()

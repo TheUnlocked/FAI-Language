@@ -48,7 +48,7 @@ expression
 	;
 
 relational
-	: binary ( op=(EQ | NE | R_ARR | L_ARR | GE | LE) binary)*
+	: binary ( relational_op binary)*
 	;
 
 binary
@@ -56,6 +56,7 @@ binary
 	| <assoc=right> binary op=EXPONENT binary
 	| binary op=( MULTIPLY | DIVIDE | MODULO ) binary
 	| binary op=( PLUS | SUBTRACT ) binary
+	| binary op=IS binary
 	;
 
 prefix
@@ -112,6 +113,15 @@ condition
 
 union
 	: L_PAREN (expression VERT_LINE)+ expression R_PAREN
+	;
+
+relational_op
+	: EQ
+	| NE
+	| R_ARR
+	| L_ARR
+	| GE
+	| LE
 	;
 
 end
@@ -266,6 +276,10 @@ IF
 	;
 OTHERWISE
 	: 'otherwise'
+	;
+
+IS
+	: 'is'
 	;
 
 NAME

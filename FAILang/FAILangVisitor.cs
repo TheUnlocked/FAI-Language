@@ -87,7 +87,7 @@ namespace FAILang
                 return VisitBinary(context.binary(0));
             }
             var binaryNodes = context.binary();
-            var ops = context.GetTokens(context.op.Type);
+            var ops = context.relational_op();
 
             RelationalOperator[] opers = new RelationalOperator[ops.Length];
             for (int i = 0; i < opers.Length; i++)
@@ -107,10 +107,10 @@ namespace FAILang
                         opers[i] = RelationalOperator.LESS;
                         break;
                     case ">=":
-                        opers[i] = RelationalOperator.GR_EQUAL;
+                        opers[i] = RelationalOperator.GREATER_EQUAL;
                         break;
                     case "<=":
-                        opers[i] = RelationalOperator.LE_EQUAL;
+                        opers[i] = RelationalOperator.LESS_EQUAL;
                         break;
                 }
             }
@@ -148,6 +148,9 @@ namespace FAILang
                     break;
                 case "^":
                     oper = BinaryOperator.EXPONENT;
+                    break;
+                case "is":
+                    oper = BinaryOperator.IS;
                     break;
             }
             return new BinaryOperatorExpression(oper, VisitBinary(binaryNodes[0]), VisitBinary(binaryNodes[1]));

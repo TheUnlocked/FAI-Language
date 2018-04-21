@@ -17,7 +17,8 @@ namespace FAILang
         MULTIPLY,
         DIVIDE,
         MODULO,
-        EXPONENT
+        EXPONENT,
+        IS
     }
     public enum RelationalOperator
     {
@@ -25,8 +26,8 @@ namespace FAILang
         NOT_EQUALS,
         GREATER,
         LESS,
-        GR_EQUAL,
-        LE_EQUAL
+        GREATER_EQUAL,
+        LESS_EQUAL
     }
     public enum UnaryOperator
     {
@@ -51,6 +52,8 @@ namespace FAILang
                     return "%";
                 case BinaryOperator.EXPONENT:
                     return "^";
+                case BinaryOperator.IS:
+                    return "is";
                 default:
                     return "";
             }
@@ -67,9 +70,9 @@ namespace FAILang
                     return ">";
                 case RelationalOperator.LESS:
                     return "<";
-                case RelationalOperator.GR_EQUAL:
+                case RelationalOperator.GREATER_EQUAL:
                     return ">=";
-                case RelationalOperator.LE_EQUAL:
+                case RelationalOperator.LESS_EQUAL:
                     return "<=";
                 default:
                     return "";

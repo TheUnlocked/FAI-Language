@@ -35,13 +35,14 @@ namespace FAILang
             "i",
             "true",
             "false",
-            "void",
+            "undefined",
             "lambda",
             "update",
             "memo",
             "self",
             "if",
-            "otherwise"
+            "otherwise",
+            "is"
         };
 
         public void LoadBuiltins(params IBuiltinProvider[] builtinProviders)

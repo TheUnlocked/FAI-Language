@@ -56,6 +56,11 @@ namespace FAILang.Types.Unevaluated
                 return eRight;
 
             // Operate
+            if (op == BinaryOperator.IS)
+            {
+                return left.Equals(right) ? MathBool.TRUE : MathBool.FALSE;
+            }
+
             if (left == Undefined.instance || right == Undefined.instance)
                     return Undefined.instance;
 
