@@ -14,9 +14,9 @@ namespace FAILang
     {
         ADD,
         SUBTRACT,
+        PLUS_MINUS,
         MULTIPLY,
         DIVIDE,
-        MODULO,
         EXPONENT,
         IS
     }
@@ -33,6 +33,7 @@ namespace FAILang
     {
         NOT,
         NEGATIVE,
+        PLUS_MINUS,
         ABS
     }
 
@@ -45,12 +46,12 @@ namespace FAILang
                     return "+";
                 case BinaryOperator.SUBTRACT:
                     return "-";
+                case BinaryOperator.PLUS_MINUS:
+                    return "+-";
                 case BinaryOperator.MULTIPLY:
                     return "*";
                 case BinaryOperator.DIVIDE:
                     return "/";
-                case BinaryOperator.MODULO:
-                    return "%";
                 case BinaryOperator.EXPONENT:
                     return "^";
                 case BinaryOperator.IS:
@@ -85,6 +86,8 @@ namespace FAILang
             {
                 case UnaryOperator.NEGATIVE:
                     return "-";
+                case UnaryOperator.PLUS_MINUS:
+                    return "+-";
                 case UnaryOperator.NOT:
                     return "~";
                 case UnaryOperator.ABS:

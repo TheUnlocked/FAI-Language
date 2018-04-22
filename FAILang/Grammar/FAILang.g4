@@ -54,13 +54,13 @@ relational
 binary
 	: prefix
 	| <assoc=right> binary op=EXPONENT binary
-	| binary op=( MULTIPLY | DIVIDE | MODULO ) binary
-	| binary op=( PLUS | SUBTRACT ) binary
+	| binary op=( MULTIPLY | DIVIDE ) binary
+	| binary op=( PLUS | SUBTRACT | PLUS_MINUS ) binary
 	| binary op=IS binary
 	;
 
 prefix
-	: op=( NOT | SUBTRACT )? postfix
+	: op=( NOT | SUBTRACT | PLUS_MINUS )? postfix
 	;
 
 postfix
@@ -170,14 +170,14 @@ PLUS
 SUBTRACT
 	: '-'
 	;
+PLUS_MINUS
+	: '+-'
+	;
 MULTIPLY
 	: '*'
 	;
 DIVIDE
 	: '/'
-	;
-MODULO
-	: '%'
 	;
 EXPONENT
 	: '^'

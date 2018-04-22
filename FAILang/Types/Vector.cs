@@ -132,7 +132,6 @@ namespace FAILang.Types
         }
 
         public IType Index(int index) => items[index];
-
         public IType IndexRange(int left_b, int right_b)
         {
             IType[] newVector = new IType[right_b - left_b + 1];

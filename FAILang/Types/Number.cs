@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using FAILang.Types.Unevaluated;
 
 namespace FAILang.Types
 {
@@ -22,9 +23,9 @@ namespace FAILang.Types
         public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
             {BinaryOperator.ADD, OpAdd},
             {BinaryOperator.SUBTRACT, OpSubtract},
+            {BinaryOperator.PLUS_MINUS, OpPlusMinus},
             {BinaryOperator.MULTIPLY, OpMultiply},
             {BinaryOperator.DIVIDE, OpDivide},
-            {BinaryOperator.MODULO, OpModulo},
             {BinaryOperator.EXPONENT, OpExponent}
         };
 
@@ -40,6 +41,7 @@ namespace FAILang.Types
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
         {
             {UnaryOperator.NEGATIVE, OpNegate},
+            {UnaryOperator.PLUS_MINUS, OpPlusMinus},
             {UnaryOperator.ABS, OpAbs}
         };
 
@@ -59,6 +61,16 @@ namespace FAILang.Types
             {
                 case Number num:
                     return new Number(value - num.value);
+                default:
+                    return null;
+            }
+        }
+        private IType OpPlusMinus(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    return new Union(new IType[] { OpAdd(num), OpSubtract(num) });
                 default:
                     return null;
             }
@@ -83,19 +95,6 @@ namespace FAILang.Types
                     if (num.IsReal && num.value.Real == 0)
                         return Undefined.instance;
                     return new Number(value / num.value);
-                default:
-                    return null;
-            }
-        }
-        private IType OpModulo(IOperable other)
-        {
-            switch (other)
-            {
-                case Number num:
-                    if (num.value.Real == 0 || !num.IsReal)
-                        return Undefined.instance;
-                    return new Number(new Complex(((value.Real % num.value.Real) + num.value.Real) % num.value.Real,
-                                             ((value.Imaginary % num.value.Real) + num.value.Real) % num.value.Real));
                 default:
                     return null;
             }
@@ -209,6 +208,10 @@ namespace FAILang.Types
         private IType OpNegate()
         {
             return new Number(-value);
+        }
+        private IType OpPlusMinus()
+        {
+            return new Union(new IType[] { new Number(value), OpNegate() });
         }
         private IType OpAbs()
         {

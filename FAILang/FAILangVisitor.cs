@@ -139,17 +139,14 @@ namespace FAILang
                 case "-":
                     oper = BinaryOperator.SUBTRACT;
                     break;
-                case "*":
-                    oper = BinaryOperator.MULTIPLY;
+                case "+-":
+                    oper = BinaryOperator.PLUS_MINUS;
                     break;
-                case "":
+                case "*":
                     oper = BinaryOperator.MULTIPLY;
                     break;
                 case "/":
                     oper = BinaryOperator.DIVIDE;
-                    break;
-                case "%":
-                    oper = BinaryOperator.MODULO;
                     break;
                 case "^":
                     oper = BinaryOperator.EXPONENT;
@@ -177,6 +174,9 @@ namespace FAILang
                         break;
                     case "-":
                         prefix = UnaryOperator.NEGATIVE;
+                        break;
+                    case "+-":
+                        prefix = UnaryOperator.PLUS_MINUS;
                         break;
                 }
                 return new UnaryOperatorExpression(prefix, VisitPostfix(context.postfix()));
