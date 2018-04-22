@@ -13,6 +13,11 @@ namespace FAILang
 {
     public class FAILangVisitor : FAILangBaseVisitor<IType>
     {
+        public new IType[] VisitCompileUnit([NotNull] FAILangParser.CompileUnitContext context)
+        {
+            return VisitCalls(context.calls());
+        }
+
         public new IType[] VisitCalls([NotNull] FAILangParser.CallsContext context)
         {
             return context.call().Select(call => VisitCall(call)).ToArray();
@@ -200,7 +205,12 @@ namespace FAILang
         public override IType VisitAtom([NotNull] FAILangParser.AtomContext context)
         {
             if (context.expression() != null)
+            {
+                if (context.PIPE().Length == 2)
+                    return new UnaryOperatorExpression(UnaryOperator.ABS, VisitExpression(context.expression()));
                 return VisitExpression(context.expression());
+
+            }
             else if (context.name() != null)
                 return VisitName(context.name());
             else if (context.callparams() != null)    

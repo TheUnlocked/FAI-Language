@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using FAILang.Types;
+using FAILang.Types.Unevaluated;
 
 namespace FAILang.Builtins
 {
@@ -39,25 +40,7 @@ namespace FAILang.Builtins
                 x => new Number(new Complex(Math.Round(x.value.Real), Math.Round(x.value.Imaginary))),
                 x => new Error("WrongType", $"{x} is not a valid input to round")),
                 "c");
-        private static ExternFunction ABS = new ExternFunction(x => {
-                if (x[0] is Number n)
-                    return new Number(n.value.Magnitude);
-                else if (x[0] is Types.Vector v)
-                {
-                    Complex sum = 0;
-                    foreach (var t in v.items)
-                    {
-                        if (t is Number num)
-                        {
-                            sum += num.value * num.value;
-                        }
-                        else
-                            return new Error("WrongType", $"abs only works on a purely numeric vector");
-                    }
-                    return new Number(Complex.Sqrt(sum));
-                }
-                return new Error("WrongType", $"{x[0]} has no absolute value");
-                }, "n");
+        private static ExternFunction ABS = new ExternFunction(x => new UnaryOperatorExpression(UnaryOperator.ABS, x[0]), "x");
         private static ExternFunction SQRT = new ExternFunction(ValidateType<Number>(
                 x => new Number(Complex.Sqrt(x.value)),
                 x => new Error("WrongType", $"{x} is not a valid input to sqrt")),

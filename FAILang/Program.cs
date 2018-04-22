@@ -66,10 +66,10 @@ namespace FAILang
                 FAILangParser parser = new FAILangParser(commonTokenStream);
                 parser.ErrorHandler = new BailErrorStrategy();
 
-                FAILangParser.CallsContext expressionContext = parser.calls();
+                FAILangParser.CompileUnitContext expressionContext = parser.compileUnit();
                 FAILangVisitor visitor = new FAILangVisitor();
 
-                return visitor.VisitCalls(expressionContext).Select(x => Global.Instance.Evaluate(x)).ToArray();
+                return visitor.VisitCompileUnit(expressionContext).Select(x => Global.Instance.Evaluate(x)).ToArray();
             }
             catch (Antlr4.Runtime.Misc.ParseCanceledException)
             {

@@ -39,7 +39,8 @@ namespace FAILang.Types
 
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
         {
-            {UnaryOperator.NEGATIVE, OpNegate}
+            {UnaryOperator.NEGATIVE, OpNegate},
+            {UnaryOperator.ABS, OpAbs}
         };
 
         private IType OpAdd(IOperable other)
@@ -205,10 +206,13 @@ namespace FAILang.Types
                     return null;
             }
         }
-
         private IType OpNegate()
         {
             return new Number(-value);
+        }
+        private IType OpAbs()
+        {
+            return new Number(value.Magnitude);
         }
 
 

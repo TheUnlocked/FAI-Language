@@ -32,7 +32,8 @@ namespace FAILang
     public enum UnaryOperator
     {
         NOT,
-        NEGATIVE
+        NEGATIVE,
+        ABS
     }
 
     public static class OperatorExtension {
@@ -86,6 +87,8 @@ namespace FAILang
                     return "-";
                 case UnaryOperator.NOT:
                     return "~";
+                case UnaryOperator.ABS:
+                    return "|x|";
                 default:
                     return "";
             }

@@ -29,7 +29,8 @@ namespace FAILang.Types
 
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
         {
-            {UnaryOperator.NEGATIVE, null}
+            {UnaryOperator.NEGATIVE, OpNegate},
+            {UnaryOperator.ABS, OpMagnitude}
         };
 
         private IType OpAdd(IOperable other)
@@ -101,6 +102,33 @@ namespace FAILang.Types
                 default:
                     return null;
             }
+        }
+        private IType OpNegate()
+        {
+            IType[] newItems = new IType[items.Length];
+            for (int i = 0; i < newItems.Length; i++) {
+                if (items[i] is Number num)
+                {
+                    newItems[i] = new Number(-num.value);
+                }
+                else
+                    return new Error("WrongType", $"Vector inputs to the |x| operator must be purely numeric");
+            }
+            return new Vector(items);
+        }
+        private IType OpMagnitude()
+        {
+            Complex sum = 0;
+            foreach (var t in items)
+            {
+                if (t is Number num)
+                {
+                    sum += num.value * num.value;
+                }
+                else
+                    return new Error("WrongType", $"Vector inputs to the |x| operator must be purely numeric");
+            }
+            return new Number(Complex.Sqrt(sum));
         }
 
         public IType Index(int index) => items[index];

@@ -69,6 +69,7 @@ postfix
 
 atom
 	: L_PAREN expression R_PAREN
+	| PIPE expression PIPE
 	| name
 	| atom L_PAREN callparams R_PAREN
 	| union
@@ -112,7 +113,7 @@ condition
 	;
 
 union
-	: L_PAREN (expression VERT_LINE)+ expression R_PAREN
+	: L_PAREN (expression PIPE)+ expression R_PAREN
 	;
 
 relational_op
@@ -231,7 +232,7 @@ COLON
 SEMI_COLON
 	: ';'
 	;
-VERT_LINE
+PIPE
 	: '|'
 	;
 ELIPSIS
