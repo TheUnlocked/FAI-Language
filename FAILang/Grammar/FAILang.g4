@@ -55,7 +55,7 @@ binary
 	: prefix
 	| <assoc=right> binary op=EXPONENT binary
 	| binary op=( MULTIPLY | DIVIDE ) binary
-	| binary op=( PLUS | SUBTRACT | PLUS_MINUS ) binary
+	| binary op=( PLUS | SUBTRACT | PLUS_MINUS | CONCAT ) binary
 	| binary op=IS binary
 	;
 
@@ -181,6 +181,9 @@ DIVIDE
 	;
 EXPONENT
 	: '^'
+	;
+CONCAT
+	: '||'
 	;
 EQ
 	: '='

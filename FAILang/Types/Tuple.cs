@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FAILang.Types
 {
-    struct Tuple : IType, IIndexable
+    struct Tuple : IIndexable, IOperable
     {
         public string TypeName => "Tuple";
         public readonly IType[] items;
@@ -18,17 +18,28 @@ namespace FAILang.Types
             this.items = items;
         }
 
+        public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>()
+        {
+            {BinaryOperator.CONCAT, OpConcat}
+        };
+
+        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;
+        public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
+
+        private IType OpConcat(IOperable other)
+        {
+            switch (other)
+            {
+                case Tuple tup:
+                    return new Tuple(items.Concat(tup.items).ToArray());
+                default:
+                    return null;
+            }
+        }
+
         public IType Index(int index) => items[index];
 
-        public IType IndexRange(int left_b, int right_b)
-        {
-            IType[] newTuple = new IType[right_b - left_b + 1];
-            for (int i = 0; i <= right_b - left_b; i++)
-            {
-                newTuple[i] = items[i + left_b];
-            }
-            return new Tuple(newTuple);
-        }
+        public IType IndexRange(int left_b, int right_b) => new Tuple(items.Skip(left_b).SkipLast(Length - right_b - 1).ToArray());
 
         public override string ToString() {
             switch (items.Length) {

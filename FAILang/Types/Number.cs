@@ -26,7 +26,8 @@ namespace FAILang.Types
             {BinaryOperator.PLUS_MINUS, OpPlusMinus},
             {BinaryOperator.MULTIPLY, OpMultiply},
             {BinaryOperator.DIVIDE, OpDivide},
-            {BinaryOperator.EXPONENT, OpExponent}
+            {BinaryOperator.EXPONENT, OpExponent},
+            {BinaryOperator.CONCAT, OpConcat}
         };
 
         public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => new Dictionary<RelationalOperator, Func<IOperable, MathBool>>() {
@@ -129,6 +130,18 @@ namespace FAILang.Types
                         return new Number(c * Math.Pow(value.Imaginary, num.value.Real));
                     }
                     return new Number(Complex.Pow(value, num.value));
+                default:
+                    return null;
+            }
+        }
+        private IType OpConcat(IOperable other)
+        {
+            switch (other)
+            {
+                case Number num:
+                    var log = 1 + Complex.Log10(num.value);
+                    Complex floor = new Complex(Math.Floor(log.Real), Math.Floor(log.Imaginary));
+                    return new Number(num.value + (value * Complex.Pow(10, floor)));
                 default:
                     return null;
             }

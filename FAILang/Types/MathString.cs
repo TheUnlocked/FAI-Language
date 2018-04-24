@@ -20,7 +20,7 @@ namespace FAILang.Types
 
         public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>()
         {
-            {BinaryOperator.ADD, OpConcat}
+            {BinaryOperator.CONCAT, OpConcat}
         };
 
         public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;

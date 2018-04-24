@@ -151,6 +151,9 @@ namespace FAILang
                 case "^":
                     oper = BinaryOperator.EXPONENT;
                     break;
+                case "||":
+                    oper = BinaryOperator.CONCAT;
+                    break;
                 case "is":
                     oper = BinaryOperator.IS;
                     break;

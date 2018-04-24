@@ -22,7 +22,8 @@ namespace FAILang.Types
         public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
             {BinaryOperator.ADD, OpAdd},
             {BinaryOperator.SUBTRACT, OpSubtract},
-            {BinaryOperator.MULTIPLY, OpMultiply}
+            {BinaryOperator.MULTIPLY, OpMultiply},
+            {BinaryOperator.CONCAT, OpConcat}
         };
 
         public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;
@@ -103,6 +104,16 @@ namespace FAILang.Types
                     return null;
             }
         }
+        private IType OpConcat(IOperable other)
+        {
+            switch (other)
+            {
+                case Vector vec:
+                    return new Vector(items.Concat(vec.items).ToArray());
+                default:
+                    return null;
+            }
+        }
         private IType OpNegate()
         {
             IType[] newItems = new IType[items.Length];
@@ -132,15 +143,7 @@ namespace FAILang.Types
         }
 
         public IType Index(int index) => items[index];
-        public IType IndexRange(int left_b, int right_b)
-        {
-            IType[] newVector = new IType[right_b - left_b + 1];
-            for (int i = 0; i <= right_b - left_b; i++)
-            {
-                newVector[i] = items[i + left_b];
-            }
-            return new Vector(newVector);
-        }
+        public IType IndexRange(int left_b, int right_b) => new Vector(items.Skip(left_b).SkipLast(Length - right_b - 1).ToArray());
 
         public override string ToString() => $"<{String.Join(", ", (object[])items)}>";
 

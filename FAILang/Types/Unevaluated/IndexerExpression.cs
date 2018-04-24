@@ -46,7 +46,7 @@ namespace FAILang.Types.Unevaluated
                     if (!n_left.IsReal || left != n_left.value.Real)
                         return new Error("IndexError", "Indexer values must be positive integers.");
                     if (!range && (left < 0 || left >= item.Length))
-                        return new Error("IndexError", $"{left} is out of range.");
+                        return Undefined.instance;
                 }
                 IType t_right = rightIndex;
                 if (rightIndex is IUnevaluated u_right) t_right = u_right.Evaluate(lookups);
@@ -56,7 +56,7 @@ namespace FAILang.Types.Unevaluated
                     if (!n_right.IsReal || right != n_right.value.Real)
                         return new Error("IndexError", "Indexer values must be positive integers.");
                     if (!range && (right < 0 || right >= item.Length))
-                        return new Error("IndexError", $"{right} is out of range.");
+                        return Undefined.instance;
                 }
 
                 if (range)
@@ -66,7 +66,12 @@ namespace FAILang.Types.Unevaluated
                     else if (t_left == null && right < left)
                         left = right;
                     if (left > right)
-                        return new Error("IndexError", "The first index in an index range cannot be greater than the second index.");
+                    {
+                        var tmp = left;
+                        left = right;
+                        right = tmp;
+                    }
+                        
                     return item.IndexRange(left, right);
                 }
                 else

@@ -18,6 +18,7 @@ namespace FAILang
         MULTIPLY,
         DIVIDE,
         EXPONENT,
+        CONCAT,
         IS
     }
     public enum RelationalOperator
@@ -54,6 +55,8 @@ namespace FAILang
                     return "/";
                 case BinaryOperator.EXPONENT:
                     return "^";
+                case BinaryOperator.CONCAT:
+                    return "||";
                 case BinaryOperator.IS:
                     return "is";
                 default:
