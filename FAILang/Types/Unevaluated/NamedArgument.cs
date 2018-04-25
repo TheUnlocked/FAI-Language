@@ -29,5 +29,12 @@ namespace FAILang.Types.Unevaluated
                 return Global.Instance.globalVariables[name];
             return new Error("InvalidName", $"The name {name} is neither globally defined nor an argument.");
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + name.GetHashCode();
+            return hash;
+        }
     }
 }

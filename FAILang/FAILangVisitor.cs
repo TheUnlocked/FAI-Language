@@ -71,10 +71,17 @@ namespace FAILang
             }
             else
             {
-                var v = Global.Instance.Evaluate(VisitExpression(exp));
-                if (v is Error)
-                    return v;
-                Global.Instance.globalVariables[name] = v;
+                if (context.ASSIGN() != null)
+                {
+                    var v = Global.Instance.Evaluate(VisitExpression(exp));
+                    if (v is Error)
+                        return v;
+                    Global.Instance.globalVariables[name] = v;
+                }
+                else
+                {
+                    Global.Instance.globalVariables[name] = VisitExpression(context.expression());
+                }
             }
 
             return null;

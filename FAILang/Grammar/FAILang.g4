@@ -19,7 +19,7 @@ call
 
 def
 	: update=UPDATE? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
-	| update=UPDATE? name EQ expression
+	| update=UPDATE? name ( EQ | ASSIGN ) expression
 	| update=UPDATE memoize=MEMO name
 	;
 
@@ -244,6 +244,9 @@ ELIPSIS
 	;
 ARROW
 	: '->'
+	;
+ASSIGN
+	: ':='
 	;
 
 NUMBER

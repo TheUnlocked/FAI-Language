@@ -67,5 +67,13 @@ namespace FAILang.Types.Unevaluated
                 return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(lookups);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + EqualityComparer<(IType, bool)[]>.Default.GetHashCode(args);
+            hash = hash * 1532528149 + func_expr.GetHashCode();
+            return hash;
+        }
     }
 }

@@ -86,5 +86,15 @@ namespace FAILang.Types.Unevaluated
                 return new Error("TypeError", $"The type {expr.TypeName} cannot be indexed");
             }
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + expression.GetHashCode();
+            hash = hash * 1532528149 + leftIndex.GetHashCode();
+            hash = hash * 1532528149 + rightIndex.GetHashCode();
+            hash = hash * 1532528149 + range.GetHashCode();
+            return hash;
+        }
     }
 }

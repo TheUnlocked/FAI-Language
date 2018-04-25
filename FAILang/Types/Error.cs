@@ -22,5 +22,13 @@ namespace FAILang.Types
         {
             return $"{name}: {message}";
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + name.GetHashCode();
+            hash = hash * 1532528149 + message.GetHashCode();
+            return hash;
+        }
     }
 }

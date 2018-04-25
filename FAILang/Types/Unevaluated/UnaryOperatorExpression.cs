@@ -51,5 +51,13 @@ namespace FAILang.Types.Unevaluated
             }
             return new Error("WrongType", $"The {pre.ToDisplayString()} operator cannot be applied to type {t.TypeName}");
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + pre.GetHashCode();
+            hash = hash * 1532528149 + target.GetHashCode();
+            return hash;
+        }
     }
 }

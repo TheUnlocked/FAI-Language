@@ -28,8 +28,6 @@ namespace FAILang
 
         public Dictionary<string, IType> globalVariables = new Dictionary<string, IType>();
 
-        public readonly Dictionary<string, IType> noVariables = new Dictionary<string, IType>();
-
         public readonly List<string> reservedNames = new List<string>
         {
             "i",
@@ -60,8 +58,11 @@ namespace FAILang
             }
         }
 
+        static readonly Dictionary<string, IType> noVariables = new Dictionary<string, IType>();
+
         public IType Evaluate(IType expr)
         {
+            var exprMem = expr;
             while (expr is IUnevaluated u)
             {
                 if (u is Union un)
@@ -73,6 +74,10 @@ namespace FAILang
                     }
                 }
                 expr = u.Evaluate(noVariables);
+                if (expr.GetType() == exprMem.GetType() && expr.GetHashCode() == exprMem.GetHashCode())
+                {
+                    return new Error("InfiniteRecursion", "The entered expression will recurse infinitely, and has been terminated");
+                }
             }
             return expr;
         }

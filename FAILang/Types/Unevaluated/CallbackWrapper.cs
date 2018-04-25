@@ -6,7 +6,7 @@ namespace FAILang.Types.Unevaluated
 {
     public class CallbackWrapper : IUnevaluated
     {
-        public string TypeName => throw new NotImplementedException();
+        public string TypeName => "CallbackWrapper";
         public List<Action<IType>> callbacks = new List<Action<IType>>();
         IType expression;
 
@@ -52,6 +52,14 @@ namespace FAILang.Types.Unevaluated
                 }
                 return expression;
             }
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + EqualityComparer<List<Action<IType>>>.Default.GetHashCode(callbacks);
+            hash = hash * 1532528149 + expression.GetHashCode();
+            return hash;
         }
     }
 }

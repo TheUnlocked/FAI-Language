@@ -63,5 +63,14 @@ namespace FAILang.Types.Unevaluated
             }
             return default_expr is IUnevaluated retd ? retd.Evaluate(lookups) : default_expr;
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + EqualityComparer<IType[]>.Default.GetHashCode(conds);
+            hash = hash * 1532528149 + EqualityComparer<IType[]>.Default.GetHashCode(exprs);
+            hash = hash * 1532528149 + default_expr.GetHashCode();
+            return hash;
+        }
     }
 }

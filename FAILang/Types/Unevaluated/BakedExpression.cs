@@ -21,5 +21,13 @@ namespace FAILang.Types.Unevaluated
                 return u.Evaluate(lookups);
             return expression;
         }
+
+        public override int GetHashCode()
+        {
+            int hash = 691949981;
+            hash = hash * 1532528149 + expression.GetHashCode();
+            hash = hash * 1532528149 + lookups.GetHashCode();
+            return hash;
+        }
     }
 }
