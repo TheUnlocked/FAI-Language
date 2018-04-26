@@ -87,7 +87,12 @@ namespace FAILang.Builtins
                     return new Error("WrongType", $"{xs[0]} and {xs[1]} are not valid inputs to log");
                 }, "a", "b");
 
-        public (string, ExternFunction)[] GetBuiltins() => new(string, ExternFunction)[] {
+        private static Number PI = new Number(Math.PI);
+        private static Number E = new Number(Math.E);
+        private static Number DEGREES_TO_RADIANS = new Number(2 * Math.PI / 360);
+        private static Number RADIANS_TO_DEGREES = new Number(360 / 2 * Math.PI);
+
+        public (string, IType)[] GetBuiltins() => new(string, IType)[] {
                 ("real", REAL),
                 ("imaginary", IMAGINARY),
                 ("floor", FLOOR),
@@ -104,7 +109,12 @@ namespace FAILang.Builtins
                 ("atan", ATAN),
                 ("log10", LOG10),
                 ("ln", LN),
-                ("log", LOG)
+                ("log", LOG),
+
+                ("pi", PI),
+                ("e", E),
+                ("degrees_to_radians", DEGREES_TO_RADIANS),
+                ("radians_to_degrees", RADIANS_TO_DEGREES)
             };
 
         public string[] GetReservedNames() => new string[] {
@@ -124,7 +134,12 @@ namespace FAILang.Builtins
             "atan",
             "log10",
             "ln",
-            "log"
+            "log",
+
+            "pi",
+            "e",
+            "degrees_to_radians",
+            "radians_to_degrees"
         };
     }
 }

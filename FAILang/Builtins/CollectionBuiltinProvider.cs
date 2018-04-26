@@ -22,7 +22,7 @@ namespace FAILang.Builtins
                 x => new Error("WrongType", $"{x} has no length")),
                 "c");
 
-        public (string, ExternFunction)[] GetBuiltins() => new(string, ExternFunction)[] {
+        public (string, IType)[] GetBuiltins() => new(string, IType)[] {
                 ("length", LENGTH)
             };
 

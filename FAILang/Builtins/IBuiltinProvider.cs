@@ -7,7 +7,7 @@ namespace FAILang.Builtins
 {
     public interface IBuiltinProvider
     {
-        (string, ExternFunction)[] GetBuiltins();
+        (string, IType)[] GetBuiltins();
         string[] GetReservedNames();
     }
 }
