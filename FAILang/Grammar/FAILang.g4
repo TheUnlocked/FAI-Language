@@ -9,7 +9,7 @@ compileUnit
 	;
 
 calls
-	: (call end)*
+	: (call end)* call?
 	;
 
 call
@@ -64,7 +64,15 @@ prefix
 	;
 
 postfix
-	: atom indexer?
+	: type ( indexer | atom )?
+	;
+
+type
+	: atom
+	| t_number=NUMBER
+	| t_string=STRING
+	| t_boolean=BOOLEAN
+	| t_undefined=UNDEFINED
 	;
 
 atom
@@ -75,10 +83,6 @@ atom
 	| union
 	| lambda
 	| piecewise
-	| t_number=NUMBER
-	| t_string=STRING
-	| t_boolean=BOOLEAN
-	| t_undefined=UNDEFINED
 	| tuple
 	| vector
 	;
@@ -105,7 +109,7 @@ indexer
 	;
 
 piecewise
-	: L_CURL condition+ expression OTHERWISE SEMI_COLON
+	: L_CURL condition+ (expression OTHERWISE SEMI_COLON)?
 	;
 
 condition
@@ -126,8 +130,7 @@ relational_op
 	;
 
 end
-	: SEMI_COLON
-	| 
+	: DOT
 	;
 
 
@@ -229,6 +232,9 @@ R_BRAC
 COMMA
 	: ','
 	;
+DOT
+	: '.'
+	;
 COLON
 	: ':'
 	;
@@ -303,7 +309,7 @@ NAME
 	;
 
 COMMENT
-	: ('//' .*?) -> channel(HIDDEN)
+	: ('//' .*? EOF) -> channel(HIDDEN)
 	;
 
 MULTILINE_COMMENT

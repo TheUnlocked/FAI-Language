@@ -195,11 +195,7 @@ namespace FAILang
 
         public override IType VisitPostfix([NotNull] FAILangParser.PostfixContext context)
         {
-            if (context.indexer() == null)
-            {
-                return VisitAtom(context.atom());
-            }
-            else
+            if (context.indexer() != null)
             {
                 var indexer = context.indexer();
                 IType leftIndex = null;
@@ -208,35 +204,19 @@ namespace FAILang
                 IType rightIndex = null;
                 if (indexer.r_index != null)
                     rightIndex = VisitExpression(indexer.r_index);
-                return new IndexerExpression(VisitAtom(context.atom()), leftIndex, rightIndex, indexer.elipsis != null);
+                return new IndexerExpression(VisitType(context.type()), leftIndex, rightIndex, indexer.elipsis != null);
             }
+            else if (context.atom() != null)
+            {
+                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, VisitType(context.type()), VisitAtom(context.atom()));
+            }
+            else
+                return VisitType(context.type());
         }
 
-        public override IType VisitAtom([NotNull] FAILangParser.AtomContext context)
+        public override IType VisitType([NotNull] FAILangParser.TypeContext context)
         {
-            if (context.expression() != null)
-            {
-                if (context.PIPE().Length == 2)
-                    return new UnaryOperatorExpression(UnaryOperator.ABS, VisitExpression(context.expression()));
-                return VisitExpression(context.expression());
-
-            }
-            else if (context.name() != null)
-                return VisitName(context.name());
-            else if (context.callparams() != null)    
-            {
-                return new FunctionExpression(
-                    VisitAtom(context.atom()),
-                    context.callparams().arg()
-                        .Select(x => (VisitExpression(x.expression()), x.elipsis != null)).ToArray());
-            }
-            else if (context.union() != null)
-                return VisitUnion(context.union());
-            else if (context.lambda() != null)
-                return VisitLambda(context.lambda());
-            else if (context.piecewise() != null)
-                return VisitPiecewise(context.piecewise());
-            else if (context.t_number != null)
+            if (context.t_number != null)
             {
                 var number = context.t_number;
                 if (number.Text.Equals("i"))
@@ -263,7 +243,35 @@ namespace FAILang
             else if (context.t_boolean != null)
                 return context.t_boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
             else if (context.t_undefined != null)
-                return Types.Undefined.instance;
+                return Undefined.instance;
+            else
+                return VisitAtom(context.atom());
+        }
+
+        public override IType VisitAtom([NotNull] FAILangParser.AtomContext context)
+        {
+            if (context.expression() != null)
+            {
+                if (context.PIPE().Length == 2)
+                    return new UnaryOperatorExpression(UnaryOperator.ABS, VisitExpression(context.expression()));
+                return VisitExpression(context.expression());
+
+            }
+            else if (context.name() != null)
+                return VisitName(context.name());
+            else if (context.callparams() != null)
+            {
+                return new FunctionExpression(
+                    VisitAtom(context.atom()),
+                    context.callparams().arg()
+                        .Select(x => (VisitExpression(x.expression()), x.elipsis != null)).ToArray());
+            }
+            else if (context.union() != null)
+                return VisitUnion(context.union());
+            else if (context.lambda() != null)
+                return VisitLambda(context.lambda());
+            else if (context.piecewise() != null)
+                return VisitPiecewise(context.piecewise());
             else if (context.vector() != null)
                 return VisitVector(context.vector());
             else if (context.tuple() != null)
@@ -291,7 +299,11 @@ namespace FAILang
                 conds[i] = VisitExpression(conditions[i].cond);
                 exprs[i] = VisitExpression(conditions[i].expr);
             }
-            return new CondExpression(conds, exprs, VisitExpression(context.expression()));
+            IType otherwise = Undefined.instance;
+            if (context.OTHERWISE() != null)
+                otherwise = VisitExpression(context.expression());
+
+            return new CondExpression(conds, exprs, otherwise);
         }
 
         public override IType VisitLambda([NotNull] FAILangParser.LambdaContext context)
