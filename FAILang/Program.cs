@@ -22,8 +22,8 @@ namespace FAILang
             FAI fai = new FAI();
 
             Global.Instance.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
-            Console.InputEncoding = Encoding.Unicode;
-            Console.OutputEncoding = Encoding.Unicode;
+            Console.InputEncoding = Encoding.UTF8;
+            Console.OutputEncoding = Encoding.UTF8;
 
             foreach (ITest testPackage in new ITest[] { new LanguageTests() })
             {
