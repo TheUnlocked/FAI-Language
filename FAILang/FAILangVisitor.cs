@@ -204,46 +204,32 @@ namespace FAILang
                 IType rightIndex = null;
                 if (indexer.r_index != null)
                     rightIndex = VisitExpression(indexer.r_index);
-                return new IndexerExpression(VisitType(context.type()), leftIndex, rightIndex, indexer.elipsis != null);
-            }
-            else if (context.atom() != null)
-            {
-                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, VisitType(context.type()), VisitAtom(context.atom()));
+                return new IndexerExpression(VisitMultiplier(context.multiplier()), leftIndex, rightIndex, indexer.elipsis != null);
             }
             else
-                return VisitType(context.type());
+                return VisitMultiplier(context.multiplier());
         }
 
-        public override IType VisitType([NotNull] FAILangParser.TypeContext context)
+        public override IType VisitMultiplier([NotNull] FAILangParser.MultiplierContext context)
         {
             if (context.t_number != null)
             {
                 var number = context.t_number;
+                Number n;
                 if (number.Text.Equals("i"))
-                    return new Number(Complex.ImaginaryOne);
+                    n = new Number(Complex.ImaginaryOne);
                 else if (number.Text.EndsWith('i'))
-                    return new Number(Complex.ImaginaryOne * Convert.ToDouble(number.Text.TrimEnd('i')));
+                    n = new Number(Complex.ImaginaryOne * Convert.ToDouble(number.Text.TrimEnd('i')));
                 else
-                    return new Number(Convert.ToDouble(number.Text));
+                    n = new Number(Convert.ToDouble(number.Text));
+
+                if (context.atom() != null)
+                {
+                    return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n, VisitAtom(context.atom()));
+                }
+                else
+                    return n;
             }
-            else if (context.t_string != null)
-            {
-                var str = context.t_string;
-                string processed = str.Text.Substring(1, str.Text.Length - 2)
-                    .Replace("\\\\", "\\")
-                    .Replace("\\b", "\b")
-                    .Replace("\\f", "\f")
-                    .Replace("\\n", "\n")
-                    .Replace("\\r", "\r")
-                    .Replace("\\t", "\t")
-                    .Replace("\\v", "\v")
-                    .Replace("\\\"", "\"");
-                return new MathString(processed);
-            }
-            else if (context.t_boolean != null)
-                return context.t_boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
-            else if (context.t_undefined != null)
-                return Undefined.instance;
             else
                 return VisitAtom(context.atom());
         }
@@ -276,6 +262,24 @@ namespace FAILang
                 return VisitVector(context.vector());
             else if (context.tuple() != null)
                 return VisitTuple(context.tuple());
+            else if (context.t_string != null)
+            {
+                var str = context.t_string;
+                string processed = str.Text.Substring(1, str.Text.Length - 2)
+                    .Replace("\\\\", "\\")
+                    .Replace("\\b", "\b")
+                    .Replace("\\f", "\f")
+                    .Replace("\\n", "\n")
+                    .Replace("\\r", "\r")
+                    .Replace("\\t", "\t")
+                    .Replace("\\v", "\v")
+                    .Replace("\\\"", "\"");
+                return new MathString(processed);
+            }
+            else if (context.t_boolean != null)
+                return context.t_boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
+            else if (context.t_undefined != null)
+                return Undefined.instance;
 
             return null;
         }

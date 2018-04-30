@@ -64,15 +64,12 @@ prefix
 	;
 
 postfix
-	: type ( indexer | atom )?
+	: multiplier ( indexer )?
 	;
 
-type
-	: atom
-	| t_number=NUMBER
-	| t_string=STRING
-	| t_boolean=BOOLEAN
-	| t_undefined=UNDEFINED
+multiplier
+	: t_number=NUMBER atom?
+	| atom
 	;
 
 atom
@@ -85,6 +82,9 @@ atom
 	| piecewise
 	| tuple
 	| vector
+	| t_string=STRING
+	| t_boolean=BOOLEAN
+	| t_undefined=UNDEFINED
 	;
 
 lambda
