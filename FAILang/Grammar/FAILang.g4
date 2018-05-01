@@ -44,11 +44,15 @@ param
 	;
 
 expression
-	: relational
+	: boolean
+	;
+
+boolean
+	: relational ( op=( AND | OR ) relational)?
 	;
 
 relational
-	: binary ( relational_op binary)*
+	: binary ( relational_op binary )*
 	;
 
 binary
@@ -209,6 +213,12 @@ LE
 
 NOT
 	: '~'
+	;
+AND
+	: 'and'
+	;
+OR
+	: 'or'
 	;
 
 L_PAREN

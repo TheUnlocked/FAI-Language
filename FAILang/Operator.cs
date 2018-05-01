@@ -19,7 +19,9 @@ namespace FAILang
         DIVIDE,
         EXPONENT,
         CONCAT,
-        IS
+        IS,
+        AND,
+        OR
     }
     public enum RelationalOperator
     {
@@ -59,6 +61,10 @@ namespace FAILang
                     return "||";
                 case BinaryOperator.IS:
                     return "is";
+                case BinaryOperator.AND:
+                    return "and";
+                case BinaryOperator.OR:
+                    return "or";
                 default:
                     return "";
             }

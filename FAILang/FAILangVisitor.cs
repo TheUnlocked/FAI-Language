@@ -89,7 +89,27 @@ namespace FAILang
 
         public override IType VisitExpression([NotNull] FAILangParser.ExpressionContext context)
         {
-            return VisitRelational(context.relational());
+            return VisitBoolean(context.boolean());
+        }
+
+        public override IType VisitBoolean([NotNull] FAILangParser.BooleanContext context)
+        {
+            if (context.op != null)
+            {
+                var relationalNodes = context.relational();
+                BinaryOperator oper = BinaryOperator.MULTIPLY;
+                switch (context.op.Text)
+                {
+                    case "and":
+                        oper = BinaryOperator.AND;
+                        break;
+                    case "or":
+                        oper = BinaryOperator.OR;
+                        break;
+                }
+                return new BinaryOperatorExpression(oper, VisitRelational(relationalNodes[0]), VisitRelational(relationalNodes[1]));
+            }
+            return VisitRelational(context.relational(0));
         }
 
         public override IType VisitRelational([NotNull] FAILangParser.RelationalContext context)

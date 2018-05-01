@@ -20,8 +20,8 @@ namespace FAILang.Types
         }
 
         public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
-            {BinaryOperator.ADD, OpOr},
-            {BinaryOperator.MULTIPLY, OpAnd},
+            {BinaryOperator.OR, OpOr},
+            {BinaryOperator.AND, OpAnd},
             {BinaryOperator.EXPONENT, OpXor}
         };
 
