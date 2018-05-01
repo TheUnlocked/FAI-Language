@@ -8,7 +8,7 @@ FAI (or FAI lang) stands for **F**unctional **A**legbraic, and **I**nterpreted l
 </div>
 
 ```fai
-quadratic(a, b, c) = (-b +- sqrt(b^2 - 4*a*c)) / 2*a
+quadratic(a, b, c) = (-b +- sqrt(b^2 - 4a*c)) / 2a
 ```
 
 <div align="center">
