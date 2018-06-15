@@ -26,7 +26,7 @@ namespace FAILang.Types.Unevaluated
             if (func is Error)
                 return func;
 
-            if (func is Function f)
+            if (func is Function f && !(func is UnevaluatedFunction))
             {
                 List<IType> args = new List<IType>();
                 for (int i = 0; i < this.args.Length; i++)

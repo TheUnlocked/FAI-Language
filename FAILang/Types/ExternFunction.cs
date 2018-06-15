@@ -11,7 +11,7 @@ namespace FAILang.Types
     {
         ExternalFunction func;
 
-        public ExternFunction(ExternalFunction func, params string[] fparams) : base(fparams, null)
+        public ExternFunction(ExternalFunction func, params string[] fparams) : base(fparams, null, null, false, false)
         {
             this.func = func;
         }

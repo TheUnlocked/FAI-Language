@@ -17,11 +17,13 @@ namespace FAILang.Types
 
         public bool memoize;
         public Dictionary<int, IType> memos = new Dictionary<int, IType>();
+        public Dictionary<string, IType> lookups;
 
-        public Function(string[] fparams, IType expression, bool memoize = false, bool elipsis = false)
+        public Function(string[] fparams, IType expression, Dictionary<string, IType> lookups, bool memoize, bool elipsis)
         {
             this.fparams = fparams.ToArray();
             this.expression = expression;
+            this.lookups = lookups;
             this.memoize = memoize;
             this.elipsis = elipsis;
         }
@@ -32,7 +34,7 @@ namespace FAILang.Types
             {
                 if (memoize && memos.TryGetValue(GetArgListHashCode(args), out IType v))
                     return v;
-                Dictionary<string, IType> lookup = new Dictionary<string, IType>();
+                Dictionary<string, IType> lookup = new Dictionary<string, IType>(lookups);
                 IType[] extra = new IType[args.Length - fparams.Length + 1];
                 for (int i = 0; i < args.Length; i++)
                 {

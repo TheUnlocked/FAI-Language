@@ -65,7 +65,7 @@ namespace FAILang
             else if (context.fparams() != null)
             {
                 IType expr = VisitExpression(exp);
-                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, memoize: memoize, elipsis: context.fparams().elipsis != null);
+                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, Global.Instance.globalVariables, memoize: memoize, elipsis: context.fparams().elipsis != null);
 
                 Global.Instance.globalVariables[name] = f;
             }
@@ -333,9 +333,9 @@ namespace FAILang
         public override IType VisitLambda([NotNull] FAILangParser.LambdaContext context)
         {
             if (context.fparams() != null)
-                return new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), VisitExpression(context.expression()), memoize: context.memoize != null, elipsis: context.fparams().elipsis != null);
+                return new UnevaluatedFunction(context.fparams().param().Select(x => x.GetText()).ToArray(), VisitExpression(context.expression()), memoize: context.memoize != null, elipsis: context.fparams().elipsis != null);
             else
-                return new Function(new string[] { context.param().GetText() }, VisitExpression(context.expression()), memoize: false, elipsis: context.elipsis != null);
+                return new UnevaluatedFunction(new string[] { context.param().GetText() }, VisitExpression(context.expression()), memoize: false, elipsis: context.elipsis != null);
         }
 
         public override IType VisitUnion([NotNull] FAILangParser.UnionContext context)
