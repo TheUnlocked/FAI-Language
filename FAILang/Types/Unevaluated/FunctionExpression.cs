@@ -55,7 +55,7 @@ namespace FAILang.Types.Unevaluated
                         args.Add(arg);
                     }
                 }
-                if (args.Any(x => x is IUnevaluated))
+                if (args.Any(x => x is IUnevaluated && !(x is Union)))
                     return new BakedExpression(new FunctionExpression(func, args.Select(x => (x, false)).ToArray()), lookups);
                 return f.Evaluate(args.ToArray());
             }
