@@ -5,7 +5,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <StartupObject>FAILang.FAI</StartupObject>
+    <StartupObject>FAILang.Program</StartupObject>
     <AssemblyName>FAILang</AssemblyName>
     <Authors>Unlocked</Authors>
     <Company />

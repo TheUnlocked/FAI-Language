@@ -86,7 +86,7 @@ namespace FAILang.Builtins
                         return new Number(Complex.Log(a.value, b.value.Magnitude));
                     return new Error("WrongType", $"{xs[0]} and {xs[1]} are not valid inputs to log");
                 }, "a", "b");
-
+        
         private static Number PI = new Number(Math.PI);
         private static Number E = new Number(Math.E);
         private static Number DEGREES_TO_RADIANS = new Number(2 * Math.PI / 360);
@@ -110,7 +110,7 @@ namespace FAILang.Builtins
                 ("log10", LOG10),
                 ("ln", LN),
                 ("log", LOG),
-
+                
                 ("pi", PI),
                 ("e", E),
                 ("degrees_to_radians", DEGREES_TO_RADIANS),

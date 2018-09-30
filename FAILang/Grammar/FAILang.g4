@@ -245,9 +245,6 @@ COMMA
 DOT
 	: '.'
 	;
-COLON
-	: ':'
-	;
 SEMI_COLON
 	: ';'
 	;
@@ -266,9 +263,8 @@ ASSIGN
 	;
 
 NUMBER
-	: DIGIT* '.' DIGIT+ (E '-'? DIGIT+)? 'i'?
-	| DIGIT+ ('.' DIGIT+)? (E '-'? DIGIT+)? 'i'?
-	| 'i'
+	: DIGIT* '.' DIGIT+ (E '-'? DIGIT+)?
+	| DIGIT+ ('.' DIGIT+)? (E '-'? DIGIT+)?
 	;
 STRING
 	: '"'

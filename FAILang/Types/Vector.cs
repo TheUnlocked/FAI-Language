@@ -143,7 +143,14 @@ namespace FAILang.Types
         }
 
         public IType Index(int index) => items[index];
-        public IType IndexRange(int left_b, int right_b) => new Vector(items.Skip(left_b).SkipLast(Length - right_b - 1).ToArray());
+        public IType IndexRange(int left_b, int right_b) {
+            var newItems = items.Skip(left_b).SkipLast(Length - right_b - 1).ToArray();
+            if (newItems.Length > 0)
+            {
+                return new Vector(newItems);
+            }
+            return Undefined.instance;
+        }
 
         public override string ToString() => $"<{String.Join(", ", (object[])items)}>";
 

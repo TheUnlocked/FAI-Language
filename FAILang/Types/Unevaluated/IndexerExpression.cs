@@ -48,6 +48,11 @@ namespace FAILang.Types.Unevaluated
                     if (!range && (left < 0 || left >= item.Length))
                         return Undefined.instance;
                 }
+                else if (t_left != null)
+                {
+                    return Undefined.instance;
+                }
+
                 IType t_right = rightIndex;
                 if (rightIndex is IUnevaluated u_right) t_right = u_right.Evaluate(lookups);
                 if (t_right != null && t_right is Number n_right)
@@ -57,6 +62,10 @@ namespace FAILang.Types.Unevaluated
                         return new Error("IndexError", "Indexer values must be positive integers.");
                     if (!range && (right < 0 || right >= item.Length))
                         return Undefined.instance;
+                }
+                else if (t_right != null)
+                {
+                    return Undefined.instance;
                 }
 
                 if (range)
@@ -81,7 +90,7 @@ namespace FAILang.Types.Unevaluated
             }
             else
             {
-                if (expr is Error)
+                if (expr is Error || expr is Undefined)
                     return expr;
                 return new Error("TypeError", $"The type {expr.TypeName} cannot be indexed");
             }

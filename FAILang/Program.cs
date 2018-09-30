@@ -1,25 +1,18 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Antlr4.Runtime;
-using FAILang.Builtins;
+﻿using FAILang.Builtins;
 using FAILang.Tests;
 using FAILang.Types;
-using FAILang.Types.Unevaluated;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 
 namespace FAILang
 {
-    public class FAI
+    class Program
     {
-        public FAI()
-        {
-            Global.ResetGlobals();
-        }
-
         static void Main(string[] args)
         {
-            FAI fai = new FAI();
+            FAI fai = FAI.Instance;
 
             Global.Instance.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
             Console.InputEncoding = Encoding.UTF8;
@@ -32,7 +25,7 @@ namespace FAILang
                 {
                     try
                     {
-                        Debug.Assert(firstIfOnly(fai.RunLines(assertion.Item1)).Equals(assertion.Item2));
+                        Debug.Assert(firstIfOnly(fai.InterpretLines(assertion.Item1)).Equals(assertion.Item2));
                     }
                     catch (Exception e)
                     {
@@ -42,46 +35,16 @@ namespace FAILang
             }
 
             // Read-eval-print loop
-            while (true) {
+            while (true)
+            {
                 string input = Console.ReadLine();
                 while (input.EndsWith("  "))
                     input += Console.ReadLine();
-                
-                foreach (var val in fai.RunLines(input))
+
+                foreach (var val in fai.InterpretLines(input))
                     if (val != null)
                         Console.WriteLine(val);
             }
         }
-
-        public IType[] RunLines(string input)
-        {
-            if (input == null)
-                return new IType[] { };
-            try
-            {
-                AntlrInputStream inputStream = new AntlrInputStream(input);
-
-                FAILangLexer lexer = new FAILangLexer(inputStream);
-                CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-                FAILangParser parser = new FAILangParser(commonTokenStream);
-                parser.ErrorHandler = new BailErrorStrategy();
-
-                FAILangParser.CompileUnitContext expressionContext = parser.compileUnit();
-                FAILangVisitor visitor = new FAILangVisitor();
-
-                return visitor.VisitCompileUnit(expressionContext).Select(x => Global.Instance.Evaluate(x)).ToArray();
-            }
-            catch (Antlr4.Runtime.Misc.ParseCanceledException)
-            {
-                return new IType[] { new Error("ParseError", "The input failed to parse.") };
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.StackTrace);
-            }
-            return new IType[] { };
-        }
     }
-
 }

@@ -21,12 +21,15 @@ namespace FAILang
             }
         }
 
-        public static void ResetGlobals()
+        public static void ResetGlobalInstance()
         {
             _instance = new Global();
         }
 
-        public Dictionary<string, IType> globalVariables = new Dictionary<string, IType>();
+        public Dictionary<string, IType> globalVariables = new Dictionary<string, IType>()
+        {
+            { "i", new Number(new Complex(0, 1)) }
+        };
 
         public readonly List<string> reservedNames = new List<string>
         {
