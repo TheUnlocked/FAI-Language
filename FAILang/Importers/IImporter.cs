@@ -4,8 +4,9 @@ using System.Text;
 
 namespace FAILang.Importers
 {
-    interface IImporter
+    public interface IImporter
     {
-
+        string[] FileExtensions { get; }
+        bool TryImport(string path, FAI fai, Global globals);
     }
 }

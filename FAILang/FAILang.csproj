@@ -1,7 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <Import Project="..\packages\Antlr4.CodeGenerator.4.6.5-beta001\build\Antlr4.CodeGenerator.props" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.5-beta001\build\Antlr4.CodeGenerator.props')" />
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -25,21 +22,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Antlr4" Version="4.6.5-beta001" />
-    <Reference Include="Antlr4.Runtime, Version=4.6.0.0, Culture=neutral, PublicKeyToken=e9931a4108ef2354, processorArchitecture=MSIL">
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="Antlr4" Version="4.6.5" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <Antlr4 Include="Grammar\FAILang.g4">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>FAILang</CustomToolNamespace>
-      <Listener>True</Listener>
-      <Visitor>True</Visitor>
+    <Antlr4 Update="Grammar\FAILang.g4">
+      <Listener>false</Listener>
     </Antlr4>
   </ItemGroup>
-
-  <Import Project="..\packages\Antlr4.CodeGenerator.4.6.5-beta001\build\Antlr4.CodeGenerator.targets" Condition="Exists('..\packages\Antlr4.CodeGenerator.4.6.5-beta001\build\Antlr4.CodeGenerator.targets')" />
-
 </Project>

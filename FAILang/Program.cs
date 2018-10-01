@@ -1,4 +1,5 @@
 ﻿using FAILang.Builtins;
+using FAILang.Importers;
 using FAILang.Tests;
 using FAILang.Types;
 using System;
@@ -15,6 +16,7 @@ namespace FAILang
             FAI fai = FAI.Instance;
 
             Global.Instance.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
+            FAI.Instance.LoadImporters(new DotNetImporter());
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
 

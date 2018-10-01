@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
+using FAILang.Grammar;
+using FAILang.Importers;
 using FAILang.Types;
 
 namespace FAILang
@@ -21,6 +24,13 @@ namespace FAILang
         public FAI()
         {
             Global.ResetGlobalInstance();
+        }
+
+        public readonly List<IImporter> importers = new List<IImporter>();
+
+        public void LoadImporters(params IImporter[] importers)
+        {
+            this.importers.AddRange(importers);
         }
 
         public IType[] InterpretLines(string input)

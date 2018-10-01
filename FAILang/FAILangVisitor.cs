@@ -8,6 +8,8 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using FAILang.Types.Unevaluated;
 using System.Numerics;
+using FAILang.Grammar;
+using System.IO;
 
 namespace FAILang
 {
@@ -25,13 +27,84 @@ namespace FAILang
 
         public override IType VisitCall([NotNull] FAILangParser.CallContext context)
         {
-            if (context.def() != null)
+            if (context.imp() != null)
+            {
+                return VisitImp(context.imp());
+            }
+            else if (context.def() != null)
             {
                 return VisitDef(context.def());
             }
             if (context.expression() != null)
                 return VisitExpression(context.expression());
             return new Error("ParseError", "The input failed to parse.");
+        }
+
+        public override IType VisitImp([NotNull] FAILangParser.ImpContext context)
+        {
+            IType Match(string filepath)
+            {
+                var importers = FAI.Instance.importers.Where(x => x.FileExtensions.Contains(Path.GetExtension(filepath))).ToArray();
+
+                bool errored = false;
+                foreach (var importer in importers)
+                {
+                    try
+                    {
+                        if (importer.TryImport(filepath, FAI.Instance, Global.Instance))
+                        {
+                            return null;
+                        }
+                    }
+                    catch(Exception)
+                    {
+                        errored = true;
+                    }
+                }
+                if (errored)
+                {
+                    return new Error("ImportError", $"\"{filepath}\" failed to import.");
+                }
+                return new Error("ImportError", $"\"{filepath}\" is not a library file.");
+            }
+
+            string str = context.STRING().GetText().Trim('"');
+            if (Path.HasExtension(str)) {
+                if (File.Exists(str))
+                {
+                    return Match(str);
+                }
+                else
+                {
+                    return new Error("ImportError", $"No library file \"{str}\" exists.");
+                }
+            }
+            else
+            {
+                string dir = Path.GetDirectoryName(str),
+                    name = Path.GetFileNameWithoutExtension(str);
+                string[] validFiles;
+                try
+                {
+                    validFiles = Directory.GetFiles(dir == "" ? Directory.GetCurrentDirectory() : dir, name + ".*")
+                        .Where(x => FAI.Instance.importers
+                            .Where(y => y.FileExtensions.Contains(Path.GetExtension(x))).Count() > 0)
+                        .ToArray();
+                }
+                catch(Exception)
+                {
+                    return new Error("ImportError", $"\"{str}\" is not a valid import target.");
+                }
+                switch (validFiles.Length)
+                {
+                    case 0:
+                        return new Error("ImportError", $"No library file \"{str}\" exists.");
+                    case 1:
+                        return Match(validFiles[0]);
+                    default:
+                        return new Error("ImportError", $"Multiple files match \"{str}\": {String.Join(", ", validFiles)}");
+                }
+            }
         }
 
         public override IType VisitDef([NotNull] FAILangParser.DefContext context)

@@ -13,8 +13,13 @@ calls
 	;
 
 call
-	: def
+	: imp
+	| def
 	| expression
+	;
+
+imp
+	: IMPORT target=STRING
 	;
 
 def
@@ -211,14 +216,15 @@ LE
 	: '<='
 	;
 
-NOT
-	: '~'
-	;
 AND
 	: 'and'
 	;
-OR
+OR	
 	: 'or'
+	;
+
+NOT
+	: '~'
 	;
 
 L_PAREN
@@ -299,6 +305,10 @@ OTHERWISE
 
 IS
 	: 'is'
+	;
+
+IMPORT
+	: 'import'
 	;
 
 NAME
