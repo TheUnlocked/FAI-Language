@@ -19,15 +19,16 @@ namespace FAILang.Importers
             {
                 dll = Assembly.LoadFile(Path.GetFullPath(path));
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
 
             foreach (Type type in dll.GetExportedTypes())
             {
+
                 foreach (var method in type.GetMethods()) {
-                    var attr = (CompiledFAIMethod)method.GetCustomAttribute(typeof(CompiledFAIMethod));
+                    var attr = (FAIMethodAttribute)method.GetCustomAttribute(typeof(FAIMethodAttribute));
                     if (attr != null)
                     {
                         ExternalFunction func = (ExternalFunction)method.CreateDelegate(typeof(ExternalFunction));

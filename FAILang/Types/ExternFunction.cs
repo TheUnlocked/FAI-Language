@@ -16,6 +16,11 @@ namespace FAILang.Types
             this.func = func;
         }
 
+        public ExternFunction(ExternalFunction func, bool memoize = false, bool elipses = false, params string[] fparams) : base(fparams, null, null, memoize, elipses)
+        {
+            this.func = func;
+        }
+
         public override IType Evaluate(IType[] args)
         {
             if (args.Length == fparams.Length)
