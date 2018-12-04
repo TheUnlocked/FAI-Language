@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace FAILang.Types
 {
-    struct Vector : IOperable, IIndexable
+    public struct Vector : IOperable, IIndexable
     {
         public string TypeName => "Vector";
         public readonly IType[] items;

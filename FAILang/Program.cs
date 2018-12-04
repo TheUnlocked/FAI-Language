@@ -5,6 +5,7 @@ using FAILang.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace FAILang
@@ -15,7 +16,10 @@ namespace FAILang
         {
             FAI fai = FAI.Instance;
 
-            Global.Instance.LoadBuiltins(new NumberBuiltinProvider(), new CollectionBuiltinProvider());
+            Global.Instance.LoadBuiltins(
+                new NumberBuiltinProvider(),
+                new CollectionBuiltinProvider(),
+                new TypesBuiltinProvider());
             FAI.Instance.LoadImporters(new DotNetImporter());
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
@@ -34,6 +38,17 @@ namespace FAILang
                         Console.WriteLine(e.StackTrace);
                     }
                 }
+            }
+
+            if (!File.Exists("input.fai"))
+                File.Create("input.fai").Close();
+            string fileInput = File.ReadAllText("input.fai");
+            if (fileInput.Length > 0)
+            {
+                Console.Write(fileInput + "\n\n");
+                foreach (var val in fai.InterpretLines(fileInput))
+                    if (val != null)
+                        Console.WriteLine(val);
             }
 
             // Read-eval-print loop

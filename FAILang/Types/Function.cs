@@ -110,4 +110,16 @@ namespace FAILang.Types
             return hashCode;
         }
     }
+
+    class UnevaluatedFunction : Function, IUnevaluated
+    {
+        public UnevaluatedFunction(string[] fparams, IType expression, bool memoize = false, bool elipsis = false) :
+            base(fparams, expression, null, memoize, elipsis)
+        {
+
+        }
+
+        public IType Evaluate(Dictionary<string, IType> lookups) =>
+            new Function(fparams, expression, lookups, memoize, elipsis);
+    }
 }

@@ -113,8 +113,8 @@ namespace FAILang.Builtins
                 
                 ("pi", PI),
                 ("e", E),
-                ("degrees_to_radians", DEGREES_TO_RADIANS),
-                ("radians_to_degrees", RADIANS_TO_DEGREES)
+                ("degreesToRadians", DEGREES_TO_RADIANS),
+                ("radiansToDegrees", RADIANS_TO_DEGREES)
             };
 
         public string[] GetReservedNames() => new string[] {
@@ -138,8 +138,8 @@ namespace FAILang.Builtins
 
             "pi",
             "e",
-            "degrees_to_radians",
-            "radians_to_degrees"
+            "degreesToRadians",
+            "radiansToDegrees"
         };
     }
 }

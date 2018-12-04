@@ -144,17 +144,22 @@ namespace FAILang
             }
             else
             {
-                if (context.ASSIGN() != null)
-                {
+                //if (context.ASSIGN() != null)
+                //{
                     var v = Global.Instance.Evaluate(VisitExpression(exp));
                     if (v is Error)
                         return v;
                     Global.Instance.globalVariables[name] = v;
-                }
-                else
-                {
-                    Global.Instance.globalVariables[name] = VisitExpression(context.expression());
-                }
+                //}
+                //else
+                //{
+                //    var v = VisitExpression(context.expression());
+                //    if (v is UnevaluatedFunction)
+                //    {
+                //        v = Global.Instance.Evaluate(v);
+                //    }
+                //    Global.Instance.globalVariables[name] = v;
+                //}
             }
 
             return null;
@@ -353,6 +358,8 @@ namespace FAILang
                 return VisitPiecewise(context.piecewise());
             else if (context.vector() != null)
                 return VisitVector(context.vector());
+            //else if (context.map() != null)
+            //    return VisitMap(context.map());
             else if (context.tuple() != null)
                 return VisitTuple(context.tuple());
             else if (context.t_string != null)
@@ -382,6 +389,11 @@ namespace FAILang
 
         public override IType VisitVector([NotNull] FAILangParser.VectorContext context) =>
             new UnevaluatedVector(context.expression().Select(x => VisitExpression(x)).ToArray());
+
+        public override IType VisitMap([NotNull] FAILangParser.MapContext context) =>
+            new UnevaluatedMap(
+                context.expression().Where((v, i) => i % 2 == 0).Select(x => VisitExpression(x)).ToArray(),
+                context.expression().Where((v, i) => i % 2 == 1).Select(x => VisitExpression(x)).ToArray());
 
         public override IType VisitTuple([NotNull] FAILangParser.TupleContext context) =>
             new UnevaluatedTuple(context.expression().Select(x => VisitExpression(x)).ToArray());

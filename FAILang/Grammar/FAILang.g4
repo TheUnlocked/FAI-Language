@@ -19,7 +19,7 @@ call
 	;
 
 imp
-	: IMPORT target=STRING
+	: USING target=STRING
 	;
 
 def
@@ -91,6 +91,7 @@ atom
 	| piecewise
 	| tuple
 	| vector
+	//| map
 	| t_string=STRING
 	| t_boolean=BOOLEAN
 	| t_undefined=UNDEFINED
@@ -108,6 +109,10 @@ tuple
 
 vector
 	: L_ARR (expression COMMA)* expression R_ARR
+	;
+
+map
+	: L_BRAC (expression ARROW expression COMMA)* expression ARROW expression R_BRAC
 	;
 
 indexer
@@ -140,6 +145,7 @@ relational_op
 
 end
 	: DOT
+	|
 	;
 
 
@@ -307,8 +313,8 @@ IS
 	: 'is'
 	;
 
-IMPORT
-	: 'import'
+USING
+	: 'using'
 	;
 
 NAME

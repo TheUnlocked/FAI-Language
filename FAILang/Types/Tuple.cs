@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FAILang.Types
 {
-    struct Tuple : IIndexable, IOperable
+    public struct Tuple : IIndexable, IOperable
     {
         public string TypeName => "Tuple";
         public readonly IType[] items;
