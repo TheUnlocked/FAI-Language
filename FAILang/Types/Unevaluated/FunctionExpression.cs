@@ -63,7 +63,7 @@ namespace FAILang.Types.Unevaluated
             {
                 return new BakedExpression(new FunctionExpression(func, args), lookups);
             }
-            if (func is IOperable n1 && args.Length == 1)
+            if (func is Number n1 && args.Length == 1)
                 return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(lookups);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }

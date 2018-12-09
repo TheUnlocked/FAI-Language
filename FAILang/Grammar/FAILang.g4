@@ -24,7 +24,7 @@ imp
 
 def
 	: update=UPDATE? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
-	| update=UPDATE? name ( EQ | ASSIGN ) expression
+	| update=UPDATE? name EQ expression
 	| update=UPDATE memoize=MEMO name
 	;
 
@@ -49,6 +49,11 @@ param
 	;
 
 expression
+	: where
+	;
+
+where
+	//: boolean (WHERE (name EQ expression COMMA)* name EQ expression)?
 	: boolean
 	;
 
@@ -123,7 +128,7 @@ indexer
 	;
 
 piecewise
-	: L_CURL condition+ (expression OTHERWISE SEMI_COLON)?
+	: L_CURL condition+ (expression OTHERWISE SEMI_COLON?)?
 	;
 
 condition
@@ -270,9 +275,6 @@ ELIPSIS
 ARROW
 	: '->'
 	;
-ASSIGN
-	: ':='
-	;
 
 NUMBER
 	: DIGIT* '.' DIGIT+ (E '-'? DIGIT+)?
@@ -292,9 +294,6 @@ UNDEFINED
 	: 'undefined'
 	;
 
-LAMBDA
-	: 'lambda'
-	;
 UPDATE
 	: 'update'
 	;
@@ -315,6 +314,10 @@ IS
 
 USING
 	: 'using'
+	;
+
+WHERE
+	: 'where'
 	;
 
 NAME

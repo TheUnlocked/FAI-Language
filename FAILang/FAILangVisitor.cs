@@ -167,6 +167,12 @@ namespace FAILang
 
         public override IType VisitExpression([NotNull] FAILangParser.ExpressionContext context)
         {
+            return VisitWhere(context.where());
+        }
+
+        public override IType VisitWhere([NotNull] FAILangParser.WhereContext context)
+        {
+            // TODO: Implement this
             return VisitBoolean(context.boolean());
         }
 
