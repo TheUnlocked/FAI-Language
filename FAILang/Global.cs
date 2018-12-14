@@ -37,7 +37,6 @@ namespace FAILang
             "true",
             "false",
             "undefined",
-            "lambda",
             "update",
             "memo",
             "self",
