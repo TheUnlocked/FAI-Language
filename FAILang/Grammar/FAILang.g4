@@ -19,7 +19,7 @@ call
 	;
 
 imp
-	: USING target=STRING
+	: IMPORT target=STRING
 	;
 
 def
@@ -312,8 +312,8 @@ IS
 	: 'is'
 	;
 
-USING
-	: 'using'
+IMPORT
+	: 'import'
 	;
 
 WHERE
