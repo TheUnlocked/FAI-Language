@@ -172,13 +172,17 @@ namespace FAILang
 
         public override IType VisitWhere([NotNull] FAILangParser.WhereContext context)
         {
-            if (context.WHERE() != null)
-            {
-                return new BakedExpression(VisitBoolean(context.boolean()),
-                    context.name()
-                    .Zip(context.expression(), (name, expr) => (((NamedArgument)VisitName(name)).name, VisitExpression(expr)))
-                    .ToDictionary(pair => pair.name, pair => pair.Item2));
-            }
+            //if (context.WHERE() != null)
+            //{
+            //    return new FunctionExpression(
+            //        new UnevaluatedFunction(
+            //            context.name().Select(name => name.GetText()).Append("self").ToArray(),
+            //            VisitBoolean(context.boolean())),
+            //        context.expression()
+            //            .Select(expr => (VisitExpression(expr), false))
+            //            .Append((new NamedArgument("self"), false))
+            //            .ToArray());
+            //}
             return VisitBoolean(context.boolean());
         }
 

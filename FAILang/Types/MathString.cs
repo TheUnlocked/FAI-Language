@@ -23,7 +23,10 @@ namespace FAILang.Types
             {BinaryOperator.CONCAT, OpConcat}
         };
 
-        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => null;
+        public Dictionary<RelationalOperator, Func<IOperable, MathBool>> RelativeOperators => new Dictionary<RelationalOperator, Func<IOperable, MathBool>>() {
+            {RelationalOperator.EQUALS, OpEquals}
+        };
+
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => null;
 
         private IType OpConcat(IOperable other)
@@ -34,6 +37,16 @@ namespace FAILang.Types
                     return new MathString(value + str.value);
                 default:
                     return null;
+            }
+        }
+        private MathBool OpEquals(IOperable other)
+        {
+            switch (other)
+            {
+                case MathString str:
+                    return str.value.Equals(value) ? MathBool.TRUE : MathBool.FALSE;
+                default:
+                    return MathBool.FALSE;
             }
         }
 
