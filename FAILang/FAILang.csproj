@@ -7,9 +7,10 @@
     <Authors>Unlocked</Authors>
     <Company />
     <Product />
-    <Version>0.4.3</Version>
-    <AssemblyVersion>0.4.3.0</AssemblyVersion>
+    <Version>0.5</Version>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
     <FileVersion>0.4.3.0</FileVersion>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
