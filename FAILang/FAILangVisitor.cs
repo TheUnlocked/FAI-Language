@@ -10,6 +10,7 @@ using FAILang.Types.Unevaluated;
 using System.Numerics;
 using FAILang.Grammar;
 using System.IO;
+using FAILang.Types.Unevaluated.Passthrough;
 
 namespace FAILang
 {
@@ -183,7 +184,9 @@ namespace FAILang
             //            .Append((new NamedArgument("self"), false))
             //            .ToArray());
             //}
-            return VisitBoolean(context.boolean());
+            return new WhereExpression(VisitBoolean(context.boolean()),
+                new Dictionary<string, IType>(context.name().Zip(context.expression(),
+                    (name, expr) => new KeyValuePair<string, IType>(name.GetText(), VisitExpression(expr)))));
         }
 
         public override IType VisitBoolean([NotNull] FAILangParser.BooleanContext context)

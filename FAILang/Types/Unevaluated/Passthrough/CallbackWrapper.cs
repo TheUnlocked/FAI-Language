@@ -2,28 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FAILang.Types.Unevaluated
+namespace FAILang.Types.Unevaluated.Passthrough
 {
-    public class CallbackWrapper : IUnevaluated
+    public class CallbackWrapper : IUnevaluated, IPassthrough
     {
         public string TypeName => "CallbackWrapper";
+        public IType PassthroughExpression { get; private set; }
+
         public List<Action<IType>> callbacks = new List<Action<IType>>();
-        IType expression;
 
         public CallbackWrapper(IType expr, params Action<IType>[] cbs)
         {
             callbacks = cbs.ToList();
-            expression = expr;
+            PassthroughExpression = expr;
         }
 
         public IType Evaluate(Dictionary<string, IType> lookups)
         {
-            while (expression is CallbackWrapper cw)
+            while (PassthroughExpression is CallbackWrapper cw)
             {
-                expression = cw.expression;
+                PassthroughExpression = cw.PassthroughExpression;
                 callbacks.AddRange(cw.callbacks);
             }
-            if (expression is Union un)
+            if (PassthroughExpression is Union un)
             {
                 List<IType> items = new List<IType>();
                 return new Union(un.values.Select(v =>
@@ -40,7 +41,7 @@ namespace FAILang.Types.Unevaluated
                             }
                         })).ToArray());
             }
-            else if (expression is IUnevaluated uneval)
+            else if (PassthroughExpression is IUnevaluated uneval)
             {
                 return new CallbackWrapper(uneval.Evaluate(lookups), callbacks.ToArray()).Evaluate(lookups);
             }
@@ -48,9 +49,9 @@ namespace FAILang.Types.Unevaluated
             {
                 foreach (Action<IType> cb in callbacks)
                 {
-                    cb.Invoke(expression);
+                    cb.Invoke(PassthroughExpression);
                 }
-                return expression;
+                return PassthroughExpression;
             }
         }
 
@@ -58,7 +59,7 @@ namespace FAILang.Types.Unevaluated
         {
             int hash = 691949981;
             hash = hash * 1532528149 + EqualityComparer<List<Action<IType>>>.Default.GetHashCode(callbacks);
-            hash = hash * 1532528149 + expression.GetHashCode();
+            hash = hash * 1532528149 + PassthroughExpression.GetHashCode();
             return hash;
         }
     }

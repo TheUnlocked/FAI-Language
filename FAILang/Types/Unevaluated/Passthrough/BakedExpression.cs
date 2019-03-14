@@ -1,31 +1,31 @@
 ﻿using System.Collections.Generic;
 
-namespace FAILang.Types.Unevaluated
+namespace FAILang.Types.Unevaluated.Passthrough
 {
-    public class BakedExpression : IUnevaluated
+    public class BakedExpression : IUnevaluated, IPassthrough
     {
         public string TypeName => "BakedExpression";
+        public IType PassthroughExpression { get; }
 
-        IType expression;
         Dictionary<string, IType> lookups;
 
         public BakedExpression(IType expression, Dictionary<string, IType> lookups)
         {
-            this.expression = expression;
+            PassthroughExpression = expression;
             this.lookups = lookups;
         }
 
         public IType Evaluate(Dictionary<string, IType> _)
         {
-            if (expression is IUnevaluated u)
+            if (PassthroughExpression is IUnevaluated u)
                 return u.Evaluate(lookups);
-            return expression;
+            return PassthroughExpression;
         }
 
         public override int GetHashCode()
         {
             int hash = 691949981;
-            hash = hash * 1532528149 + expression.GetHashCode();
+            hash = hash * 1532528149 + PassthroughExpression.GetHashCode();
             hash = hash * 1532528149 + lookups.GetHashCode();
             return hash;
         }

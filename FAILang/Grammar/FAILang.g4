@@ -53,8 +53,8 @@ expression
 	;
 
 where
-	//: boolean (WHERE (name EQ expression COMMA)* name EQ expression)?
-	: boolean
+	: boolean (WHERE (name EQ expression COMMA)* name EQ expression)?
+	| boolean
 	;
 
 boolean

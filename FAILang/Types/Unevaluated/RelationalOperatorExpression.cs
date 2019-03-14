@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FAILang.Types.Unevaluated.Passthrough;
 
 namespace FAILang.Types.Unevaluated
 {

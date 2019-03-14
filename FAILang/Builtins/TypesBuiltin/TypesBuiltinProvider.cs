@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using FAILang.Types;
+using FAILang.Types.Unevaluated.Passthrough;
 using Tuple = FAILang.Types.Tuple;
 
 namespace FAILang.Builtins
@@ -23,9 +24,18 @@ namespace FAILang.Builtins
             var constructor = args[0];
             if (constructor is Function f)
             {
-                if (f.expression is UnevaluatedFunction innerObject)
+                IType innerObject = f.expression;
+
+            CheckPassthrough:
+                if (innerObject is IPassthrough passthroughObject)
                 {
-                    UnevaluatedTypedFunction newConstruction = new UnevaluatedTypedFunction(innerObject);
+                    innerObject = passthroughObject.PassthroughExpression;
+                    goto CheckPassthrough;
+                }
+
+                if (innerObject is UnevaluatedFunction innerFunction)
+                {
+                    UnevaluatedTypedFunction newConstruction = new UnevaluatedTypedFunction(innerFunction);
                     f = new Function(f.fparams, newConstruction, f.lookups, f.memoize, f.elipsis);
                     newConstruction.Constructor = f;
                     return f;
