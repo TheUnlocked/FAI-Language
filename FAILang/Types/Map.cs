@@ -26,7 +26,7 @@ namespace FAILang.Types
 
         public override IType Evaluate(IType[] args)
         {
-            return kvMap.TryGetValue(args[0], out IType result) ? result : Undefined.instance;
+            return kvMap.TryGetValue(args[0], out IType result) ? result : Undefined.Instance;
         }
     }
 

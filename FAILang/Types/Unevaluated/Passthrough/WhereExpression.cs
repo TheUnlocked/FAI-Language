@@ -5,7 +5,7 @@ namespace FAILang.Types.Unevaluated.Passthrough
 {
     public class WhereExpression : IUnevaluated, IPassthrough
     {
-        public string TypeName => "ExpressionWrapper";
+        public string TypeName => "WhereExpression";
 
         public IType PassthroughExpression { get; }
 

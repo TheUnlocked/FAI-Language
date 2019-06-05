@@ -50,10 +50,10 @@ namespace FAILang.Types.Unevaluated
                 return new Union(result, lookups);
             }
             if (first is IUnevaluated || second is IUnevaluated) {
-                var newIns = ins;
+                var newIns = ins.ToArray();
                 newIns[0] = first;
                 newIns[1] = second;
-                return new BakedExpression(new RelationalOperatorExpression(ops, ins), lookups);
+                return new BakedExpression(new RelationalOperatorExpression(ops, newIns), lookups);
             }
 
             if (first is Error)
@@ -61,8 +61,8 @@ namespace FAILang.Types.Unevaluated
             if (second is Error)
                 return second;
 
-            if (first == Undefined.instance || second == Undefined.instance)
-                return Undefined.instance;
+            if (first == Undefined.Instance || second == Undefined.Instance)
+                return Undefined.Instance;
 
             // Operate
             if (first is IOperable firstOp && second is IOperable secondOp)

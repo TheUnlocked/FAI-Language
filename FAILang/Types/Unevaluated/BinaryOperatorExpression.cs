@@ -62,8 +62,8 @@ namespace FAILang.Types.Unevaluated
                 return left.Equals(right) ? MathBool.TRUE : MathBool.FALSE;
             }
 
-            if (left == Undefined.instance || right == Undefined.instance)
-                    return Undefined.instance;
+            if (left == Undefined.Instance || right == Undefined.Instance)
+                    return Undefined.Instance;
 
             if (left is IOperable lop && right is IOperable rop)
             {

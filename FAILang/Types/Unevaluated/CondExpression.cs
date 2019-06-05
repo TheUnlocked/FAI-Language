@@ -53,16 +53,23 @@ namespace FAILang.Types.Unevaluated
                         ret = uexpr.Evaluate(lookups);
                     if (ret is IUnevaluated && !(ret is Union))
                     {
-                        var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
-                        nexpr.exprs[0] = ret;
-                        return new BakedExpression(nexpr, lookups);
+                        return new BakedExpression(ret, lookups);
                     }
                     return ret;
                 }
                 if (tCond is Error)
                     return tCond;
             }
-            return default_expr is IUnevaluated retd ? retd.Evaluate(lookups) : default_expr;
+            IType retd = default_expr;
+            if (retd is IUnevaluated retdu)
+            {
+                retd = retdu.Evaluate(lookups);
+            }
+            if (retd is IUnevaluated && !(retd is Union))
+            {
+                return new BakedExpression(retd, lookups);
+            }
+            return retd;
         }
 
         public override int GetHashCode()

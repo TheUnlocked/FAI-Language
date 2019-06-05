@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FAILang.Types.Unevaluated.Passthrough;
 
 namespace FAILang.Types.Unevaluated
 {
@@ -33,6 +34,10 @@ namespace FAILang.Types.Unevaluated
             {
                 return new Union(union.values.Select(x => new IndexerExpression(x, leftIndex, rightIndex, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
             }
+            if (expr is IUnevaluated && !(expr is Union))
+            {
+                return new BakedExpression(new IndexerExpression(expr, leftIndex, rightIndex, range), lookups);
+            }
             else if (expr is IIndexable item)
             {
                 int left = 0;
@@ -40,32 +45,48 @@ namespace FAILang.Types.Unevaluated
 
                 IType t_left = leftIndex;
                 if (leftIndex is IUnevaluated u_left) t_left = u_left.Evaluate(lookups);
+                if (t_left is Union un_left)
+                {
+                    return new Union(un_left.values.Select(x => new IndexerExpression(expr, x, rightIndex, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
+                }
+                if (t_left is IUnevaluated)
+                {
+                    return new BakedExpression(new IndexerExpression(expr, t_left, rightIndex, range), lookups);
+                }
                 if (t_left != null && t_left is Number n_left)
                 {
                     left = (int)n_left.value.Real;
                     if (!n_left.IsReal || left != n_left.value.Real)
                         return new Error("IndexError", "Indexer values must be positive integers.");
                     if (!range && (left < 0 || left >= item.Length))
-                        return Undefined.instance;
+                        return Undefined.Instance;
                 }
                 else if (t_left != null)
                 {
-                    return Undefined.instance;
+                    return Undefined.Instance;
                 }
 
                 IType t_right = rightIndex;
                 if (rightIndex is IUnevaluated u_right) t_right = u_right.Evaluate(lookups);
+                if (t_left is Union un_right)
+                {
+                    return new Union(un_right.values.Select(x => new IndexerExpression(expr,t_left, x, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
+                }
+                if (t_right is IUnevaluated)
+                {
+                    return new BakedExpression(new IndexerExpression(expr, t_left, t_right, range), lookups);
+                }
                 if (t_right != null && t_right is Number n_right)
                 {
                     right = (int)n_right.value.Real;
                     if (!n_right.IsReal || right != n_right.value.Real)
                         return new Error("IndexError", "Indexer values must be positive integers.");
                     if (!range && (right < 0 || right >= item.Length))
-                        return Undefined.instance;
+                        return Undefined.Instance;
                 }
                 else if (t_right != null)
                 {
-                    return Undefined.instance;
+                    return Undefined.Instance;
                 }
 
                 if (range)

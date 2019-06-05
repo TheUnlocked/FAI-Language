@@ -184,9 +184,13 @@ namespace FAILang
             //            .Append((new NamedArgument("self"), false))
             //            .ToArray());
             //}
-            return new WhereExpression(VisitBoolean(context.boolean()),
-                new Dictionary<string, IType>(context.name().Zip(context.expression(),
-                    (name, expr) => new KeyValuePair<string, IType>(name.GetText(), VisitExpression(expr)))));
+            if (context.WHERE() != null)
+            {
+                return new WhereExpression(VisitBoolean(context.boolean()),
+                    new Dictionary<string, IType>(context.name().Zip(context.expression(),
+                        (name, expr) => new KeyValuePair<string, IType>(name.GetText(), VisitExpression(expr)))));
+            }
+            return VisitBoolean(context.boolean());
         }
 
         public override IType VisitBoolean([NotNull] FAILangParser.BooleanContext context)
@@ -398,7 +402,7 @@ namespace FAILang
             else if (context.t_boolean != null)
                 return context.t_boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
             else if (context.t_undefined != null)
-                return Undefined.instance;
+                return Undefined.Instance;
 
             return null;
         }
@@ -427,7 +431,7 @@ namespace FAILang
                 conds[i] = VisitExpression(conditions[i].cond);
                 exprs[i] = VisitExpression(conditions[i].expr);
             }
-            IType otherwise = Undefined.instance;
+            IType otherwise = Undefined.Instance;
             if (context.OTHERWISE() != null)
                 otherwise = VisitExpression(context.expression());
 

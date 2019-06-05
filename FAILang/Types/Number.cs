@@ -94,7 +94,7 @@ namespace FAILang.Types
             {
                 case Number num:
                     if (num.IsReal && num.value.Real == 0)
-                        return Undefined.instance;
+                        return Undefined.Instance;
                     return new Number(value / num.value);
                 default:
                     return null;

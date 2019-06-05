@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FAILang.Types.Unevaluated.Passthrough;
 
 namespace FAILang.Types
 {
@@ -86,6 +87,7 @@ namespace FAILang.Types
         public IType Evaluate(Dictionary<string, IType> lookups)
         {
             IType[] evalTuple = new IType[items.Length];
+            bool incomplete = false;
             for(int i = 0; i < items.Length; i++)
             {
                 if (items[i] is IUnevaluated u)
@@ -106,9 +108,15 @@ namespace FAILang.Types
                         }
                         return new Union(tuples);
                     }
+                    if (evalTuple[i] is IUnevaluated)
+                        incomplete = true;
                 }
                 else
                     evalTuple[i] = items[i];
+            }
+            if (incomplete)
+            {
+                return new BakedExpression(new UnevaluatedTuple(evalTuple), lookups);
             }
             return new Tuple(evalTuple);
         }

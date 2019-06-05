@@ -8,6 +8,7 @@ namespace FAILang.Types
     {
         public string TypeName => "Undefined";
         public static readonly Undefined instance = new Undefined();
+        public static Undefined Instance => instance;
 
         public override string ToString()
         {

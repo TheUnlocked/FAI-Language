@@ -149,7 +149,7 @@ namespace FAILang.Types
             {
                 return new Vector(newItems);
             }
-            return Undefined.instance;
+            return Undefined.Instance;
         }
 
         public override string ToString() => $"<{String.Join(", ", (object[])items)}>";
