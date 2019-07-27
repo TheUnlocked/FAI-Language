@@ -80,12 +80,166 @@ namespace FAILang.Types
 
         public override string ToString()
         {
+            return ToString(fparams);
+        }
+        private string ToString(IEnumerable<string> visibleVars)
+        {
+            string start;
+            string expressionString = "";
             string memo = memoize ? (fparams.Length == 0 ? "memo" : "memo ") : "";
             string elipses = elipsis ? "..." : "";
             if (fparams.Length == 1 && !memoize)
-                return $"{fparams[0]}{elipses} -> {ExpressionString}";
+                start = $"{fparams[0]}{elipses}";
             else
-                return $"({memo}{string.Join(", ", fparams)}{elipses}) -> {ExpressionString}";
+                start = $"({memo}{string.Join(", ", fparams)}{elipses})";
+
+            if (expression != null)
+            {
+                Stack<object> exprs = new Stack<object>();
+                Stack<object> temp = new Stack<object>();
+                IEnumerable<string> tempParams = null;
+                exprs.Push(expression);
+                while (exprs.Count > 0)
+                {
+                    switch (exprs.Pop())
+                    {
+                        case string s:
+                            expressionString += s;
+                            break;
+                        case IEnumerable<string> fparams:
+                            tempParams = fparams;
+                            continue;
+                        case BinaryOperatorExpression e:
+                            temp.Push(e.left);
+                            temp.Push($" {e.op.ToDisplayString()} ");
+                            temp.Push(e.right);
+                            break;
+                        case UnaryOperatorExpression e:
+                            temp.Push(e.pre.ToDisplayString());
+                            temp.Push(e.target);
+                            break;
+                        case RelationalOperatorExpression e:
+                            temp.Push(e.ins[0]);
+                            int i = 0;
+                            while (i < e.ops.Length)
+                            {
+                                temp.Push($" {e.ops[i].ToDisplayString()} ");
+                                temp.Push(e.ins[++i]);
+                            }
+                            break;
+                        case FunctionExpression e:
+                            temp.Push(e.func_expr);
+                            temp.Push("(");
+                            foreach (var arg in e.args)
+                            {
+                                temp.Push(arg.argument);
+                                if (arg.spread)
+                                    temp.Push("..");
+                                temp.Push(", ");
+                            }
+                            temp.Pop();
+                            temp.Push(")");
+                            break;
+                        case IndexerExpression e:
+                            temp.Push(e.expression);
+                            temp.Push("[");
+                            if (e.leftIndex != null)
+                                temp.Push(e.leftIndex);
+                            if (e.range)
+                                temp.Push("..");
+                            if (e.rightIndex != null)
+                                temp.Push(e.rightIndex);
+                            temp.Push("]");
+                            break;
+                        case NamedArgument e:
+                            if (!visibleVars.Contains(e.name) && e.name != "self")
+                                temp.Push("↑");
+                            temp.Push(e.name);
+                            break;
+                        case CondExpression e:
+                            temp.Push("{");
+                            for (int j = 0; j < e.exprs.Length; j++)
+                            {
+                                temp.Push(e.exprs[j]);
+                                temp.Push(" if ");
+                                temp.Push(e.conds[j]);
+                                temp.Push("; ");
+                            }
+                            if (e.default_expr != Undefined.instance)
+                            {
+                                temp.Push(e.default_expr);
+                                temp.Push(" otherwise;");
+                            }
+                            break;
+                        case WhereExpression e:
+                            temp.Push(e.lookups.Keys);
+                            temp.Push(e.PassthroughExpression);
+                            temp.Push(" where");
+                            foreach (var lookup in e.lookups)
+                            {
+                                temp.Push($" {lookup.Key} = ");
+                                temp.Push(lookup.Value);
+                                temp.Push(";");
+                            }
+                            temp.Push(null);
+                            break;
+                        case Function e:
+                            if (tempParams != null)
+                                temp.Push(e.ToString(visibleVars.Concat(e.fparams).Concat(tempParams)));
+                            else
+                                temp.Push(e.ToString(visibleVars.Concat(e.fparams)));
+                            break;
+                        case UnevaluatedTuple e:
+                            temp.Push("(");
+                            switch (e.items.Length)
+                            {
+                                case 0:
+                                    temp.Push(",");
+                                    break;
+                                case 1:
+                                    temp.Push(e.items[0]);
+                                    temp.Push(",");
+                                    break;
+                                default:
+                                    foreach (var item in e.items)
+                                    {
+                                        temp.Push(item);
+                                        temp.Push(", ");
+                                    }
+                                    temp.Pop();
+                                    break;
+                            }
+                            temp.Push(")");
+                            break;
+                        case UnevaluatedVector e:
+                            temp.Push("<");
+                            foreach (var item in e.items)
+                            {
+                                temp.Push(item);
+                                temp.Push(", ");
+                            }
+                            temp.Pop();
+                            temp.Push(">");
+                            break;
+                        case IType v:
+                            temp.Push(v.ToString());
+                            break;
+                        case null:
+                            tempParams = null;
+                            break;
+                        default:
+                            break;
+                    }
+                    while (temp.Count > 0)
+                        exprs.Push(temp.Pop());
+                }
+            }
+            else
+            {
+                expressionString = "<external>";
+            }
+
+            return $"{start} -> {expressionString}";
         }
 
         public override bool Equals(object obj)

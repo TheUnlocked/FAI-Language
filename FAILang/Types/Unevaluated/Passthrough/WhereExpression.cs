@@ -9,7 +9,7 @@ namespace FAILang.Types.Unevaluated.Passthrough
 
         public IType PassthroughExpression { get; }
 
-        Dictionary<string, IType> lookups;
+        public Dictionary<string, IType> lookups;
 
         public WhereExpression(IType expression, Dictionary<string, IType> lookups)
         {

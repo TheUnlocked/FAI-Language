@@ -10,7 +10,7 @@ namespace FAILang.Types.Unevaluated
     {
         public string TypeName => "FunctionExpression";
 
-        public (IType, bool)[] args;
+        public (IType argument, bool spread)[] args;
         public IType func_expr = null;
 
         public FunctionExpression(IType func_expr, (IType, bool)[] args)
