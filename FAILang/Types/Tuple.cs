@@ -84,7 +84,7 @@ namespace FAILang.Types
             this.items = items;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             IType[] evalTuple = new IType[items.Length];
             bool incomplete = false;
@@ -92,7 +92,7 @@ namespace FAILang.Types
             {
                 if (items[i] is IUnevaluated u)
                 {
-                    evalTuple[i] = u.Evaluate(lookups);
+                    evalTuple[i] = u.Evaluate(scope);
                     if (evalTuple[i] is Union un)
                     {
                         for (int k = i; k < items.Length; k++)
@@ -104,7 +104,7 @@ namespace FAILang.Types
                         {
                             var unTuple = evalTuple.ToArray();
                             unTuple[i] = un.values[j];
-                            tuples[j] = new UnevaluatedTuple(unTuple).Evaluate(lookups);
+                            tuples[j] = new UnevaluatedTuple(unTuple).Evaluate(scope);
                         }
                         return new Union(tuples);
                     }
@@ -116,7 +116,7 @@ namespace FAILang.Types
             }
             if (incomplete)
             {
-                return new BakedExpression(new UnevaluatedTuple(evalTuple), lookups);
+                return new BakedExpression(new UnevaluatedTuple(evalTuple), scope);
             }
             return new Tuple(evalTuple);
         }

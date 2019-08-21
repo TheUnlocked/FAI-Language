@@ -17,7 +17,7 @@ namespace FAILang.Types.Unevaluated.Passthrough
             PassthroughExpression = expr;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             while (PassthroughExpression is CallbackWrapper cw)
             {
@@ -43,7 +43,7 @@ namespace FAILang.Types.Unevaluated.Passthrough
             }
             else if (PassthroughExpression is IUnevaluated uneval)
             {
-                return new CallbackWrapper(uneval.Evaluate(lookups), callbacks.ToArray()).Evaluate(lookups);
+                return new CallbackWrapper(uneval.Evaluate(scope), callbacks.ToArray()).Evaluate(scope);
             }
             else
             {

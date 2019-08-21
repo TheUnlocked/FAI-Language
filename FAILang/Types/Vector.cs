@@ -185,14 +185,14 @@ namespace FAILang.Types
             this.items = items;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             IType[] evalVector = new IType[items.Length];
             for(int i = 0; i < items.Length; i++)
             {
                 if (items[i] is IUnevaluated u)
                 {
-                    evalVector[i] = u.Evaluate(lookups);
+                    evalVector[i] = u.Evaluate(scope);
                     if (evalVector[i] is Union un)
                     {
                         for (int k = i; k < items.Length; k++)
@@ -204,7 +204,7 @@ namespace FAILang.Types
                         {
                             var unVector = evalVector.ToArray();
                             unVector[i] = un.values[j];
-                            vectors[j] = new UnevaluatedVector(unVector).Evaluate(lookups);
+                            vectors[j] = new UnevaluatedVector(unVector).Evaluate(scope);
                         }
                         return new Union(vectors);
                     }

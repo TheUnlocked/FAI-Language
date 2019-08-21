@@ -7,18 +7,18 @@ namespace FAILang.Types.Unevaluated.Passthrough
         public string TypeName => "BakedExpression";
         public IType PassthroughExpression { get; }
 
-        Dictionary<string, IType> lookups;
+        Scope scope;
 
-        public BakedExpression(IType expression, Dictionary<string, IType> lookups)
+        public BakedExpression(IType expression, Scope scope)
         {
             PassthroughExpression = expression;
-            this.lookups = lookups;
+            this.scope = scope;
         }
 
-        public IType Evaluate(Dictionary<string, IType> _)
+        public IType Evaluate(Scope _)
         {
             if (PassthroughExpression is IUnevaluated u)
-                return u.Evaluate(lookups);
+                return u.Evaluate(scope);
             return PassthroughExpression;
         }
 
@@ -26,7 +26,7 @@ namespace FAILang.Types.Unevaluated.Passthrough
         {
             int hash = 691949981;
             hash = hash * 1532528149 + PassthroughExpression.GetHashCode();
-            hash = hash * 1532528149 + lookups.GetHashCode();
+            hash = hash * 1532528149 + scope.GetHashCode();
             return hash;
         }
     }

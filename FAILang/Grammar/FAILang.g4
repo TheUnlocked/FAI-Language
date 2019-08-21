@@ -5,7 +5,18 @@ grammar FAILang;
  */
 
 compileUnit
-	: calls EOF
+	: earlyCalls calls EOF
+	;
+
+expressionCompileUnit
+	: importStatement
+	| includeStatement
+	| def
+	| expression
+	;
+
+earlyCalls
+	: importStatement* includeStatement* namespaceStatement?
 	;
 
 calls
@@ -13,19 +24,27 @@ calls
 	;
 
 call
-	: imp
-	| def
+	: def
 	| expression
 	;
 
-imp
-	: IMPORT target=STRING
+importStatement
+	: 'import' target=STRING
+	;
+
+includeStatement
+	: 'include' namespace
+	| 'include' (name COMMA)* from='from' namespace
+	;
+
+namespaceStatement
+	: 'namespace' namespace
 	;
 
 def
-	: update=UPDATE? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
-	| update=UPDATE? name EQ expression
-	| update=UPDATE memoize=MEMO name
+	: update='update'? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
+	| update='update'? name EQ expression
+	| update='update' memoize=MEMO name
 	;
 
 fparams
@@ -40,8 +59,12 @@ arg
 	: expression elipsis=ELIPSIS?
 	;
 
+namespace
+	: (NAME NAMESPACE_OP)* NAME
+	;
+
 name
-	: NAME
+	: (namespace NAMESPACE_OP)? NAME
 	;
 
 param
@@ -275,6 +298,9 @@ ELIPSIS
 ARROW
 	: '->'
 	;
+NAMESPACE_OP
+	: '::'
+	;
 
 NUMBER
 	: DIGIT* '.' DIGIT+ (E '-'? DIGIT+)?
@@ -294,9 +320,6 @@ UNDEFINED
 	: 'undefined'
 	;
 
-UPDATE
-	: 'update'
-	;
 MEMO
 	: 'memo'
 	;
@@ -310,10 +333,6 @@ OTHERWISE
 
 IS
 	: 'is'
-	;
-
-IMPORT
-	: 'import'
 	;
 
 WHERE

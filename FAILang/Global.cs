@@ -12,24 +12,24 @@ namespace FAILang
 {
     public class Global
     {
-        private static Global _instance;
-        public static Global Instance {
-            get {
-                if (_instance == null)
-                    _instance = new Global();
-                return _instance;
+        internal Dictionary<string, IType> _globalVariables = new Dictionary<string, IType>();
+        public Namespace Namespace { get; set; } = Namespace.GlobalNamespace.Instance;
+        private Scope _globalScope;
+        public Scope GlobalScope
+        {
+            get
+            {
+                if (_globalScope == null)
+                {
+                    _globalScope = new Scope(Namespace, _globalVariables);
+                }
+                return _globalScope;
+            }
+            set
+            {
+                _globalScope = value;
             }
         }
-
-        public static void ResetGlobalInstance()
-        {
-            _instance = new Global();
-        }
-
-        public Dictionary<string, IType> globalVariables = new Dictionary<string, IType>()
-        {
-            { "i", new Number(new Complex(0, 1)) }
-        };
 
         public readonly List<string> reservedNames = new List<string>
         {
@@ -45,13 +45,19 @@ namespace FAILang
             "is"
         };
 
-        public void LoadBuiltins(params IBuiltinProvider[] builtinProviders)
+        public Global()
+        {
+            LoadBuiltins(FAI.Instance.builtinProviders.ToArray());
+        }
+
+        private void LoadBuiltins(params IBuiltinProvider[] builtinProviders)
         {
             foreach (var builtinProvider in builtinProviders)
             {
+                var ns = Namespace.GlobalNamespace.Instance.GetSubNamespace(builtinProvider.NamespacePath);
                 foreach (var pair in builtinProvider.GetBuiltins())
                 {
-                    globalVariables[pair.Item1] = pair.Item2;
+                    ns.Variables[pair.Item1] = pair.Item2;
                 }
                 foreach (string name in builtinProvider.GetReservedNames())
                 {
@@ -60,7 +66,7 @@ namespace FAILang
             }
         }
 
-        static readonly Dictionary<string, IType> noVariables = new Dictionary<string, IType>();
+        private static readonly Scope emptyScope = new Scope(null, new Dictionary<string, IType>());
 
         public IType Evaluate(IType expr)
         {
@@ -71,11 +77,11 @@ namespace FAILang
                 {
                     if (!un.values.Any(x => x is IUnevaluated))
                     {
-                        expr = un.Evaluate(noVariables);
+                        expr = un.Evaluate(emptyScope);
                         break;
                     }
                 }
-                expr = u.Evaluate(noVariables);
+                expr = u.Evaluate(GlobalScope);
                 if (expr.GetType() == exprMem.GetType() && expr.GetHashCode() == exprMem.GetHashCode())
                 {
                     return new Error("InfiniteRecursion", "The entered expression will recurse infinitely, and has been terminated");

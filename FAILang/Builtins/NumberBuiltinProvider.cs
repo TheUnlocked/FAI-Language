@@ -10,6 +10,8 @@ namespace FAILang.Builtins
 {
     class NumberBuiltinProvider : IBuiltinProvider
     {
+        public string[] NamespacePath { get; } = new string[] { "std", "math" };
+
         private static ExternalFunction ValidateType<T>(Func<T, IType> f, Func<IType, IType> fail) where T : IType
         {
             return x =>

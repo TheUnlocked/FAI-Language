@@ -9,5 +9,6 @@ namespace FAILang.Builtins
     {
         (string, IType)[] GetBuiltins();
         string[] GetReservedNames();
+        string[] NamespacePath { get; }
     }
 }

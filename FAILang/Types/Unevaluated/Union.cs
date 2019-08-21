@@ -11,30 +11,27 @@ namespace FAILang.Types.Unevaluated
 
         public IType[] values;
 
-        public Union(IType[] values, Dictionary<string, IType> lookups = null)
+        public Union(IType[] values, Scope scope = null)
         {
             this.values = values.Where(x => x != Undefined.Instance).ToArray();
             if (this.values.Length == 0)
                 this.values = new IType[] { Undefined.Instance };
-            if (lookups != null)
-                this.values = Flatten(lookups);
+            if (scope != null)
+                this.values = Flatten(scope);
         }
 
-        private IType[] Flatten(Dictionary<string, IType> lookups)
+        private IType[] Flatten(Scope scope)
         {
-            if (lookups == null)
-                lookups = new Dictionary<string, IType>();
-
             List<IType> newValues = new List<IType>();
 
             foreach (var type in values)
             {
                 var ty = type;
                 if (ty is IUnevaluated u && !(ty is Union))
-                    ty = u.Evaluate(lookups);
+                    ty = u.Evaluate(scope);
                 if (ty is Union)
                 {
-                    newValues.AddRange((ty as Union).Flatten(lookups));
+                    newValues.AddRange((ty as Union).Flatten(scope));
                 }
                 else
                 {
@@ -50,20 +47,20 @@ namespace FAILang.Types.Unevaluated
             return $"({string.Join(" | ", values.Select(v => v.ToString()))})";
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             IType[] newVals = new IType[values.Length];
             for (int i = 0; i < values.Length; i++)
             {
                 if (values[i] is IUnevaluated)
                 {
-                    newVals[i] = (values[i] as IUnevaluated).Evaluate(lookups);
+                    newVals[i] = (values[i] as IUnevaluated).Evaluate(scope);
                 }
                 else {
                     newVals[i] = values[i];
                 }
             }
-            IType[] evaled = new Union(newVals).Flatten(lookups);
+            IType[] evaled = new Union(newVals).Flatten(scope);
             evaled = evaled.Where(x => x != Undefined.Instance).ToArray();
             if (evaled.Length == 1)
                 return evaled[0];

@@ -22,34 +22,34 @@ namespace FAILang.Types.Unevaluated
             this.right = right;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             var left = this.left;
             var right = this.right;
             if (left is IUnevaluated uLeft)
-                left = uLeft.Evaluate(lookups);
+                left = uLeft.Evaluate(scope);
             if (right is IUnevaluated uRight)
-                right = uRight.Evaluate(lookups);
+                right = uRight.Evaluate(scope);
             if (left is Union unionLeft)
             {
                 IType[] result = new IType[unionLeft.values.Length];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    result[i] = new BinaryOperatorExpression(op, unionLeft.values[i], right).Evaluate(lookups);
+                    result[i] = new BinaryOperatorExpression(op, unionLeft.values[i], right).Evaluate(scope);
                 }
-                return new Union(result, lookups);
+                return new Union(result, scope);
             }
             if (right is Union unionRight)
             {
                 IType[] result = new IType[unionRight.values.Length];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    result[i] = new BinaryOperatorExpression(op, left, unionRight.values[i]).Evaluate(lookups);
+                    result[i] = new BinaryOperatorExpression(op, left, unionRight.values[i]).Evaluate(scope);
                 }
-                return new Union(result, lookups);
+                return new Union(result, scope);
             }
             if (left is IUnevaluated || right is IUnevaluated)
-                return new BakedExpression(new BinaryOperatorExpression(op, left, right), lookups);
+                return new BakedExpression(new BinaryOperatorExpression(op, left, right), scope);
 
             if (left is Error eLeft)
                 return eLeft;

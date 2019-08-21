@@ -8,6 +8,6 @@ namespace FAILang.Types.Unevaluated
 {
     interface IUnevaluated : IType
     {
-        IType Evaluate(Dictionary<string, IType> lookups);
+        IType Evaluate(Scope scope);
     }
 }

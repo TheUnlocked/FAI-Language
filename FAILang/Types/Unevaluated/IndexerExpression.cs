@@ -23,20 +23,20 @@ namespace FAILang.Types.Unevaluated
             range = elipsis;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             IType expr = expression;
             if (expr is IUnevaluated u)
             {
-                expr = u.Evaluate(lookups);
+                expr = u.Evaluate(scope);
             }
             if (expr is Union union)
             {
-                return new Union(union.values.Select(x => new IndexerExpression(x, leftIndex, rightIndex, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
+                return new Union(union.values.Select(x => new IndexerExpression(x, leftIndex, rightIndex, range).Evaluate(scope)).ToArray()).Evaluate(scope);
             }
             if (expr is IUnevaluated && !(expr is Union))
             {
-                return new BakedExpression(new IndexerExpression(expr, leftIndex, rightIndex, range), lookups);
+                return new BakedExpression(new IndexerExpression(expr, leftIndex, rightIndex, range), scope);
             }
             else if (expr is IIndexable item)
             {
@@ -44,14 +44,14 @@ namespace FAILang.Types.Unevaluated
                 int right = item.Length - 1;
 
                 IType t_left = leftIndex;
-                if (leftIndex is IUnevaluated u_left) t_left = u_left.Evaluate(lookups);
+                if (leftIndex is IUnevaluated u_left) t_left = u_left.Evaluate(scope);
                 if (t_left is Union un_left)
                 {
-                    return new Union(un_left.values.Select(x => new IndexerExpression(expr, x, rightIndex, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
+                    return new Union(un_left.values.Select(x => new IndexerExpression(expr, x, rightIndex, range).Evaluate(scope)).ToArray()).Evaluate(scope);
                 }
                 if (t_left is IUnevaluated)
                 {
-                    return new BakedExpression(new IndexerExpression(expr, t_left, rightIndex, range), lookups);
+                    return new BakedExpression(new IndexerExpression(expr, t_left, rightIndex, range), scope);
                 }
                 if (t_left != null && t_left is Number n_left)
                 {
@@ -67,14 +67,14 @@ namespace FAILang.Types.Unevaluated
                 }
 
                 IType t_right = rightIndex;
-                if (rightIndex is IUnevaluated u_right) t_right = u_right.Evaluate(lookups);
+                if (rightIndex is IUnevaluated u_right) t_right = u_right.Evaluate(scope);
                 if (t_left is Union un_right)
                 {
-                    return new Union(un_right.values.Select(x => new IndexerExpression(expr,t_left, x, range).Evaluate(lookups)).ToArray()).Evaluate(lookups);
+                    return new Union(un_right.values.Select(x => new IndexerExpression(expr,t_left, x, range).Evaluate(scope)).ToArray()).Evaluate(scope);
                 }
                 if (t_right is IUnevaluated)
                 {
-                    return new BakedExpression(new IndexerExpression(expr, t_left, t_right, range), lookups);
+                    return new BakedExpression(new IndexerExpression(expr, t_left, t_right, range), scope);
                 }
                 if (t_right != null && t_right is Number n_right)
                 {

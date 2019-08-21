@@ -20,24 +20,24 @@ namespace FAILang.Types.Unevaluated
             this.target = target;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             IType t = target;
             if (target is IUnevaluated utarget)
             {
-                t = utarget.Evaluate(lookups);
+                t = utarget.Evaluate(scope);
             }
             if (t is Union union)
             {
                 IType[] result = new IType[union.values.Length];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    result[i] = new UnaryOperatorExpression(pre, union.values[i]).Evaluate(lookups);
+                    result[i] = new UnaryOperatorExpression(pre, union.values[i]).Evaluate(scope);
                 }
-                return new Union(result, lookups);
+                return new Union(result, scope);
             }
             if (t is IUnevaluated)
-                return new BakedExpression(new UnaryOperatorExpression(pre, t), lookups);
+                return new BakedExpression(new UnaryOperatorExpression(pre, t), scope);
 
             // Operate
             if (t is IOperable oper)

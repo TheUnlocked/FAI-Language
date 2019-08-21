@@ -11,23 +11,26 @@ namespace FAILang.Types.Unevaluated
         public string TypeName => "UnevaluatedName";
 
         public string name;
-        public NamedArgument(string name)
+        public Namespace targetNamespace;
+
+        public NamedArgument(string name, Namespace targetNamespace = null)
         {
             this.name = name;
+            this.targetNamespace = targetNamespace;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
-            if (lookups.ContainsKey(name))
+            if (targetNamespace != null)
             {
-                IType val = lookups[name];
-                if (val is IUnevaluated)
-                    return (val as IUnevaluated).Evaluate(lookups);
-                return val;
+                var result = targetNamespace?[name];
+                if (result is Error)
+                {
+                    return new Error("InvalidName", $"The name {name} does not exist in namespace {targetNamespace.Address}.");
+                }
+                return result;
             }
-            else if (Global.Instance.globalVariables.ContainsKey(name))
-                return Global.Instance.globalVariables[name];
-            return new Error("InvalidName", $"The name {name} is neither globally defined nor an argument.");
+            return scope[name];
         }
 
         public override int GetHashCode()

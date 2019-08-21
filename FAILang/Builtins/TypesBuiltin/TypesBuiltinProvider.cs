@@ -9,6 +9,8 @@ namespace FAILang.Builtins
 {
     class TypesBuiltinProvider : IBuiltinProvider
     {
+        public string[] NamespacePath { get; } = new string[] { "std", "types" };
+
         private static ExternalFunction ValidateType<T>(Func<T, IType> f, Func<IType, IType> fail) where T : IType
         {
             return x =>
@@ -36,8 +38,8 @@ namespace FAILang.Builtins
                 if (innerObject is UnevaluatedFunction innerFunction)
                 {
                     UnevaluatedTypedFunction newConstruction = new UnevaluatedTypedFunction(innerFunction);
-                    f = new Function(f.fparams, newConstruction, f.lookups, f.memoize, f.elipsis);
-                    newConstruction.Constructor = f;
+                    f = new Function(f.fparams, newConstruction, f.scope, f.memoize, f.elipsis);
+                    newConstruction.constructor = f;
                     return f;
                 }
             }
@@ -82,7 +84,7 @@ namespace FAILang.Builtins
 
 
         private static ExternFunction FUNCTION = new ExternFunction(ValidateType<Function>(
-                x => new Function(x.fparams, x.expression, x.lookups, x.memoize, x.elipsis),
+                x => new Function(x.fparams, x.expression, x.scope, x.memoize, x.elipsis),
                 x => new Error("WrongType", $"A Function object cannot be constructed from a {x.TypeName}")),
                 "func");
 

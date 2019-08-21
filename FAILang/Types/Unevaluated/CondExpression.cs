@@ -22,13 +22,13 @@ namespace FAILang.Types.Unevaluated
             this.default_expr = default_expr;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             for (int i = 0; i < conds.Length; i++)
             {
                 IType tCond = conds[i];
                 if (tCond is IUnevaluated u)
-                    tCond = u.Evaluate(lookups);
+                    tCond = u.Evaluate(scope);
                 if (tCond is Union tu)
                 {
                     IType[] result = new IType[tu.values.Length];
@@ -36,24 +36,24 @@ namespace FAILang.Types.Unevaluated
                     {
                         var ncond = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
                         ncond.conds[0] = tu.values[j];
-                        result[j] = ncond.Evaluate(lookups);
+                        result[j] = ncond.Evaluate(scope);
                     }
-                    return new Union(result, lookups);
+                    return new Union(result, scope);
                 }
                 if (tCond is IUnevaluated)
                 {
                     var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
                     nexpr.conds[0] = tCond;
-                    return new BakedExpression(nexpr, lookups);
+                    return new BakedExpression(nexpr, scope);
                 }
                 if (tCond == MathBool.TRUE)
                 {
                     IType ret = exprs[i];
                     if (ret is IUnevaluated uexpr)
-                        ret = uexpr.Evaluate(lookups);
+                        ret = uexpr.Evaluate(scope);
                     if (ret is IUnevaluated && !(ret is Union))
                     {
-                        return new BakedExpression(ret, lookups);
+                        return new BakedExpression(ret, scope);
                     }
                     return ret;
                 }
@@ -63,11 +63,11 @@ namespace FAILang.Types.Unevaluated
             IType retd = default_expr;
             if (retd is IUnevaluated retdu)
             {
-                retd = retdu.Evaluate(lookups);
+                retd = retdu.Evaluate(scope);
             }
             if (retd is IUnevaluated && !(retd is Union))
             {
-                return new BakedExpression(retd, lookups);
+                return new BakedExpression(retd, scope);
             }
             return retd;
         }

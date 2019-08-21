@@ -16,9 +16,28 @@ namespace FAILang
 {
     public class FAILangVisitor : FAILangBaseVisitor<IType>
     {
+        Global executionGlobal;
+
+        public FAILangVisitor(Global executionGlobal)
+        {
+            this.executionGlobal = executionGlobal;
+        }
+
         public new IType[] VisitCompileUnit([NotNull] FAILangParser.CompileUnitContext context)
         {
-            return VisitCalls(context.calls());
+            return VisitEarlyCalls(context.earlyCalls()).Concat(VisitCalls(context.calls())).ToArray();
+        }
+
+        public new IType[] VisitEarlyCalls([NotNull] FAILangParser.EarlyCallsContext context)
+        {
+            List<IType> ret = new List<IType>();
+            ret.AddRange(context.importStatement()?.Select(x => VisitImportStatement(x)));
+            ret.AddRange(context.includeStatement()?.Select(x => VisitIncludeStatement(x)));
+            if (context.namespaceStatement() != null)
+                ret.Add(VisitNamespaceStatement(context.namespaceStatement()));
+
+            return ret.ToArray();
+
         }
 
         public new IType[] VisitCalls([NotNull] FAILangParser.CallsContext context)
@@ -28,11 +47,7 @@ namespace FAILang
 
         public override IType VisitCall([NotNull] FAILangParser.CallContext context)
         {
-            if (context.imp() != null)
-            {
-                return VisitImp(context.imp());
-            }
-            else if (context.def() != null)
+            if (context.def() != null)
             {
                 return VisitDef(context.def());
             }
@@ -41,7 +56,7 @@ namespace FAILang
             return new Error("ParseError", "The input failed to parse.");
         }
 
-        public override IType VisitImp([NotNull] FAILangParser.ImpContext context)
+        public override IType VisitImportStatement([NotNull] FAILangParser.ImportStatementContext context)
         {
             IType Match(string filepath)
             {
@@ -52,7 +67,7 @@ namespace FAILang
                 {
                     try
                     {
-                        if (importer.TryImport(filepath, FAI.Instance, Global.Instance))
+                        if (importer.TryImport(filepath, FAI.Instance))
                         {
                             return null;
                         }
@@ -108,15 +123,28 @@ namespace FAILang
             }
         }
 
+        public override IType VisitIncludeStatement([NotNull] FAILangParser.IncludeStatementContext context)
+        {
+            return Namespace.GlobalNamespace.Instance.IncludeNamespace(
+                Namespace.GlobalNamespace.Instance.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText())));
+        }
+
+        public override IType VisitNamespaceStatement([NotNull] FAILangParser.NamespaceStatementContext context)
+        {
+            executionGlobal.Namespace = Namespace.GlobalNamespace.Instance.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()));
+            executionGlobal.GlobalScope = new Scope(executionGlobal.Namespace, executionGlobal._globalVariables);
+            return null;
+        }
+
         public override IType VisitDef([NotNull] FAILangParser.DefContext context)
         {
             var name = context.name().GetText();
             var update = context.update;
             var exp = context.expression();
 
-            if (Global.Instance.reservedNames.Contains(name))
+            if (executionGlobal.reservedNames.Contains(name))
                 return new Error("DefineFailed", $"{name} is a reserved name.");
-            if (update == null && Global.Instance.globalVariables.ContainsKey(name))
+            if (update == null && executionGlobal.GlobalScope.HasVar(name))
                 return new Error("DefineFailed", "The update keyword is required to change a function or variable.");
 
             bool memoize = context.memoize != null;
@@ -124,9 +152,9 @@ namespace FAILang
             // `update memo name` pattern
             if (exp == null && memoize)
             {
-                if (!Global.Instance.globalVariables.ContainsKey(name))
+                if (!executionGlobal.GlobalScope.HasVar(name))
                     return new Error("UpdateFailed", $"{name} is not defined");
-                if (Global.Instance.globalVariables.TryGetValue(name, out var val) && val is Function func)
+                if (executionGlobal.GlobalScope.TryGetVar(name, out var val) && val is Function func)
                 {
                     if (func.memoize)
                         func.memos.Clear();
@@ -139,27 +167,27 @@ namespace FAILang
             else if (context.fparams() != null)
             {
                 IType expr = VisitExpression(exp);
-                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, Global.Instance.globalVariables, memoize: memoize, elipsis: context.fparams().elipsis != null);
+                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, executionGlobal.GlobalScope, memoize: memoize, elipsis: context.fparams().elipsis != null);
 
-                Global.Instance.globalVariables[name] = f;
+                executionGlobal._globalVariables[name] = f;
             }
             else
             {
                 //if (context.ASSIGN() != null)
                 //{
-                    var v = Global.Instance.Evaluate(VisitExpression(exp));
+                    var v = executionGlobal.Evaluate(VisitExpression(exp));
                     if (v is Error)
                         return v;
-                    Global.Instance.globalVariables[name] = v;
+                    executionGlobal._globalVariables[name] = v;
                 //}
                 //else
                 //{
                 //    var v = VisitExpression(context.expression());
                 //    if (v is UnevaluatedFunction)
                 //    {
-                //        v = Global.Instance.Evaluate(v);
+                //        v = executionGlobal.Evaluate(v);
                 //    }
-                //    Global.Instance.globalVariables[name] = v;
+                //    executionGlobal.globalVariables[name] = v;
                 //}
             }
 
@@ -259,6 +287,7 @@ namespace FAILang
 
             var binaryNodes = context.binary();
             BinaryOperator oper = BinaryOperator.MULTIPLY;
+
             switch (context.op.Text)
             {
                 case "+":
@@ -278,6 +307,25 @@ namespace FAILang
                     break;
                 case "^":
                     oper = BinaryOperator.EXPONENT;
+
+                    // Exponentation is an edge-case in which the prefix operator needs to go after it. e.g. -2^2 = -4
+                    if (binaryNodes[0].prefix() != null && binaryNodes[0].prefix().op != null)
+                    {
+                        UnaryOperator prefix = UnaryOperator.NOT;
+                        switch (binaryNodes[0].prefix().op.Text)
+                        {
+                            case "~":
+                                prefix = UnaryOperator.NOT;
+                                break;
+                            case "-":
+                                prefix = UnaryOperator.NEGATIVE;
+                                break;
+                            case "+-":
+                                prefix = UnaryOperator.PLUS_MINUS;
+                                break;
+                        }
+                        return new UnaryOperatorExpression(prefix, new BinaryOperatorExpression(oper, VisitPostfix(binaryNodes[0].prefix().postfix()), VisitBinary(binaryNodes[1])));
+                    }
                     break;
                 case "||":
                     oper = BinaryOperator.CONCAT;
@@ -408,15 +456,18 @@ namespace FAILang
         }
 
         public override IType VisitName([NotNull] FAILangParser.NameContext context) =>
-            new NamedArgument(context.GetText());
+            new NamedArgument(context.NAME().GetText(), 
+                context.@namespace() == null
+                    ? null
+                    : Namespace.GlobalNamespace.Instance.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()).ToArray()));
 
         public override IType VisitVector([NotNull] FAILangParser.VectorContext context) =>
             new UnevaluatedVector(context.expression().Select(x => VisitExpression(x)).ToArray());
 
-        public override IType VisitMap([NotNull] FAILangParser.MapContext context) =>
-            new UnevaluatedMap(
-                context.expression().Where((v, i) => i % 2 == 0).Select(x => VisitExpression(x)).ToArray(),
-                context.expression().Where((v, i) => i % 2 == 1).Select(x => VisitExpression(x)).ToArray());
+        //public override IType VisitMap([NotNull] FAILangParser.MapContext context) =>
+        //    new UnevaluatedMap(
+        //        context.expression().Where((v, i) => i % 2 == 0).Select(x => VisitExpression(x)).ToArray(),
+        //        context.expression().Where((v, i) => i % 2 == 1).Select(x => VisitExpression(x)).ToArray());
 
         public override IType VisitTuple([NotNull] FAILangParser.TupleContext context) =>
             new UnevaluatedTuple(context.expression().Select(x => VisitExpression(x)).ToArray());

@@ -11,24 +11,26 @@ namespace FAILang.Builtins
     {
         public readonly Function constructor;
 
-        public TypedFunction(Function f, Function constructor, Dictionary<string, IType> lookups=null)
-            : base(f.fparams, f.expression, lookups ?? f.lookups ?? new Dictionary<string, IType>(), f.memoize, f.elipsis)
+        public TypedFunction(Function f, Function constructor, Scope scope)
+            : base(f.fparams, f.expression, scope, f.memoize, f.elipsis)
         {
             this.constructor = constructor;
         }
     }
 
-    class UnevaluatedTypedFunction : TypedFunction, IUnevaluated
+    class UnevaluatedTypedFunction : IUnevaluated
     {
-        public Function Constructor { get; internal set; }
+        public Function constructor;
+        public Function thisFunction;
+        public string TypeName => "UnevaluatedTypedFunction";
 
-        public UnevaluatedTypedFunction(Function f, Function constructor=null) :
-            base(f, null)
+        public UnevaluatedTypedFunction(Function f, Function constructor=null)
         {
-            Constructor = constructor;
+            this.constructor = constructor;
+            thisFunction = f;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups) =>
-            new TypedFunction(this, Constructor, lookups);
+        public IType Evaluate(Scope scope) =>
+            new TypedFunction(thisFunction, constructor, scope);
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
+using FAILang.Builtins;
 using FAILang.Grammar;
 using FAILang.Importers;
 using FAILang.Types;
@@ -23,17 +24,22 @@ namespace FAILang
 
         public FAI()
         {
-            Global.ResetGlobalInstance();
         }
 
         public readonly List<IImporter> importers = new List<IImporter>();
+        public readonly List<IBuiltinProvider> builtinProviders = new List<IBuiltinProvider>();
 
         public void LoadImporters(params IImporter[] importers)
         {
             this.importers.AddRange(importers);
         }
 
-        public IType[] InterpretLines(string input)
+        public void ProvideBuiltins(params IBuiltinProvider[] builtinProviders)
+        {
+            this.builtinProviders.AddRange(builtinProviders);
+        }
+
+        public IType[] InterpretLines(Global environment, string input)
         {
             if (input == null)
                 return new IType[] { };
@@ -47,9 +53,9 @@ namespace FAILang
                 parser.ErrorHandler = new BailErrorStrategy();
 
                 FAILangParser.CompileUnitContext expressionContext = parser.compileUnit();
-                FAILangVisitor visitor = new FAILangVisitor();
+                FAILangVisitor visitor = new FAILangVisitor(environment);
 
-                return visitor.VisitCompileUnit(expressionContext).Select(x => Global.Instance.Evaluate(x)).ToArray();
+                return visitor.VisitCompileUnit(expressionContext).Select(x => environment.Evaluate(x)).ToArray();
             }
             catch (Antlr4.Runtime.Misc.ParseCanceledException)
             {

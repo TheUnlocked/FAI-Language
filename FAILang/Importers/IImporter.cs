@@ -7,6 +7,6 @@ namespace FAILang.Importers
     public interface IImporter
     {
         string[] FileExtensions { get; }
-        bool TryImport(string path, FAI fai, Global globals);
+        bool TryImport(string path, FAI fai);
     }
 }

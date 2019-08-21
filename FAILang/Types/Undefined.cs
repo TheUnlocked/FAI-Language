@@ -7,8 +7,7 @@ namespace FAILang.Types
     public class Undefined : IType
     {
         public string TypeName => "Undefined";
-        public static readonly Undefined instance = new Undefined();
-        public static Undefined Instance => instance;
+        public static Undefined Instance { get; } = new Undefined();
 
         public override string ToString()
         {

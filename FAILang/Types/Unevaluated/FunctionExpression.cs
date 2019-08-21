@@ -19,11 +19,11 @@ namespace FAILang.Types.Unevaluated
             this.args = args;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             IType func = func_expr;
             if (func is IUnevaluated u)
-                func = u.Evaluate(lookups);
+                func = u.Evaluate(scope);
             if (func is Error)
                 return func;
 
@@ -35,7 +35,7 @@ namespace FAILang.Types.Unevaluated
                     var arg = this.args[i].Item1;
                     if (arg is IUnevaluated uneval)
                     {
-                        arg = uneval.Evaluate(lookups);
+                        arg = uneval.Evaluate(scope);
                     }
                     if (this.args[i].Item2)
                     {
@@ -57,15 +57,15 @@ namespace FAILang.Types.Unevaluated
                     }
                 }
                 if (args.Any(x => x is IUnevaluated && !(x is Union)))
-                    return new BakedExpression(new FunctionExpression(func, args.Select(x => (x, false)).ToArray()), lookups);
+                    return new BakedExpression(new FunctionExpression(func, args.Select(x => (x, false)).ToArray()), scope);
                 return f.Evaluate(args.ToArray());
             }
             if (func is IUnevaluated)
             {
-                return new BakedExpression(new FunctionExpression(func, args), lookups);
+                return new BakedExpression(new FunctionExpression(func, args), scope);
             }
             if (func is Number n1 && args.Length == 1)
-                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(lookups);
+                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(scope);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }
 

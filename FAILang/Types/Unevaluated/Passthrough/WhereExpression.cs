@@ -17,13 +17,12 @@ namespace FAILang.Types.Unevaluated.Passthrough
             this.lookups = lookups;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             if (PassthroughExpression is IUnevaluated u)
             {
-                var newLookups = new Dictionary<string, IType>(lookups);
-                this.lookups.ToList().ForEach(pair => newLookups[pair.Key] = pair.Value);
-                return u.Evaluate(newLookups);
+                var newScope = new Scope(scope, lookups);
+                return u.Evaluate(newScope);
             }
             return PassthroughExpression;
         }

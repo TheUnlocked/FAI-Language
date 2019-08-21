@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 
 namespace FAILang.Importers
 {
@@ -11,7 +12,7 @@ namespace FAILang.Importers
     {
         public string[] FileExtensions => new string[] { ".dll" };
 
-        public bool TryImport(string path, FAI fai, Global globals)
+        public bool TryImport(string path, FAI fai)
         {
             Assembly dll;
 
@@ -31,8 +32,9 @@ namespace FAILang.Importers
                     var attr = (FAIMethodAttribute)method.GetCustomAttribute(typeof(FAIMethodAttribute));
                     if (attr != null)
                     {
+                        string[] namePath = attr.FunctionName.Split(":");
                         ExternalFunction func = (ExternalFunction)method.CreateDelegate(typeof(ExternalFunction));
-                        globals.globalVariables[attr.FunctionName] = new ExternFunction(func, attr.ArgList);
+                        Namespace.GlobalNamespace.Instance.GetSubNamespace(namePath.SkipLast(1)).Variables[attr.FunctionName] = new ExternFunction(func, attr.ArgList);
                     }
                 }
             }

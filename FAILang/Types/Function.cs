@@ -18,13 +18,13 @@ namespace FAILang.Types
 
         public bool memoize;
         public Dictionary<int, IType> memos = new Dictionary<int, IType>();
-        public Dictionary<string, IType> lookups;
+        public Scope scope;
 
-        public Function(string[] fparams, IType expression, Dictionary<string, IType> lookups, bool memoize, bool elipsis)
+        public Function(string[] fparams, IType expression, Scope scope, bool memoize, bool elipsis)
         {
             this.fparams = fparams.ToArray();
             this.expression = expression;
-            this.lookups = lookups;
+            this.scope = scope;
             this.memoize = memoize;
             this.elipsis = elipsis;
         }
@@ -35,7 +35,7 @@ namespace FAILang.Types
             {
                 if (memoize && memos.TryGetValue(GetArgListHashCode(args), out IType v))
                     return v;
-                Dictionary<string, IType> lookup = new Dictionary<string, IType>(lookups);
+                var newScopeVars = new Dictionary<string, IType>();
                 IType[] extra = new IType[args.Length - fparams.Length + 1];
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -54,21 +54,22 @@ namespace FAILang.Types
                             }
                             results[j] = Evaluate(newArgs);
                         }
-                        return new Union(results).Evaluate(lookup);
+                        return new Union(results).Evaluate(scope);
                     }
                     if (args[i] is Error)
                         return args[i];
                     if (elipsis && i >= fparams.Length - 1)
                         extra[i - fparams.Length + 1] = args[i];
                     else
-                        lookup[fparams[i]] = args[i];
+                        newScopeVars[fparams[i]] = args[i];
                 }
                 if (elipsis)
-                    lookup[fparams[fparams.Length - 1]] = new UnevaluatedTuple(extra);
-                lookup["self"] = this;
+                    newScopeVars[fparams[fparams.Length - 1]] = new UnevaluatedTuple(extra);
+                newScopeVars["self"] = this;
                 var ret = expression;
+                var newScope = new Scope(scope, newScopeVars);
                 if (ret is IUnevaluated u)
-                    ret = new BakedExpression(u, lookup);
+                    ret = new BakedExpression(u, newScope);
                 if (memoize)
                     return new CallbackWrapper(ret, x => memos[GetArgListHashCode(args)] = x);
                 return ret;
@@ -165,7 +166,7 @@ namespace FAILang.Types
                                 temp.Push(e.conds[j]);
                                 temp.Push("; ");
                             }
-                            if (e.default_expr != Undefined.instance)
+                            if (e.default_expr != Undefined.Instance)
                             {
                                 temp.Push(e.default_expr);
                                 temp.Push(" otherwise;");
@@ -274,7 +275,7 @@ namespace FAILang.Types
 
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups) =>
-            new Function(fparams, expression, lookups, memoize, elipsis);
+        public IType Evaluate(Scope scope) =>
+            new Function(fparams, expression, scope, memoize, elipsis);
     }
 }

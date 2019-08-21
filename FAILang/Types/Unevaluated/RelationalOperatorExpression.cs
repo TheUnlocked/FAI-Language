@@ -19,14 +19,14 @@ namespace FAILang.Types.Unevaluated
             this.ins = ins;
         }
 
-        public IType Evaluate(Dictionary<string, IType> lookups)
+        public IType Evaluate(Scope scope)
         {
             var first = ins[0];
             var second = ins[1];
             if (first is IUnevaluated uFirst)
-                first = uFirst.Evaluate(lookups);
+                first = uFirst.Evaluate(scope);
             if (second is IUnevaluated uSecond)
-                second = uSecond.Evaluate(lookups);
+                second = uSecond.Evaluate(scope);
             if (first is Union unionFirst)
             {
                 IType[] result = new IType[unionFirst.values.Length];
@@ -34,9 +34,9 @@ namespace FAILang.Types.Unevaluated
                 {
                     var newIns = ins;
                     newIns[0] = first;
-                    result[i] = new RelationalOperatorExpression(ops, newIns).Evaluate(lookups);
+                    result[i] = new RelationalOperatorExpression(ops, newIns).Evaluate(scope);
                 }
-                return new Union(result, lookups);
+                return new Union(result, scope);
             }
             if (second is Union unionSecond)
             {
@@ -45,15 +45,15 @@ namespace FAILang.Types.Unevaluated
                 {
                     var newIns = ins;
                     newIns[1] = second;
-                    result[i] = new RelationalOperatorExpression(ops, newIns).Evaluate(lookups);
+                    result[i] = new RelationalOperatorExpression(ops, newIns).Evaluate(scope);
                 }
-                return new Union(result, lookups);
+                return new Union(result, scope);
             }
             if (first is IUnevaluated || second is IUnevaluated) {
                 var newIns = ins.ToArray();
                 newIns[0] = first;
                 newIns[1] = second;
-                return new BakedExpression(new RelationalOperatorExpression(ops, newIns), lookups);
+                return new BakedExpression(new RelationalOperatorExpression(ops, newIns), scope);
             }
 
             if (first is Error)
