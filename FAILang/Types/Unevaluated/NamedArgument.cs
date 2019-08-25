@@ -12,25 +12,33 @@ namespace FAILang.Types.Unevaluated
 
         public string name;
         public Namespace targetNamespace;
+        public Global globalEnvironment;
 
-        public NamedArgument(string name, Namespace targetNamespace = null)
+        public NamedArgument(string name, Global globalEnvironment, Namespace targetNamespace = null)
         {
             this.name = name;
             this.targetNamespace = targetNamespace;
+            this.globalEnvironment = globalEnvironment;
         }
 
         public IType Evaluate(Scope scope)
         {
+            IType result;
             if (targetNamespace != null)
             {
-                var result = targetNamespace?[name];
+                result = targetNamespace?[name];
                 if (result is Error)
                 {
                     return new Error("InvalidName", $"The name {name} does not exist in namespace {targetNamespace.Address}.");
                 }
                 return result;
             }
-            return scope[name];
+            result = scope[name];
+            if (result is Error)
+            {
+                return globalEnvironment.GlobalScope?[name];
+            }
+            return result;
         }
 
         public override int GetHashCode()

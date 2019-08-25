@@ -9,7 +9,7 @@ namespace FAILang.Builtins
 {
     class TypesBuiltinProvider : IBuiltinProvider
     {
-        public string[] NamespacePath { get; } = new string[] { "std", "types" };
+        public string[] NamespacePath { get; } = new string[] { "std", "type" };
 
         private static ExternalFunction ValidateType<T>(Func<T, IType> f, Func<IType, IType> fail) where T : IType
         {
@@ -23,27 +23,35 @@ namespace FAILang.Builtins
 
         private static ExternFunction ESTABLISH_CONSTRUCTOR = new ExternFunction(args =>
         {
-            var constructor = args[0];
-            if (constructor is Function f)
+            var constructorFunction = args[0];
+            if (constructorFunction is Function f)
             {
                 IType innerObject = f.expression;
 
-            CheckPassthrough:
                 if (innerObject is IPassthrough passthroughObject)
                 {
-                    innerObject = passthroughObject.PassthroughExpression;
-                    goto CheckPassthrough;
+                    innerObject = passthroughObject.DeepGetPassthroughObject();
                 }
 
-                if (innerObject is UnevaluatedFunction innerFunction)
-                {
-                    UnevaluatedTypedFunction newConstruction = new UnevaluatedTypedFunction(innerFunction);
-                    f = new Function(f.fparams, newConstruction, f.scope, f.memoize, f.elipsis);
-                    newConstruction.constructor = f;
-                    return f;
-                }
+                ExternFunction constructor = null;
+                constructor = new ExternFunction(fargs => {
+                    var result = f.Evaluate(fargs);
+                    if (result is IPassthrough pt)
+                    {
+                        IType inner = pt.DeepGetPassthroughObject();
+                        if (inner is Function innerObj)
+                            return pt.DeepReplacePassthroughObject(new UnevaluatedTypedFunction(constructor, innerObj));
+                    }
+                    else if (result is Function obj)
+                    {
+                        return new UnevaluatedTypedFunction(f, obj);
+                    }
+                    return result;
+                }, f.memoize, f.elipsis, f.fparams);
+
+                return constructor;
             }
-            return new Error("InvalidConstructor", "A constructor must be a Function in the format <args1> -> <args2> -> <expression>");
+            return new Error("InvalidConstructor", "A constructor must be a Function");
         }, "constructor");
 
         private static ExternFunction GET_CONSTRUCTOR = new ExternFunction(args =>
@@ -63,7 +71,7 @@ namespace FAILang.Builtins
         }, "object");
 
         public (string, IType)[] GetBuiltins() => new(string, IType)[] {
-                ("establishConstructor", ESTABLISH_CONSTRUCTOR),
+                ("makeConstructor", ESTABLISH_CONSTRUCTOR),
                 ("getConstructor", GET_CONSTRUCTOR),
                 ("Function", FUNCTION),
                 ("Number", NUMBER),
@@ -73,43 +81,33 @@ namespace FAILang.Builtins
                 ("Tuple", TUPLE)
             };
 
-        public string[] GetReservedNames() => new string[] {
-            "Function",
-            "Number",
-            "Boolean",
-            "String",
-            "Vector",
-            "Tuple"
-        };
-
-
         private static ExternFunction FUNCTION = new ExternFunction(ValidateType<Function>(
-                x => new Function(x.fparams, x.expression, x.scope, x.memoize, x.elipsis),
+                x => x,
                 x => new Error("WrongType", $"A Function object cannot be constructed from a {x.TypeName}")),
                 "func");
 
         private static ExternFunction NUMBER = new ExternFunction(ValidateType<Number>(
-                x => new Number(x.value),
+                x => x,
                 x => new Error("WrongType", $"A Number object cannot be constructed from a {x.TypeName}")),
                 "num");
 
         private static ExternFunction BOOLEAN = new ExternFunction(ValidateType<MathBool>(
-                x => x.value ? MathBool.TRUE : MathBool.FALSE,
+                x => x,
                 x => new Error("WrongType", $"A Boolean object cannot be constructed from a {x.TypeName}")),
                 "bool");
 
         private static ExternFunction STRING = new ExternFunction(ValidateType<MathString>(
-                x => new MathString(x.value),
+                x => x,
                 x => new MathString(x.ToString())),
                 "string");
 
         private static ExternFunction VECTOR = new ExternFunction(ValidateType<Vector>(
-                x => new Vector(x.items),
+                x => x,
                 x => new Error("WrongType", $"A Vector object cannot be constructed from a {x.TypeName}")),
                 "vector");
 
         private static ExternFunction TUPLE = new ExternFunction(ValidateType<Tuple>(
-                x => new Tuple(x.items),
+                x => x,
                 x => new Error("WrongType", $"A Tuple object cannot be constructed from a {x.TypeName}")),
                 "tuple");
     }

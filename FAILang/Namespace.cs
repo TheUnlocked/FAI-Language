@@ -10,8 +10,13 @@ namespace FAILang
         private readonly Dictionary<string, Namespace> children = new Dictionary<string, Namespace>();
         public Dictionary<string, IType> Variables => (Dictionary<string, IType>)variables;
         public string Address { get; }
+        public static Namespace Root { get; } = new Namespace("");
 
-        public Namespace(string address) : base(GlobalNamespace.Instance, new Dictionary<string, IType>())
+        static Namespace() {
+            Root.Variables.Add("i", new Number(System.Numerics.Complex.ImaginaryOne));
+        }
+
+        public Namespace(string address) : base(null, new Dictionary<string, IType>())
         {
             Address = address;
         }
@@ -40,52 +45,12 @@ namespace FAILang
                 }
                 else
                 {
-                    var tempNS = new Namespace(Address == "" ? name : $"{Address}::{name}");
+                    var tempNS = new Namespace(current.Address == "" ? name : $"{current.Address}::{name}");
                     current.children.Add(name, tempNS);
                     current = tempNS;
                 }
             }
             return current;
-        }
-
-        public class GlobalNamespace : Namespace {
-            public static GlobalNamespace Instance { get; } = new GlobalNamespace();
-
-            private readonly List<Namespace> includedNamespaces = new List<Namespace>();
-
-            private GlobalNamespace() : base("") { }
-
-            public IType IncludeNamespace(Namespace ns)
-            {
-                if (includedNamespaces.Contains(ns))
-                {
-                    return new Error("IncludeError", "A namespace cannot be included more than once.");
-                }
-                includedNamespaces.Add(ns);
-                return null;
-            }
-
-            public override IType this[string varName]
-            {
-                get
-                {
-                    if (TryGetVar(varName, out var val))
-                    {
-                        return val;
-                    }
-                    else
-                    {
-                        foreach (var ns in includedNamespaces)
-                        {
-                            if (ns.TryGetVar(varName, out var val2))
-                            {
-                                return val2;
-                            }
-                        }
-                        return new Error("InvalidName", $"The name {varName} does not exist in scope.");
-                    }
-                }
-            }
         }
     }
 }

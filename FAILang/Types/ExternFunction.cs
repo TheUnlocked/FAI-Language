@@ -23,7 +23,7 @@ namespace FAILang.Types
 
         public override IType Evaluate(IType[] args)
         {
-            if (args.Length == fparams.Length)
+            if (args.Length == fparams.Length || (args.Length >= fparams.Length - 1 && elipsis))
             {
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -47,7 +47,7 @@ namespace FAILang.Types
                 }
                 return func(args);
             }
-            return new Error("BadArguments", $"The function {this} can't fit {args.Length} arguments.");
+            return new Error("ArgumentError", $"The function {this} can't fit {args.Length} arguments.");
         }
 
         protected override string ExpressionString => "<external>";

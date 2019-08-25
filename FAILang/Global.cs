@@ -13,15 +13,16 @@ namespace FAILang
     public class Global
     {
         internal Dictionary<string, IType> _globalVariables = new Dictionary<string, IType>();
-        public Namespace Namespace { get; set; } = Namespace.GlobalNamespace.Instance;
-        private Scope _globalScope;
-        public Scope GlobalScope
+
+        public Namespace Namespace { get; set; }
+        private MultiScope _globalScope;
+        public MultiScope GlobalScope
         {
             get
             {
                 if (_globalScope == null)
                 {
-                    _globalScope = new Scope(Namespace, _globalVariables);
+                    _globalScope = new MultiScope(Namespace, _globalVariables);
                 }
                 return _globalScope;
             }
@@ -47,6 +48,7 @@ namespace FAILang
 
         public Global()
         {
+            Namespace = Namespace.Root;
             LoadBuiltins(FAI.Instance.builtinProviders.ToArray());
         }
 
@@ -54,14 +56,10 @@ namespace FAILang
         {
             foreach (var builtinProvider in builtinProviders)
             {
-                var ns = Namespace.GlobalNamespace.Instance.GetSubNamespace(builtinProvider.NamespacePath);
+                var ns = Namespace.Root.GetSubNamespace(builtinProvider.NamespacePath);
                 foreach (var pair in builtinProvider.GetBuiltins())
                 {
                     ns.Variables[pair.Item1] = pair.Item2;
-                }
-                foreach (string name in builtinProvider.GetReservedNames())
-                {
-                    reservedNames.Add(name);
                 }
             }
         }
@@ -70,7 +68,6 @@ namespace FAILang
 
         public IType Evaluate(IType expr)
         {
-            var exprMem = expr;
             while (expr is IUnevaluated u)
             {
                 if (u is Union un)
@@ -82,10 +79,6 @@ namespace FAILang
                     }
                 }
                 expr = u.Evaluate(GlobalScope);
-                if (expr.GetType() == exprMem.GetType() && expr.GetHashCode() == exprMem.GetHashCode())
-                {
-                    return new Error("InfiniteRecursion", "The entered expression will recurse infinitely, and has been terminated");
-                }
             }
             return expr;
         }

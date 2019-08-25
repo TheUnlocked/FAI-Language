@@ -12,7 +12,7 @@ namespace FAILang.Importers
     {
         public string[] FileExtensions => new string[] { ".dll" };
 
-        public bool TryImport(string path, FAI fai)
+        public bool TryImport(string path, Global globalEnvironment)
         {
             Assembly dll;
 
@@ -34,7 +34,11 @@ namespace FAILang.Importers
                     {
                         string[] namePath = attr.FunctionName.Split(":");
                         ExternalFunction func = (ExternalFunction)method.CreateDelegate(typeof(ExternalFunction));
-                        Namespace.GlobalNamespace.Instance.GetSubNamespace(namePath.SkipLast(1)).Variables[attr.FunctionName] = new ExternFunction(func, attr.ArgList);
+                        if (namePath.Length == 1)
+                        {
+                            globalEnvironment._globalVariables[attr.FunctionName] = new ExternFunction(func, attr.ArgList);
+                        }
+                        Namespace.Root.GetSubNamespace(namePath.SkipLast(1)).Variables[attr.FunctionName] = new ExternFunction(func, attr.ArgList);
                     }
                 }
             }

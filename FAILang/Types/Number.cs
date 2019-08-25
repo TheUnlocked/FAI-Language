@@ -14,7 +14,8 @@ namespace FAILang.Types
 
         public readonly Complex value;
         public bool IsReal => value.Imaginary == 0;
-        
+        public bool IsNatural => IsReal && value.Real % 1 == 0;
+
         public Number(Complex value)
         {
             this.value = value;
@@ -125,6 +126,9 @@ namespace FAILang.Types
                                 break;
                             case 0:
                                 c = new Complex(1, 0);
+                                break;
+                            default:
+                                c = Complex.Zero;
                                 break;
                         }
                         return new Number(c * Math.Pow(value.Imaginary, num.value.Real));

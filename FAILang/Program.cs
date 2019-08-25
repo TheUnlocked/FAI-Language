@@ -20,9 +20,13 @@ namespace FAILang
             fai.ProvideBuiltins(
                 new NumberBuiltinProvider(),
                 new CollectionBuiltinProvider(),
-                new TypesBuiltinProvider()
+                new TypesBuiltinProvider(),
+                new FunctionBuiltinProvider()
             );
-            FAI.Instance.LoadImporters(new DotNetImporter());
+            FAI.Instance.LoadImporters(
+                new DotNetImporter(),
+                new FAIImporter()
+            );
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
 

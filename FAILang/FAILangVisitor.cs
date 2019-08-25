@@ -16,11 +16,11 @@ namespace FAILang
 {
     public class FAILangVisitor : FAILangBaseVisitor<IType>
     {
-        Global executionGlobal;
+        Global globalEnvironment;
 
-        public FAILangVisitor(Global executionGlobal)
+        public FAILangVisitor(Global globalEnvironment)
         {
-            this.executionGlobal = executionGlobal;
+            this.globalEnvironment = globalEnvironment;
         }
 
         public new IType[] VisitCompileUnit([NotNull] FAILangParser.CompileUnitContext context)
@@ -56,6 +56,7 @@ namespace FAILang
             return new Error("ParseError", "The input failed to parse.");
         }
 
+        static List<string> imported = new List<string>();
         public override IType VisitImportStatement([NotNull] FAILangParser.ImportStatementContext context)
         {
             IType Match(string filepath)
@@ -67,7 +68,7 @@ namespace FAILang
                 {
                     try
                     {
-                        if (importer.TryImport(filepath, FAI.Instance))
+                        if (importer.TryImport(filepath, globalEnvironment))
                         {
                             return null;
                         }
@@ -85,6 +86,14 @@ namespace FAILang
             }
 
             string str = context.STRING().GetText().Trim('"');
+            if (imported.Contains(str))
+            {
+                return null;
+            }
+            else
+            {
+                imported.Add(str);
+            }
             if (Path.HasExtension(str)) {
                 if (File.Exists(str))
                 {
@@ -125,14 +134,16 @@ namespace FAILang
 
         public override IType VisitIncludeStatement([NotNull] FAILangParser.IncludeStatementContext context)
         {
-            return Namespace.GlobalNamespace.Instance.IncludeNamespace(
-                Namespace.GlobalNamespace.Instance.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText())));
+            return globalEnvironment.GlobalScope.AddParent(
+                Namespace.Root.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText())));
         }
 
         public override IType VisitNamespaceStatement([NotNull] FAILangParser.NamespaceStatementContext context)
         {
-            executionGlobal.Namespace = Namespace.GlobalNamespace.Instance.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()));
-            executionGlobal.GlobalScope = new Scope(executionGlobal.Namespace, executionGlobal._globalVariables);
+            globalEnvironment.Namespace = Namespace.Root.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()));
+            globalEnvironment.GlobalScope = new MultiScope(
+                globalEnvironment.GlobalScope.bonusParents.Prepend(globalEnvironment.Namespace).ToArray(),
+                globalEnvironment._globalVariables);
             return null;
         }
 
@@ -142,9 +153,9 @@ namespace FAILang
             var update = context.update;
             var exp = context.expression();
 
-            if (executionGlobal.reservedNames.Contains(name))
+            if (globalEnvironment.reservedNames.Contains(name))
                 return new Error("DefineFailed", $"{name} is a reserved name.");
-            if (update == null && executionGlobal.GlobalScope.HasVar(name))
+            if (update == null && globalEnvironment.GlobalScope.HasVar(name))
                 return new Error("DefineFailed", "The update keyword is required to change a function or variable.");
 
             bool memoize = context.memoize != null;
@@ -152,9 +163,9 @@ namespace FAILang
             // `update memo name` pattern
             if (exp == null && memoize)
             {
-                if (!executionGlobal.GlobalScope.HasVar(name))
+                if (!globalEnvironment.GlobalScope.HasVar(name))
                     return new Error("UpdateFailed", $"{name} is not defined");
-                if (executionGlobal.GlobalScope.TryGetVar(name, out var val) && val is Function func)
+                if (globalEnvironment.GlobalScope.TryGetVar(name, out var val) && val is Function func)
                 {
                     if (func.memoize)
                         func.memos.Clear();
@@ -167,28 +178,30 @@ namespace FAILang
             else if (context.fparams() != null)
             {
                 IType expr = VisitExpression(exp);
-                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, executionGlobal.GlobalScope, memoize: memoize, elipsis: context.fparams().elipsis != null);
+                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, globalEnvironment.GlobalScope, memoize: memoize, elipsis: context.fparams().elipsis != null);
 
-                executionGlobal._globalVariables[name] = f;
+                if (globalEnvironment.Namespace == Namespace.Root)
+                {
+                    globalEnvironment._globalVariables[name] = f;
+                }
+                else
+                {
+                    globalEnvironment.Namespace.Variables[name] = f;
+                }
             }
             else
             {
-                //if (context.ASSIGN() != null)
-                //{
-                    var v = executionGlobal.Evaluate(VisitExpression(exp));
-                    if (v is Error)
-                        return v;
-                    executionGlobal._globalVariables[name] = v;
-                //}
-                //else
-                //{
-                //    var v = VisitExpression(context.expression());
-                //    if (v is UnevaluatedFunction)
-                //    {
-                //        v = executionGlobal.Evaluate(v);
-                //    }
-                //    executionGlobal.globalVariables[name] = v;
-                //}
+                var v = globalEnvironment.Evaluate(VisitExpression(exp));
+                if (v is Error)
+                    return v;
+                if (globalEnvironment.Namespace == Namespace.Root)
+                {
+                    globalEnvironment._globalVariables[name] = v;
+                }
+                else
+                {
+                    globalEnvironment.Namespace.Variables[name] = v;
+                }
             }
 
             return null;
@@ -308,23 +321,66 @@ namespace FAILang
                 case "^":
                     oper = BinaryOperator.EXPONENT;
 
-                    // Exponentation is an edge-case in which the prefix operator needs to go after it. e.g. -2^2 = -4
-                    if (binaryNodes[0].prefix() != null && binaryNodes[0].prefix().op != null)
+                    if (binaryNodes[0].prefix() != null)
                     {
-                        UnaryOperator prefix = UnaryOperator.NOT;
-                        switch (binaryNodes[0].prefix().op.Text)
+                        // Exponentation is an edge-case in which the prefix operator needs to go after it. e.g. -2^2 = -4; -2x^2 where x=5 = -50
+                        UnaryOperator? prefix = null;
+                        Number? multiplier = null;
+                        if (binaryNodes[0].prefix().op != null)
                         {
-                            case "~":
-                                prefix = UnaryOperator.NOT;
-                                break;
-                            case "-":
-                                prefix = UnaryOperator.NEGATIVE;
-                                break;
-                            case "+-":
-                                prefix = UnaryOperator.PLUS_MINUS;
-                                break;
+                            switch (binaryNodes[0].prefix().op.Text)
+                            {
+                                case "~":
+                                    prefix = UnaryOperator.NOT;
+                                    break;
+                                case "-":
+                                    prefix = UnaryOperator.NEGATIVE;
+                                    break;
+                                case "+-":
+                                    prefix = UnaryOperator.PLUS_MINUS;
+                                    break;
+                            }
                         }
-                        return new UnaryOperatorExpression(prefix, new BinaryOperatorExpression(oper, VisitPostfix(binaryNodes[0].prefix().postfix()), VisitBinary(binaryNodes[1])));
+                        if (binaryNodes[0].prefix().multiplier().NUMBER() != null)
+                        {
+                            multiplier = new Number(Convert.ToDouble(binaryNodes[0].prefix().multiplier().t_number.Text));
+                        }
+                        if (prefix != null)
+                        {
+                            if (multiplier != null)
+                            {
+                                return new UnaryOperatorExpression(prefix.Value,
+                                    new BinaryOperatorExpression(BinaryOperator.MULTIPLY, multiplier,
+                                        new BinaryOperatorExpression(oper,
+                                            VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                            VisitBinary(binaryNodes[1]))));
+                            }
+                            else
+                            {
+                                return new UnaryOperatorExpression(prefix.Value,
+                                    new BinaryOperatorExpression(oper,
+                                        VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                        VisitBinary(binaryNodes[1])));
+                            }
+
+                        }
+                        else
+                        {
+                            if (multiplier != null)
+                            {
+                                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, multiplier,
+                                    new BinaryOperatorExpression(oper,
+                                        VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                        VisitBinary(binaryNodes[1])));
+                            }
+                            else
+                            {
+                                return new BinaryOperatorExpression(oper,
+                                    VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                    VisitBinary(binaryNodes[1]));
+                            }
+                        }
+
                     }
                     break;
                 case "||":
@@ -341,7 +397,7 @@ namespace FAILang
         {
             if (context.op == null)
             {
-                return VisitPostfix(context.postfix());
+                return VisitMultiplier(context.multiplier());
             }
             else
             {
@@ -358,25 +414,8 @@ namespace FAILang
                         prefix = UnaryOperator.PLUS_MINUS;
                         break;
                 }
-                return new UnaryOperatorExpression(prefix, VisitPostfix(context.postfix()));
+                return new UnaryOperatorExpression(prefix, VisitMultiplier(context.multiplier()));
             }
-        }
-
-        public override IType VisitPostfix([NotNull] FAILangParser.PostfixContext context)
-        {
-            if (context.indexer() != null)
-            {
-                var indexer = context.indexer();
-                IType leftIndex = null;
-                if (indexer.l_index != null)
-                    leftIndex = VisitExpression(indexer.l_index);
-                IType rightIndex = null;
-                if (indexer.r_index != null)
-                    rightIndex = VisitExpression(indexer.r_index);
-                return new IndexerExpression(VisitMultiplier(context.multiplier()), leftIndex, rightIndex, indexer.elipsis != null);
-            }
-            else
-                return VisitMultiplier(context.multiplier());
         }
 
         public override IType VisitMultiplier([NotNull] FAILangParser.MultiplierContext context)
@@ -385,12 +424,12 @@ namespace FAILang
             {
                 var number = context.t_number;
                 Number n;
-                if (number.Text.Equals("i"))
-                    n = new Number(Complex.ImaginaryOne);
-                else if (number.Text.EndsWith('i'))
-                    n = new Number(Complex.ImaginaryOne * Convert.ToDouble(number.Text.TrimEnd('i')));
-                else
-                    n = new Number(Convert.ToDouble(number.Text));
+                //if (number.Text.Equals("i"))
+                //    n = new Number(Complex.ImaginaryOne);
+                //else if (number.Text.EndsWith('i'))
+                //    n = new Number(Complex.ImaginaryOne * Convert.ToDouble(number.Text.TrimEnd('i')));
+                //else
+                n = new Number(Convert.ToDouble(number.Text));
 
                 if (context.atom() != null)
                 {
@@ -420,6 +459,17 @@ namespace FAILang
                     VisitAtom(context.atom()),
                     context.callparams().arg()
                         .Select(x => (VisitExpression(x.expression()), x.elipsis != null)).ToArray());
+            }
+            else if (context.indexer() != null)
+            {
+                var indexer = context.indexer();
+                IType leftIndex = null;
+                if (indexer.l_index != null)
+                    leftIndex = VisitExpression(indexer.l_index);
+                IType rightIndex = null;
+                if (indexer.r_index != null)
+                    rightIndex = VisitExpression(indexer.r_index);
+                return new IndexerExpression(VisitAtom(context.atom()), leftIndex, rightIndex, indexer.elipsis != null);
             }
             else if (context.union() != null)
                 return VisitUnion(context.union());
@@ -456,10 +506,10 @@ namespace FAILang
         }
 
         public override IType VisitName([NotNull] FAILangParser.NameContext context) =>
-            new NamedArgument(context.NAME().GetText(), 
+            new NamedArgument(context.NAME().GetText(), globalEnvironment,
                 context.@namespace() == null
                     ? null
-                    : Namespace.GlobalNamespace.Instance.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()).ToArray()));
+                    : Namespace.Root.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()).ToArray()));
 
         public override IType VisitVector([NotNull] FAILangParser.VectorContext context) =>
             new UnevaluatedVector(context.expression().Select(x => VisitExpression(x)).ToArray());

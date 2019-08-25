@@ -1,4 +1,5 @@
-﻿using FAILang.Types.Unevaluated;
+﻿using FAILang.Builtins;
+using FAILang.Types.Unevaluated;
 using FAILang.Types.Unevaluated.Passthrough;
 using System;
 using System.Collections.Generic;
@@ -138,7 +139,7 @@ namespace FAILang.Types
                                     temp.Push("..");
                                 temp.Push(", ");
                             }
-                            temp.Pop();
+                            if (e.args.Length > 0) temp.Pop();
                             temp.Push(")");
                             break;
                         case IndexerExpression e:
@@ -180,7 +181,7 @@ namespace FAILang.Types
                             {
                                 temp.Push($" {lookup.Key} = ");
                                 temp.Push(lookup.Value);
-                                temp.Push(";");
+                                temp.Push(",");
                             }
                             temp.Push(null);
                             break;
@@ -267,7 +268,7 @@ namespace FAILang.Types
         }
     }
 
-    class UnevaluatedFunction : Function, IUnevaluated
+    public class UnevaluatedFunction : Function, IUnevaluated
     {
         public UnevaluatedFunction(string[] fparams, IType expression, bool memoize = false, bool elipsis = false) :
             base(fparams, expression, null, memoize, elipsis)

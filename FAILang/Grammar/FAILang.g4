@@ -97,11 +97,7 @@ binary
 	;
 
 prefix
-	: op=( NOT | SUBTRACT | PLUS_MINUS )? postfix
-	;
-
-postfix
-	: multiplier ( indexer )?
+	: op=( NOT | SUBTRACT | PLUS_MINUS )? multiplier
 	;
 
 multiplier
@@ -113,6 +109,7 @@ atom
 	: L_PAREN expression R_PAREN
 	| PIPE expression PIPE
 	| name
+	| atom indexer
 	| atom L_PAREN callparams R_PAREN
 	| union
 	| lambda

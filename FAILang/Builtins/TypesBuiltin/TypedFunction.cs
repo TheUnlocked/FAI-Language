@@ -1,5 +1,6 @@
 ﻿using FAILang.Types;
 using FAILang.Types.Unevaluated;
+using FAILang.Types.Unevaluated.Passthrough;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -9,28 +10,25 @@ namespace FAILang.Builtins
 {
     public class TypedFunction : Function
     {
-        public readonly Function constructor;
+        public Function constructor;
 
-        public TypedFunction(Function f, Function constructor, Scope scope)
-            : base(f.fparams, f.expression, scope, f.memoize, f.elipsis)
+        public TypedFunction(Function constructor, Function func, Scope scope)
+            : base(func.fparams, func.expression, scope, func.memoize, func.elipsis)
         {
             this.constructor = constructor;
         }
     }
 
-    class UnevaluatedTypedFunction : IUnevaluated
+    public class UnevaluatedTypedFunction : TypedFunction, IUnevaluated
     {
-        public Function constructor;
-        public Function thisFunction;
-        public string TypeName => "UnevaluatedTypedFunction";
-
-        public UnevaluatedTypedFunction(Function f, Function constructor=null)
+        public UnevaluatedTypedFunction(Function constructor, Function func)
+            : base(constructor, func, null)
         {
-            this.constructor = constructor;
-            thisFunction = f;
         }
 
-        public IType Evaluate(Scope scope) =>
-            new TypedFunction(thisFunction, constructor, scope);
+        public IType Evaluate(Scope scope)
+        {
+            return new TypedFunction(constructor, this, scope);
+        }
     }
 }

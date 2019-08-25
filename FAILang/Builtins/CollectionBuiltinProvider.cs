@@ -7,7 +7,7 @@ namespace FAILang.Builtins
 {
     class CollectionBuiltinProvider : IBuiltinProvider
     {
-        public string[] NamespacePath { get; } = new string[] { "std", "collections" };
+        public string[] NamespacePath { get; } = new string[] { "std", "collection" };
 
         private static ExternalFunction ValidateType<T>(Func<T, IType> f, Func<IType, IType> fail) where T : IType
         {

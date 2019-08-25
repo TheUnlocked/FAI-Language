@@ -8,7 +8,6 @@ namespace FAILang.Builtins
     public interface IBuiltinProvider
     {
         (string, IType)[] GetBuiltins();
-        string[] GetReservedNames();
         string[] NamespacePath { get; }
     }
 }

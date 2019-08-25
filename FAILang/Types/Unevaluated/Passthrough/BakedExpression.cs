@@ -29,5 +29,10 @@ namespace FAILang.Types.Unevaluated.Passthrough
             hash = hash * 1532528149 + scope.GetHashCode();
             return hash;
         }
+
+        public IType ReplacePassthroughExpression(IType replacement)
+        {
+            return new BakedExpression(replacement, scope);
+        }
     }
 }
