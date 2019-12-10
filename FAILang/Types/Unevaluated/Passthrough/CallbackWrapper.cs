@@ -43,7 +43,7 @@ namespace FAILang.Types.Unevaluated.Passthrough
             }
             else if (PassthroughExpression is IUnevaluated uneval)
             {
-                return new CallbackWrapper(uneval.Evaluate(scope), callbacks.ToArray()).Evaluate(scope);
+                return new CallbackWrapper(uneval.Evaluate(scope), callbacks.ToArray());
             }
             else
             {

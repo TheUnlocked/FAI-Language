@@ -33,7 +33,7 @@ namespace FAILang.Types.Unevaluated
                 for (int i = 0; i < this.args.Length; i++)
                 {
                     var arg = this.args[i].Item1;
-                    if (arg is IUnevaluated uneval)
+                    while (arg is IUnevaluated uneval && !(arg is Union))
                     {
                         arg = uneval.Evaluate(scope);
                     }

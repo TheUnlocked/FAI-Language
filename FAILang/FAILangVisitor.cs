@@ -32,7 +32,7 @@ namespace FAILang
         {
             List<IType> ret = new List<IType>();
             ret.AddRange(context.importStatement()?.Select(x => VisitImportStatement(x)));
-            ret.AddRange(context.includeStatement()?.Select(x => VisitIncludeStatement(x)));
+            ret.AddRange(context.usingStatement()?.Select(x => VisitUsingStatement(x)));
             if (context.namespaceStatement() != null)
                 ret.Add(VisitNamespaceStatement(context.namespaceStatement()));
 
@@ -132,8 +132,18 @@ namespace FAILang
             }
         }
 
-        public override IType VisitIncludeStatement([NotNull] FAILangParser.IncludeStatementContext context)
+        public override IType VisitUsingStatement([NotNull] FAILangParser.UsingStatementContext context)
         {
+            if (context.name() != null)
+            {
+                var ns = Namespace.Root.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()));
+                var newDict = new Dictionary<string, IType>();
+                foreach (var key in ns.Variables.Keys)
+                {
+                    newDict[context.name().GetText() + key] = ns.Variables[key];
+                }
+                return globalEnvironment.GlobalScope.AddParent(new Scope(null, newDict));
+            }
             return globalEnvironment.GlobalScope.AddParent(
                 Namespace.Root.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText())));
         }
@@ -326,6 +336,8 @@ namespace FAILang
                         // Exponentation is an edge-case in which the prefix operator needs to go after it. e.g. -2^2 = -4; -2x^2 where x=5 = -50
                         UnaryOperator? prefix = null;
                         Number? multiplier = null;
+                        IType atom = binaryNodes[0].prefix().multiplier().atom()?.Pipe(VisitAtom);
+
                         if (binaryNodes[0].prefix().op != null)
                         {
                             switch (binaryNodes[0].prefix().op.Text)
@@ -344,6 +356,11 @@ namespace FAILang
                         if (binaryNodes[0].prefix().multiplier().NUMBER() != null)
                         {
                             multiplier = new Number(Convert.ToDouble(binaryNodes[0].prefix().multiplier().t_number.Text));
+                            if (atom == null)
+                            {
+                                atom = multiplier;
+                                multiplier = null;
+                            }
                         }
                         if (prefix != null)
                         {
@@ -351,15 +368,13 @@ namespace FAILang
                             {
                                 return new UnaryOperatorExpression(prefix.Value,
                                     new BinaryOperatorExpression(BinaryOperator.MULTIPLY, multiplier,
-                                        new BinaryOperatorExpression(oper,
-                                            VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                        new BinaryOperatorExpression(oper, atom,
                                             VisitBinary(binaryNodes[1]))));
                             }
                             else
                             {
                                 return new UnaryOperatorExpression(prefix.Value,
-                                    new BinaryOperatorExpression(oper,
-                                        VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                    new BinaryOperatorExpression(oper, atom,
                                         VisitBinary(binaryNodes[1])));
                             }
 
@@ -369,14 +384,12 @@ namespace FAILang
                             if (multiplier != null)
                             {
                                 return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, multiplier,
-                                    new BinaryOperatorExpression(oper,
-                                        VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                    new BinaryOperatorExpression(oper, atom,
                                         VisitBinary(binaryNodes[1])));
                             }
                             else
                             {
-                                return new BinaryOperatorExpression(oper,
-                                    VisitAtom(binaryNodes[0].prefix().multiplier().atom()),
+                                return new BinaryOperatorExpression(oper, atom,
                                     VisitBinary(binaryNodes[1]));
                             }
                         }
@@ -506,10 +519,7 @@ namespace FAILang
         }
 
         public override IType VisitName([NotNull] FAILangParser.NameContext context) =>
-            new NamedArgument(context.NAME().GetText(), globalEnvironment,
-                context.@namespace() == null
-                    ? null
-                    : Namespace.Root.GetSubNamespace(context.@namespace().NAME().Select(x => x.GetText()).ToArray()));
+            new NamedArgument(context.NAME().GetText(), globalEnvironment);
 
         public override IType VisitVector([NotNull] FAILangParser.VectorContext context) =>
             new UnevaluatedVector(context.expression().Select(x => VisitExpression(x)).ToArray());

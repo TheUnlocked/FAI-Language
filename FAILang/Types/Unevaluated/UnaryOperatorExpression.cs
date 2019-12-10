@@ -39,6 +39,9 @@ namespace FAILang.Types.Unevaluated
             if (t is IUnevaluated)
                 return new BakedExpression(new UnaryOperatorExpression(pre, t), scope);
 
+            if (t is Error)
+                return t;
+
             // Operate
             if (t is IOperable oper)
             {

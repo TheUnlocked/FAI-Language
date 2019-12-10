@@ -28,5 +28,7 @@ namespace FAILang
             }
             return (enumerable.Where(pred), enumerable.Where(x => !pred(x)));
         }
+
+        public static TOut Pipe<TIn, TOut>(this TIn self, Func<TIn, TOut> func) => func(self);
     }
 }

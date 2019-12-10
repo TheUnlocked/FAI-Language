@@ -72,7 +72,9 @@ namespace FAILang.Types
                 if (ret is IUnevaluated u)
                     ret = new BakedExpression(u, newScope);
                 if (memoize)
+                {
                     return new CallbackWrapper(ret, x => memos[GetArgListHashCode(args)] = x);
+                }
                 return ret;
             }
             return new Error("BadArguments", $"The function {this} can't fit {args.Length} arguments.");

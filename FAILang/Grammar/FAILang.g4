@@ -10,13 +10,13 @@ compileUnit
 
 expressionCompileUnit
 	: importStatement
-	| includeStatement
+	| usingStatement
 	| def
 	| expression
 	;
 
 earlyCalls
-	: importStatement* includeStatement* namespaceStatement?
+	: importStatement* usingStatement* namespaceStatement?
 	;
 
 calls
@@ -32,9 +32,9 @@ importStatement
 	: 'import' target=STRING
 	;
 
-includeStatement
-	: 'include' namespace
-	| 'include' (name COMMA)* from='from' namespace
+usingStatement
+	: 'using' namespace
+	| 'using' namespace 'with' pre='prefix' name
 	;
 
 namespaceStatement
@@ -60,11 +60,11 @@ arg
 	;
 
 namespace
-	: (NAME NAMESPACE_OP)* NAME
+	: (NAME DIVIDE)* NAME
 	;
 
 name
-	: (namespace NAMESPACE_OP)? NAME
+	: NAME
 	;
 
 param
@@ -294,9 +294,6 @@ ELIPSIS
 	;
 ARROW
 	: '->'
-	;
-NAMESPACE_OP
-	: '::'
 	;
 
 NUMBER
