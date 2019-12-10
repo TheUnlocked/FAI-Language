@@ -29,25 +29,11 @@ namespace FAILang.Types.Unevaluated
                 second = uSecond.Evaluate(scope);
             if (first is Union unionFirst)
             {
-                IType[] result = new IType[unionFirst.values.Length];
-                for (int i = 0; i < result.Length; i++)
-                {
-                    var newIns = ins;
-                    newIns[0] = first;
-                    result[i] = new RelationalOperatorExpression(ops, newIns).Evaluate(scope);
-                }
-                return new Union(result, scope);
+                return unionFirst.Apply(x => new RelationalOperatorExpression(ops, new IType[] { x }.Concat(ins[1..]).ToArray()));
             }
             if (second is Union unionSecond)
             {
-                IType[] result = new IType[unionSecond.values.Length];
-                for (int i = 0; i < result.Length; i++)
-                {
-                    var newIns = ins;
-                    newIns[1] = second;
-                    result[i] = new RelationalOperatorExpression(ops, newIns).Evaluate(scope);
-                }
-                return new Union(result, scope);
+                return unionSecond.Apply(x => new RelationalOperatorExpression(ops, new IType[] { ins[0], x }.Concat(ins[2..]).ToArray()));
             }
             if (first is IUnevaluated || second is IUnevaluated) {
                 var newIns = ins.ToArray();
@@ -76,9 +62,9 @@ namespace FAILang.Types.Unevaluated
                     {
                         if (ops.Length == 1)
                             return ret;
-                        var newIns = ins.Skip(1).ToArray();
+                        var newIns = ins[1..];
                         newIns[0] = second;
-                        return new RelationalOperatorExpression(ops.Skip(1).ToArray(), newIns);
+                        return new RelationalOperatorExpression(ops[1..], newIns);
                     }
                     return ret;
                 }

@@ -563,7 +563,7 @@ namespace FAILang
             IType[] vals = new IType[exprs.Length];
             for (int i = 0; i < exprs.Length; i++)
                 vals[i] = VisitExpression(exprs[i]);
-            return new Union(vals);
+            return new UnevaluatedUnion(vals);
         }
     }
 }

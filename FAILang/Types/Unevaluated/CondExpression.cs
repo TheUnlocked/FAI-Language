@@ -27,31 +27,18 @@ namespace FAILang.Types.Unevaluated
             for (int i = 0; i < conds.Length; i++)
             {
                 IType tCond = conds[i];
-                if (tCond is IUnevaluated u)
+                while (tCond is IUnevaluated u)
                     tCond = u.Evaluate(scope);
                 if (tCond is Union tu)
                 {
-                    IType[] result = new IType[tu.values.Length];
-                    for (int j = 0; j < result.Length; j++)
-                    {
-                        var ncond = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
-                        ncond.conds[0] = tu.values[j];
-                        result[j] = ncond.Evaluate(scope);
-                    }
-                    return new Union(result, scope);
-                }
-                if (tCond is IUnevaluated)
-                {
-                    var nexpr = new CondExpression(conds.Skip(i).ToArray(), exprs.Skip(i).ToArray(), default_expr);
-                    nexpr.conds[0] = tCond;
-                    return new BakedExpression(nexpr, scope);
+                    return tu.Apply(x => new CondExpression(new IType[] { x }.Concat(conds[(i + 1)..]).ToArray(), exprs[i..], default_expr));
                 }
                 if (tCond == MathBool.TRUE)
                 {
                     IType ret = exprs[i];
                     if (ret is IUnevaluated uexpr)
                         ret = uexpr.Evaluate(scope);
-                    if (ret is IUnevaluated && !(ret is Union))
+                    if (ret is IUnevaluated)
                     {
                         return new BakedExpression(ret, scope);
                     }
@@ -65,7 +52,7 @@ namespace FAILang.Types.Unevaluated
             {
                 retd = retdu.Evaluate(scope);
             }
-            if (retd is IUnevaluated && !(retd is Union))
+            if (retd is IUnevaluated)
             {
                 return new BakedExpression(retd, scope);
             }

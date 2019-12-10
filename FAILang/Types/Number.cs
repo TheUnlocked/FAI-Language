@@ -228,7 +228,7 @@ namespace FAILang.Types
         }
         private IType OpPlusMinus()
         {
-            return new Union(new IType[] { new Number(value), OpNegate() });
+            return new UnevaluatedUnion(new IType[] { new Number(value), OpNegate() });
         }
         private IType OpAbs()
         {

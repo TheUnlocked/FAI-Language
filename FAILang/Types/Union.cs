@@ -2,22 +2,46 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using FAILang.Types.Unevaluated;
 
-namespace FAILang.Types.Unevaluated
+namespace FAILang.Types
 {
-    public class Union : IUnevaluated
+    public class Union : IType
     {
         public string TypeName => "Union";
 
         public IType[] values;
 
-        public Union(IType[] values, Scope scope = null)
+        public Union(IType[] values)
+        {
+            this.values = values;
+        }
+
+        public IType Apply(Func<IType, IType> f)
+        {
+            IType[] newValues = new IType[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                newValues[i] = f(values[i]);
+            }
+            return new UnevaluatedUnion(newValues);
+        }
+
+        public override string ToString()
+        {
+            return $"({string.Join(" | ", values.Select(v => v.ToString()))})";
+        }
+    }
+
+    public class UnevaluatedUnion : IUnevaluated
+    {
+        public string TypeName => "UnevaluatedUnion";
+
+        public IType[] values;
+
+        public UnevaluatedUnion(IType[] values)
         {
             this.values = values.Where(x => x != Undefined.Instance).ToArray();
-            if (this.values.Length == 0)
-                this.values = new IType[] { Undefined.Instance };
-            if (scope != null)
-                this.values = Flatten(scope);
         }
 
         private IType[] Flatten(Scope scope)
@@ -27,11 +51,11 @@ namespace FAILang.Types.Unevaluated
             foreach (var type in values)
             {
                 var ty = type;
-                if (ty is IUnevaluated u && !(ty is Union))
+                while (ty is IUnevaluated u)
                     ty = u.Evaluate(scope);
                 if (ty is Union)
                 {
-                    newValues.AddRange((ty as Union).Flatten(scope));
+                    newValues.AddRange((ty as Union).values);
                 }
                 else
                 {
@@ -42,30 +66,14 @@ namespace FAILang.Types.Unevaluated
             return newValues.Distinct().ToArray();
         }
 
-        public override string ToString()
-        {
-            return $"({string.Join(" | ", values.Select(v => v.ToString()))})";
-        }
-
         public IType Evaluate(Scope scope)
         {
-            IType[] newVals = new IType[values.Length];
-            for (int i = 0; i < values.Length; i++)
-            {
-                if (values[i] is IUnevaluated)
-                {
-                    newVals[i] = (values[i] as IUnevaluated).Evaluate(scope);
-                }
-                else {
-                    newVals[i] = values[i];
-                }
-            }
-            IType[] evaled = new Union(newVals).Flatten(scope);
+            IType[] evaled = Flatten(scope);
             evaled = evaled.Where(x => x != Undefined.Instance).ToArray();
-            if (evaled.Length == 1)
-                return evaled[0];
             if (evaled.Length == 0)
                 return Undefined.Instance;
+            if (evaled.Length == 1)
+                return evaled[0];
             foreach (IType e in evaled)
             {
                 if (e is Error)

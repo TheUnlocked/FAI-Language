@@ -70,14 +70,6 @@ namespace FAILang
         {
             while (expr is IUnevaluated u)
             {
-                if (u is Union un)
-                {
-                    if (!un.values.Any(x => x is IUnevaluated))
-                    {
-                        expr = un.Evaluate(emptyScope);
-                        break;
-                    }
-                }
                 expr = u.Evaluate(GlobalScope);
             }
             return expr;
