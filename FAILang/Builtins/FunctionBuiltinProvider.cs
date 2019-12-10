@@ -43,29 +43,11 @@ namespace FAILang.Builtins
             true,
             "overloads");
 
-        private static ExternFunction REDUCEN = new ExternFunction(args =>
-        {
-            IType result = args[1];
-            if (args[0] is Function f)
-            {
-                if (args[2] is Number n && n.IsNatural)
-                {
-                    for (int i = 0; i < n.value.Real; i++)
-                    {
-                        result = f.Evaluate(new IType[] { result, new Number(i) });
-                    }
-                    return result;
-                }
-                else
-                {
-                    return new Error("TypeError", $"{args[2]} is not a number.");
-                }
-            }
-            else
-            {
-                return new Error("TypeError", $"{args[0]} is not a function.");
-            }
-        }, "accumulator", "start", "n");
+        private static IType REDUCEN = BuiltinUtil.FAIValue(@"
+            (f, start, n) ->
+                ((result, i) -> {self(f(result, i), i + 1) if i < n;
+				                 result otherwise;
+                )(start, 0)");
 
         public (string, IType)[] GetBuiltins() => new (string, IType)[] {
             ("overload", OVERLOAD),
