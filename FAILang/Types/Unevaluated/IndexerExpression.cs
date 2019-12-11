@@ -32,7 +32,7 @@ namespace FAILang.Types.Unevaluated
             }
             if (expr is Union union)
             {
-                return new Union(union.values.Select(x => new IndexerExpression(x, leftIndex, rightIndex, range).Evaluate(scope)).ToArray()).Evaluate(scope);
+                return union.Apply(x => new IndexerExpression(x, leftIndex, rightIndex, range));
             }
             if (expr is IUnevaluated && !(expr is Union))
             {
@@ -47,7 +47,7 @@ namespace FAILang.Types.Unevaluated
                 if (leftIndex is IUnevaluated u_left) t_left = u_left.Evaluate(scope);
                 if (t_left is Union un_left)
                 {
-                    return new Union(un_left.values.Select(x => new IndexerExpression(expr, x, rightIndex, range).Evaluate(scope)).ToArray()).Evaluate(scope);
+                    return un_left.Apply(x => new IndexerExpression(expr, x, rightIndex, range));
                 }
                 if (t_left is IUnevaluated)
                 {
@@ -70,7 +70,7 @@ namespace FAILang.Types.Unevaluated
                 if (rightIndex is IUnevaluated u_right) t_right = u_right.Evaluate(scope);
                 if (t_left is Union un_right)
                 {
-                    return new Union(un_right.values.Select(x => new IndexerExpression(expr,t_left, x, range).Evaluate(scope)).ToArray()).Evaluate(scope);
+                    return un_right.Apply(x => new IndexerExpression(expr,t_left, x, range));
                 }
                 if (t_right is IUnevaluated)
                 {

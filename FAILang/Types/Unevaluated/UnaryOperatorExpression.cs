@@ -29,12 +29,7 @@ namespace FAILang.Types.Unevaluated
             }
             if (t is Union union)
             {
-                IType[] result = new IType[union.values.Length];
-                for (int i = 0; i < result.Length; i++)
-                {
-                    result[i] = new UnaryOperatorExpression(pre, union.values[i]).Evaluate(scope);
-                }
-                return new Union(result, scope);
+                return union.Apply(x => new UnaryOperatorExpression(pre, x));
             }
             if (t is IUnevaluated)
                 return new BakedExpression(new UnaryOperatorExpression(pre, t), scope);

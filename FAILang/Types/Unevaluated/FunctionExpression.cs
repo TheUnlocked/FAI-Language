@@ -33,9 +33,17 @@ namespace FAILang.Types.Unevaluated
                 for (int i = 0; i < this.args.Length; i++)
                 {
                     var arg = this.args[i].Item1;
-                    while (arg is IUnevaluated uneval && !(arg is Union))
+                    while (arg is IUnevaluated uneval)
                     {
                         arg = uneval.Evaluate(scope);
+                    }
+                    if (arg is Union un)
+                    {
+                        return un.Apply(x => new FunctionExpression(func,
+                            args.Select(x => (x, false))
+                                .Concat(new[] { (x, this.args[i].Item2) })
+                                .Concat(this.args[(i + 1)..])
+                                .ToArray()));
                     }
                     if (this.args[i].Item2)
                     {
@@ -56,7 +64,7 @@ namespace FAILang.Types.Unevaluated
                         args.Add(arg);
                     }
                 }
-                if (args.Any(x => x is IUnevaluated && !(x is Union)))
+                if (args.Any(x => x is IUnevaluated))
                     return new BakedExpression(new FunctionExpression(func, args.Select(x => (x, false)).ToArray()), scope);
                 return f.Evaluate(args.ToArray());
             }

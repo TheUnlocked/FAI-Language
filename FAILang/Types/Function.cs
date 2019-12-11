@@ -40,23 +40,10 @@ namespace FAILang.Types
                 IType[] extra = new IType[args.Length - fparams.Length + 1];
                 for (int i = 0; i < args.Length; i++)
                 {
-                    if (args[i] is Union un)
-                    {
-                        IType[] results = new IType[un.values.Length];
-                        for (int j = 0; j < results.Length; j++)
-                        {
-                            IType[] newArgs = new IType[args.Length];
-                            for (int k = 0; k < newArgs.Length; k++)
-                            {
-                                if (i == k)
-                                    newArgs[k] = un.values[j];
-                                else
-                                    newArgs[k] = args[k];
-                            }
-                            results[j] = Evaluate(newArgs);
-                        }
-                        return new Union(results).Evaluate(scope);
-                    }
+                    //if (args[i] is Union un)
+                    //{
+                    //    return un.Apply(x => Evaluate(args[0..i].Concat(new IType[] { x }).Concat(args[(i + 1)..]).ToArray()));
+                    //}
                     if (args[i] is Error)
                         return args[i];
                     if (elipsis && i >= fparams.Length - 1)

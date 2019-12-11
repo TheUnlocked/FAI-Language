@@ -22,7 +22,9 @@ namespace FAILang
             }
         }
 
-        public FAI()
+        public static void ClearInstance() => _instance = null;
+
+        private FAI()
         {
         }
 

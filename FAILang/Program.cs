@@ -1,8 +1,5 @@
-﻿//#define RUN_TESTS
-
-using FAILang.Builtins;
+﻿using FAILang.Builtins;
 using FAILang.Importers;
-using FAILang.Tests;
 using FAILang.Types;
 using System;
 using System.Collections.Generic;
@@ -29,28 +26,6 @@ namespace FAILang
             );
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
-
-#if RUN_TESTS
-            {
-                Global testEnv = new Global();
-
-                foreach (ITest testPackage in new ITest[] { new LanguageTests() })
-                {
-                    object firstIfOnly(IType[] list) => list.Length == 0 ? null : (list.Length == 1 ? list[0] : (object)list);
-                    foreach (var assertion in testPackage.Assertions)
-                    {
-                        try
-                        {
-                            Debug.Assert(firstIfOnly(fai.InterpretLines(testEnv, assertion.Item1)).Equals(assertion.Item2));
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.StackTrace);
-                        }
-                    }
-                }
-            }
-#endif
 
             Global env = new Global();
 

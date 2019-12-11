@@ -8,7 +8,7 @@ using FAILang.Types.Unevaluated;
 
 namespace FAILang.Builtins
 {
-    class NumberBuiltinProvider : IBuiltinProvider
+    public class NumberBuiltinProvider : IBuiltinProvider
     {
         public string[] NamespacePath { get; } = new string[] { "std", "math" };
 
