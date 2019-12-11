@@ -68,11 +68,11 @@ namespace FAILang.Types.Unevaluated
                     return new BakedExpression(new FunctionExpression(func, args.Select(x => (x, false)).ToArray()), scope);
                 return f.Evaluate(args.ToArray());
             }
-            if (func is IUnevaluated)
+            else if (func is IUnevaluated)
             {
                 return new BakedExpression(new FunctionExpression(func, args), scope);
             }
-            if (func is Number n1 && args.Length == 1)
+            else if (func is Number n1 && args.Length == 1)
                 return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(scope);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }

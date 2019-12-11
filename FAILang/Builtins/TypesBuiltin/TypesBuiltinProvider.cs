@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using FAILang.Types;
+using FAILang.Types.Unevaluated;
 using FAILang.Types.Unevaluated.Passthrough;
 using Tuple = FAILang.Types.Tuple;
 
@@ -36,13 +37,17 @@ namespace FAILang.Builtins
                 ExternFunction constructor = null;
                 constructor = new ExternFunction(fargs => {
                     var result = f.Evaluate(fargs);
-                    if (result is IPassthrough pt)
+                    while (result is IPassthrough pt)
                     {
                         IType inner = pt.DeepGetPassthroughObject();
+                        if (inner is IUnevaluated)
+                        {
+                            result = (pt as BakedExpression).Evaluate(null);
+                        }
                         if (inner is Function innerObj)
                             return pt.DeepReplacePassthroughObject(new UnevaluatedTypedFunction(constructor, innerObj));
                     }
-                    else if (result is Function obj)
+                    if (result is Function obj)
                     {
                         return new UnevaluatedTypedFunction(f, obj);
                     }

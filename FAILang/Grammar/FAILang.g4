@@ -11,7 +11,7 @@ compileUnit
 expressionCompileUnit
 	: importStatement
 	| usingStatement
-	| def
+	| defStatement
 	| expression
 	;
 
@@ -24,7 +24,7 @@ calls
 	;
 
 call
-	: def
+	: defStatement
 	| expression
 	;
 
@@ -41,10 +41,14 @@ namespaceStatement
 	: 'namespace' namespace
 	;
 
-def
-	: update='update'? memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
-	| update='update'? name EQ expression
+defStatement
+	: update='update'? def
 	| update='update' memoize=MEMO name
+	;
+
+def
+	: memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
+	| name EQ expression
 	;
 
 fparams
@@ -76,8 +80,7 @@ expression
 	;
 
 where
-	: boolean (WHERE (name EQ expression COMMA)* name EQ expression)?
-	| boolean
+	: boolean (WHERE (def COMMA)* def)?
 	;
 
 boolean

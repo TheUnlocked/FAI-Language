@@ -47,9 +47,9 @@ namespace FAILang
 
         public override IType VisitCall([NotNull] FAILangParser.CallContext context)
         {
-            if (context.def() != null)
+            if (context.defStatement() != null)
             {
-                return VisitDef(context.def());
+                return VisitDefStatement(context.defStatement());
             }
             if (context.expression() != null)
                 return VisitExpression(context.expression());
@@ -157,25 +157,19 @@ namespace FAILang
             return null;
         }
 
-        public override IType VisitDef([NotNull] FAILangParser.DefContext context)
+        public override IType VisitDefStatement([NotNull] FAILangParser.DefStatementContext context)
         {
-            var name = context.name().GetText();
             var update = context.update;
-            var exp = context.expression();
+            var def = context.def();
+            var updateMemoName = context.name()?.GetText();
+            var defName = def.name()?.GetText();
 
-            if (globalEnvironment.reservedNames.Contains(name))
-                return new Error("DefineFailed", $"{name} is a reserved name.");
-            if (update == null && globalEnvironment.GlobalScope.HasVar(name))
-                return new Error("DefineFailed", "The update keyword is required to change a function or variable.");
-
-            bool memoize = context.memoize != null;
-
-            // `update memo name` pattern
-            if (exp == null && memoize)
+            if (updateMemoName != null)
             {
-                if (!globalEnvironment.GlobalScope.HasVar(name))
-                    return new Error("UpdateFailed", $"{name} is not defined");
-                if (globalEnvironment.GlobalScope.TryGetVar(name, out var val) && val is Function func)
+                // `update memo name` pattern
+                if (!globalEnvironment.GlobalScope.HasVar(updateMemoName))
+                    return new Error("UpdateFailed", $"{updateMemoName} is not defined");
+                if (globalEnvironment.GlobalScope.TryGetVar(updateMemoName, out var val) && val is Function func)
                 {
                     if (func.memoize)
                         func.memos.Clear();
@@ -183,38 +177,60 @@ namespace FAILang
                         func.memoize = true;
                 }
                 else
-                    return new Error("UpdateFailed", $"{name} is not a function");
+                {
+                    return new Error("UpdateFailed", $"{updateMemoName} is not a function");
+                }
             }
-            else if (context.fparams() != null)
-            {
-                IType expr = VisitExpression(exp);
-                Function f = new Function(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, globalEnvironment.GlobalScope, memoize: memoize, elipsis: context.fparams().elipsis != null);
 
-                if (globalEnvironment.Namespace == Namespace.Root)
-                {
-                    globalEnvironment._globalVariables[name] = f;
-                }
-                else
-                {
-                    globalEnvironment.Namespace.Variables[name] = f;
-                }
+            if (globalEnvironment.reservedNames.Contains(defName))
+                return new Error("DefineFailed", $"{defName} is a reserved name.");
+            if (update == null && globalEnvironment.GlobalScope.HasVar(defName))
+                return new Error("DefineFailed", "The update keyword is required to change a function or variable.");
+
+            var (_, value) = VisitDef(def);
+
+            while (value is IUnevaluated u)
+            {
+                value = u.Evaluate(globalEnvironment.GlobalScope);
+            }
+
+            if (value is Error)
+            {
+                return value;
+            }
+
+            if (globalEnvironment.Namespace == Namespace.Root)
+            {
+                globalEnvironment._globalVariables[defName] = value;
             }
             else
             {
-                var v = globalEnvironment.Evaluate(VisitExpression(exp));
-                if (v is Error)
-                    return v;
-                if (globalEnvironment.Namespace == Namespace.Root)
-                {
-                    globalEnvironment._globalVariables[name] = v;
-                }
-                else
-                {
-                    globalEnvironment.Namespace.Variables[name] = v;
-                }
+                globalEnvironment.Namespace.Variables[defName] = value;
             }
-
             return null;
+        }
+
+        public new (string name, IType value) VisitDef([NotNull] FAILangParser.DefContext context)
+        {
+            var name = context.name().GetText();
+            var exp = context.expression();
+
+            bool memoize = context.memoize != null;
+
+            if (context.fparams() != null)
+            {
+                IType expr = VisitExpression(exp);
+                var f = new UnevaluatedFunction(context.fparams().param().Select(x => x.GetText()).ToArray(), expr, memoize: memoize, elipsis: context.fparams().elipsis != null);
+
+                return (name, f);
+            }
+            else
+            {
+                var v = VisitExpression(exp);
+                if (v is Error)
+                    return (null, v);
+                return (name, v);
+            }
         }
 
         public override IType VisitExpression([NotNull] FAILangParser.ExpressionContext context)
@@ -224,22 +240,16 @@ namespace FAILang
 
         public override IType VisitWhere([NotNull] FAILangParser.WhereContext context)
         {
-            //if (context.WHERE() != null)
-            //{
-            //    return new FunctionExpression(
-            //        new UnevaluatedFunction(
-            //            context.name().Select(name => name.GetText()).Append("self").ToArray(),
-            //            VisitBoolean(context.boolean())),
-            //        context.expression()
-            //            .Select(expr => (VisitExpression(expr), false))
-            //            .Append((new NamedArgument("self"), false))
-            //            .ToArray());
-            //}
             if (context.WHERE() != null)
             {
+                var defPairs = context.def().Select(ctx => VisitDef(ctx));
+                var errors = defPairs.Where(x => x.value is Error);
+                if (errors.Count() > 0)
+                {
+                    return errors.First().value;
+                }
                 return new WhereExpression(VisitBoolean(context.boolean()),
-                    new Dictionary<string, IType>(context.name().Zip(context.expression(),
-                        (name, expr) => new KeyValuePair<string, IType>(name.GetText(), VisitExpression(expr)))));
+                    new Dictionary<string, IType>(defPairs.Select(t => new KeyValuePair<string, IType>(t.name, t.value))));
             }
             return VisitBoolean(context.boolean());
         }
