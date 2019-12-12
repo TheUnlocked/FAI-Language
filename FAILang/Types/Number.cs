@@ -72,7 +72,7 @@ namespace FAILang.Types
             switch (other)
             {
                 case Number num:
-                    return new Union(new IType[] { OpAdd(num), OpSubtract(num) });
+                    return new UnevaluatedUnion(new IType[] { OpAdd(num), OpSubtract(num) });
                 default:
                     return null;
             }
