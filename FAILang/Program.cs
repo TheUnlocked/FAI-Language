@@ -45,7 +45,7 @@ namespace FAILang
             {
                 string input = Console.ReadLine();
                 while (input.EndsWith("  "))
-                    input += Console.ReadLine();
+                    input += '\n' + Console.ReadLine();
 
                 foreach (var val in fai.InterpretLines(env, input))
                     if (val != null)

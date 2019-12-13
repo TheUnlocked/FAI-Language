@@ -375,16 +375,16 @@ namespace FAILang
 
         public override IType VisitMultiplier([NotNull] FAILangParser.MultiplierContext context)
         {
-            if (context.t_number != null)
+            if (context.NUMBER() != null)
             {
-                var number = context.t_number;
+                var number = context.NUMBER().GetText();
                 Number n;
                 //if (number.Text.Equals("i"))
                 //    n = new Number(Complex.ImaginaryOne);
                 //else if (number.Text.EndsWith('i'))
                 //    n = new Number(Complex.ImaginaryOne * Convert.ToDouble(number.Text.TrimEnd('i')));
                 //else
-                n = new Number(Convert.ToDouble(number.Text));
+                n = new Number(Convert.ToDouble(number));
 
                 if (context.exponent() != null)
                 {
@@ -399,11 +399,21 @@ namespace FAILang
 
         public override IType VisitExponent([NotNull] FAILangParser.ExponentContext context)
         {
+            IType left;
+            if (context.NUMBER() != null)
+            {
+                left = new Number(Convert.ToDouble(context.NUMBER().GetText()));
+            }
+            else
+            {
+                left = VisitAtom(context.atom());
+            }
             if (context.EXPONENT() != null)
             {
-                return new BinaryOperatorExpression(BinaryOperator.EXPONENT, VisitAtom(context.atom()), VisitPrefix(context.prefix()));
+                return new BinaryOperatorExpression(BinaryOperator.EXPONENT, left, VisitPrefix(context.prefix()));
             }
-            return VisitAtom(context.atom());
+            
+            return left;
         }
 
         public override IType VisitAtom([NotNull] FAILangParser.AtomContext context)
@@ -447,8 +457,6 @@ namespace FAILang
             //    return VisitMap(context.map());
             else if (context.tuple() != null)
                 return VisitTuple(context.tuple());
-            else if (context.NUMBER() != null)
-                return new Number(Convert.ToDouble(context.NUMBER().GetText()));
             else if (context.STRING() != null)
             {
                 var str = context.STRING().GetText();

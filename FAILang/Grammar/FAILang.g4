@@ -5,14 +5,14 @@ grammar FAILang;
  */
 
 compileUnit
-	: earlyCalls calls EOF
+	: br earlyCalls calls br EOF
 	;
 
 expressionCompileUnit
-	: importStatement
-	| usingStatement
-	| defStatement
-	| expression
+	: br importStatement
+	| br usingStatement
+	| br defStatement
+	| br expression
 	;
 
 earlyCalls
@@ -29,34 +29,33 @@ call
 	;
 
 importStatement
-	: 'import' target=STRING
+	: 'import' target=STRING br
 	;
 
 usingStatement
-	: 'using' namespace
-	| 'using' namespace 'with' pre='prefix' name
+	: 'using' namespace ('with' pre='prefix' name)? br
 	;
 
 namespaceStatement
-	: 'namespace' namespace
+	: 'namespace' namespace br
 	;
 
 defStatement
-	: update='update'? def
-	| update='update' memoize=MEMO name
+	: update='update'? def br
+	| update='update' memoize=MEMO name br
 	;
 
 def
-	: memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
-	| name EQ expression
+	: memoize=MEMO? br name br L_PAREN br fparams br R_PAREN br EQ br expression
+	| name br EQ br expression
 	;
 
 fparams
-	: ((param COMMA)* param elipsis=ELIPSIS?)?
+	: ((param br COMMA br)* param elipsis=ELIPSIS?)?
 	;
 
 callparams
-	: ((arg COMMA)* arg)?
+	: ((arg br COMMA br)* arg)?
 	;
 
 arg
@@ -72,7 +71,7 @@ name
 	;
 
 param
-	: NAME
+	: NAME br
 	;
 
 expression
@@ -80,90 +79,84 @@ expression
 	;
 
 where
-	: boolean (WHERE (def COMMA)* def)?
+	: boolean (br WHERE br (def br COMMA br)* def)?
 	;
 
 boolean
-	: relational ( op=( AND | OR ) relational)?
+	: relational (br op=( AND | OR ) br relational)?
 	;
 
 relational
-	: binary ( relational_op binary )*
+	: binary (br relational_op br binary )*
 	;
 
 binary
 	: prefix
-	| binary op=( MULTIPLY | DIVIDE ) binary
-	| binary op=( PLUS | SUBTRACT | PLUS_MINUS | CONCAT ) binary
-	| binary op=IS binary
+	| binary br op=( MULTIPLY | DIVIDE ) br binary
+	| binary br op=( PLUS | SUBTRACT | PLUS_MINUS | CONCAT ) br binary
+	| binary br op=IS br binary
 	;
 
 prefix
-	: op=( NOT | SUBTRACT | PLUS_MINUS )? multiplier
+	: (op=( NOT | SUBTRACT | PLUS_MINUS ) br)? multiplier
 	;
 
 multiplier
-	: t_number=NUMBER exponent?
+	: NUMBER exponent?
 	| exponent
 	;
 
 exponent
-	: atom (EXPONENT prefix)?
+	: (atom | NUMBER) (EXPONENT br prefix)?
 	;
 
 atom
-	: L_PAREN expression R_PAREN
+	: L_PAREN br expression br R_PAREN
 	| PIPE expression PIPE
 	| name
-	| atom indexer
-	| atom L_PAREN callparams R_PAREN
+	| atom br indexer
+	| atom L_PAREN br callparams br R_PAREN
 	| union
 	| lambda
 	| piecewise
 	| tuple
 	| vector
-	//| map
-	| NUMBER
 	| STRING
 	| BOOLEAN
 	| UNDEFINED
 	;
 
 lambda
-	: L_PAREN memoize=MEMO? fparams R_PAREN ARROW expression
-	| param elipsis=ELIPSIS? ARROW expression
+	: L_PAREN memoize=MEMO? br fparams br R_PAREN br ARROW br expression
+	| param elipsis=ELIPSIS? br ARROW br expression
 	;
 
 tuple
-	: L_PAREN (expression COMMA)* expression COMMA? R_PAREN
-	| L_PAREN COMMA R_PAREN
+	: L_PAREN br (expression br COMMA br)* expression br COMMA? br R_PAREN
+	| L_PAREN br COMMA br R_PAREN
 	;
 
 vector
-	: L_ARR (expression COMMA)* expression R_ARR
-	;
-
-map
-	: L_BRAC (expression ARROW expression COMMA)* expression ARROW expression R_BRAC
+	: L_ARR br (expression br COMMA br)* expression br R_ARR
 	;
 
 indexer
-	: L_BRAC
-		( l_index=expression (elipsis=ELIPSIS r_index=expression?)?
-		| (l_index=expression? elipsis=ELIPSIS)? r_index=expression
-		) R_BRAC
+	: L_BRAC br
+		( l_index=expression br (elipsis=ELIPSIS br r_index=expression?)?
+		| (l_index=expression? br elipsis=ELIPSIS)? br r_index=expression
+		) br R_BRAC
 	;
 
 piecewise
-	: L_CURL condition+ (expression OTHERWISE SEMI_COLON?)?
+	: L_CURL br (condition br)+ (expression br OTHERWISE (br SEMI_COLON)?)?
 	;
 
 condition
-	: expr=expression IF cond=expression SEMI_COLON
+	: expr=expression br IF br cond=expression br SEMI_COLON
 	;
 
 union
-	: L_PAREN (expression PIPE)+ expression R_PAREN
+	: L_PAREN br (expression br PIPE br)+ expression br R_PAREN
 	;
 
 relational_op
@@ -175,10 +168,9 @@ relational_op
 	| LE
 	;
 
-end
-	: DOT
-	|
-	;
+end: DOT? br;
+
+br: BR*;
 
 
 /*
@@ -361,11 +353,6 @@ MULTILINE_COMMENT
 	: ('/*' .*? '*/') -> channel(HIDDEN)
 	;
 
-WS
-	:
-		( ' '
-		| '\t'
-		| '\r'
-		| '\n'
-		) -> channel(HIDDEN)
-	;
+BR: '\n';
+
+WS: [ \t\r] -> channel(HIDDEN);
