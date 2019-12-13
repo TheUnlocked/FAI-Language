@@ -338,74 +338,6 @@ namespace FAILang
                 case "/":
                     oper = BinaryOperator.DIVIDE;
                     break;
-                case "^":
-                    oper = BinaryOperator.EXPONENT;
-
-                    if (binaryNodes[0].prefix() != null)
-                    {
-                        // Exponentation is an edge-case in which the prefix operator needs to go after it. e.g. -2^2 = -4; -2x^2 where x=5 = -50
-                        UnaryOperator? prefix = null;
-                        Number? multiplier = null;
-                        IType atom = binaryNodes[0].prefix().multiplier().atom()?.Pipe(VisitAtom);
-
-                        if (binaryNodes[0].prefix().op != null)
-                        {
-                            switch (binaryNodes[0].prefix().op.Text)
-                            {
-                                case "~":
-                                    prefix = UnaryOperator.NOT;
-                                    break;
-                                case "-":
-                                    prefix = UnaryOperator.NEGATIVE;
-                                    break;
-                                case "+-":
-                                    prefix = UnaryOperator.PLUS_MINUS;
-                                    break;
-                            }
-                        }
-                        if (binaryNodes[0].prefix().multiplier().NUMBER() != null)
-                        {
-                            multiplier = new Number(Convert.ToDouble(binaryNodes[0].prefix().multiplier().t_number.Text));
-                            if (atom == null)
-                            {
-                                atom = multiplier;
-                                multiplier = null;
-                            }
-                        }
-                        if (prefix != null)
-                        {
-                            if (multiplier != null)
-                            {
-                                return new UnaryOperatorExpression(prefix.Value,
-                                    new BinaryOperatorExpression(BinaryOperator.MULTIPLY, multiplier,
-                                        new BinaryOperatorExpression(oper, atom,
-                                            VisitBinary(binaryNodes[1]))));
-                            }
-                            else
-                            {
-                                return new UnaryOperatorExpression(prefix.Value,
-                                    new BinaryOperatorExpression(oper, atom,
-                                        VisitBinary(binaryNodes[1])));
-                            }
-
-                        }
-                        else
-                        {
-                            if (multiplier != null)
-                            {
-                                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, multiplier,
-                                    new BinaryOperatorExpression(oper, atom,
-                                        VisitBinary(binaryNodes[1])));
-                            }
-                            else
-                            {
-                                return new BinaryOperatorExpression(oper, atom,
-                                    VisitBinary(binaryNodes[1]));
-                            }
-                        }
-
-                    }
-                    break;
                 case "||":
                     oper = BinaryOperator.CONCAT;
                     break;
@@ -454,15 +386,24 @@ namespace FAILang
                 //else
                 n = new Number(Convert.ToDouble(number.Text));
 
-                if (context.atom() != null)
+                if (context.exponent() != null)
                 {
-                    return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n, VisitAtom(context.atom()));
+                    return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n, VisitExponent(context.exponent()));
                 }
                 else
                     return n;
             }
             else
-                return VisitAtom(context.atom());
+                return VisitExponent(context.exponent());
+        }
+
+        public override IType VisitExponent([NotNull] FAILangParser.ExponentContext context)
+        {
+            if (context.EXPONENT() != null)
+            {
+                return new BinaryOperatorExpression(BinaryOperator.EXPONENT, VisitAtom(context.atom()), VisitPrefix(context.prefix()));
+            }
+            return VisitAtom(context.atom());
         }
 
         public override IType VisitAtom([NotNull] FAILangParser.AtomContext context)
@@ -506,10 +447,12 @@ namespace FAILang
             //    return VisitMap(context.map());
             else if (context.tuple() != null)
                 return VisitTuple(context.tuple());
-            else if (context.t_string != null)
+            else if (context.NUMBER() != null)
+                return new Number(Convert.ToDouble(context.NUMBER().GetText()));
+            else if (context.STRING() != null)
             {
-                var str = context.t_string;
-                string processed = str.Text.Substring(1, str.Text.Length - 2)
+                var str = context.STRING().GetText();
+                string processed = str[1..^1]
                     .Replace("\\\\", "\\")
                     .Replace("\\b", "\b")
                     .Replace("\\f", "\f")
@@ -520,9 +463,9 @@ namespace FAILang
                     .Replace("\\\"", "\"");
                 return new MathString(processed);
             }
-            else if (context.t_boolean != null)
-                return context.t_boolean.Text.Equals("true") ? MathBool.TRUE : MathBool.FALSE;
-            else if (context.t_undefined != null)
+            else if (context.BOOLEAN() != null)
+                return context.BOOLEAN().GetText().Equals("true") ? MathBool.TRUE : MathBool.FALSE;
+            else if (context.UNDEFINED() != null)
                 return Undefined.Instance;
 
             return null;

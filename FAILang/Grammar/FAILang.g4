@@ -93,7 +93,6 @@ relational
 
 binary
 	: prefix
-	| <assoc=right> binary op=EXPONENT binary
 	| binary op=( MULTIPLY | DIVIDE ) binary
 	| binary op=( PLUS | SUBTRACT | PLUS_MINUS | CONCAT ) binary
 	| binary op=IS binary
@@ -104,8 +103,12 @@ prefix
 	;
 
 multiplier
-	: t_number=NUMBER atom?
-	| atom
+	: t_number=NUMBER exponent?
+	| exponent
+	;
+
+exponent
+	: atom (EXPONENT prefix)?
 	;
 
 atom
@@ -120,9 +123,10 @@ atom
 	| tuple
 	| vector
 	//| map
-	| t_string=STRING
-	| t_boolean=BOOLEAN
-	| t_undefined=UNDEFINED
+	| NUMBER
+	| STRING
+	| BOOLEAN
+	| UNDEFINED
 	;
 
 lambda

@@ -7,7 +7,7 @@ using FAILang.Types;
 
 namespace FAILang.Tests
 {
-    public class FunctionTests
+    public class FunctionTests : IDisposable
     {
         Global env;
         public FunctionTests()
