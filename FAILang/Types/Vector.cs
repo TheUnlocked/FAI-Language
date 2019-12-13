@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Numerics;
+using System.Collections;
 
 namespace FAILang.Types
 {
@@ -22,6 +23,7 @@ namespace FAILang.Types
         public Dictionary<BinaryOperator, Func<IOperable, IType>> BinaryOperators => new Dictionary<BinaryOperator, Func<IOperable, IType>>() {
             {BinaryOperator.ADD, OpAdd},
             {BinaryOperator.SUBTRACT, OpSubtract},
+            {BinaryOperator.PLUS_MINUS, OpPlusMinus},
             {BinaryOperator.MULTIPLY, OpMultiply},
             {BinaryOperator.CONCAT, OpConcat}
         };
@@ -31,6 +33,7 @@ namespace FAILang.Types
         public Dictionary<UnaryOperator, Func<IType>> UnaryOperators => new Dictionary<UnaryOperator, Func<IType>>()
         {
             {UnaryOperator.NEGATIVE, OpNegate},
+            {UnaryOperator.PLUS_MINUS, OpPlusMinus},
             {UnaryOperator.ABS, OpMagnitude}
         };
 
@@ -70,6 +73,27 @@ namespace FAILang.Types
                 default:
                     return null;
             }
+        }
+        private IType OpPlusMinus(IOperable other)
+        {
+            var pos = OpAdd(other);
+            var neg = OpSubtract(other);
+            if (pos == null || neg == null)
+            {
+                return null;
+            }
+            if (pos is Error) return pos;
+            if (neg is Error) return neg;
+            return new UnevaluatedUnion(new IType[] { pos, neg });
+        }
+        private IType OpPlusMinus()
+        {
+            var neg = OpNegate();
+            if (neg is Error)
+            {
+                return neg;
+            }
+            return new UnevaluatedUnion(new IType[] { new Vector(items), neg });
         }
         private IType OpMultiply(IOperable other)
         {
@@ -123,9 +147,9 @@ namespace FAILang.Types
                     newItems[i] = new Number(-num.value);
                 }
                 else
-                    return new Error("WrongType", $"Vector inputs to the |x| operator must be purely numeric");
+                    return new Error("WrongType", $"Vector inputs to the - operator must be purely numeric");
             }
-            return new Vector(items);
+            return new Vector(newItems);
         }
         private IType OpMagnitude()
         {
@@ -170,7 +194,7 @@ namespace FAILang.Types
 
         public override int GetHashCode()
         {
-            return -1319053796 + EqualityComparer<IType[]>.Default.GetHashCode(items);
+            return -1319053796 + ((IStructuralEquatable)items).GetHashCode(EqualityComparer<IType>.Default);
         }
     }
 

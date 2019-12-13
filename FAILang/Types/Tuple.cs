@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using FAILang.Types.Unevaluated.Passthrough;
+using System.Collections;
 
 namespace FAILang.Types
 {
@@ -69,7 +70,7 @@ namespace FAILang.Types
 
         public override int GetHashCode()
         {
-            return -1319053796 + EqualityComparer<IType[]>.Default.GetHashCode(items);
+            return -1319053796 + ((IStructuralEquatable)items).GetHashCode(EqualityComparer<IType>.Default);
         }
     }
 

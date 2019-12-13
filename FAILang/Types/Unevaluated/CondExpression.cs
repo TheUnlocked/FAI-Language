@@ -1,5 +1,6 @@
 ﻿using FAILang.Types.Unevaluated.Passthrough;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,8 +63,8 @@ namespace FAILang.Types.Unevaluated
         public override int GetHashCode()
         {
             int hash = 691949981;
-            hash = hash * 1532528149 + EqualityComparer<IType[]>.Default.GetHashCode(conds);
-            hash = hash * 1532528149 + EqualityComparer<IType[]>.Default.GetHashCode(exprs);
+            hash = hash * 1532528149 + ((IStructuralEquatable)conds).GetHashCode(EqualityComparer<IType>.Default);
+            hash = hash * 1532528149 + ((IStructuralEquatable)exprs).GetHashCode(EqualityComparer<IType>.Default);
             hash = hash * 1532528149 + default_expr.GetHashCode();
             return hash;
         }

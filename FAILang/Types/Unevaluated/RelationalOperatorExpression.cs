@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using FAILang.Types.Unevaluated.Passthrough;
+using System.Collections;
 
 namespace FAILang.Types.Unevaluated
 {
@@ -76,7 +77,7 @@ namespace FAILang.Types.Unevaluated
         {
             int hash = 691949981;
             hash = hash * 1532528149 + EqualityComparer<RelationalOperator[]>.Default.GetHashCode(ops);
-            hash = hash * 1532528149 + EqualityComparer<IType[]>.Default.GetHashCode(ins);
+            hash = hash * 1532528149 + ((IStructuralEquatable)ins).GetHashCode(EqualityComparer<IType>.Default);
             return hash;
         }
     }
