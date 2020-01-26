@@ -47,7 +47,7 @@ defStatement
 	;
 
 def
-	: memoize=MEMO? name L_PAREN fparams R_PAREN EQ expression
+	: memoize='memo'? name L_PAREN fparams R_PAREN EQ expression
 	| name EQ expression
 	;
 
@@ -130,7 +130,7 @@ atom
 	;
 
 lambda
-	: L_PAREN memoize=MEMO? fparams R_PAREN ARROW expression
+	: L_PAREN memoize='memo'? fparams R_PAREN ARROW expression
 	| param elipsis=ELIPSIS? ARROW expression
 	;
 
@@ -319,10 +319,6 @@ BOOLEAN
 	;
 UNDEFINED
 	: 'undefined'
-	;
-
-MEMO
-	: 'memo'
 	;
 
 IF
