@@ -240,7 +240,7 @@ namespace FAILang
 
         public override IType VisitWhere([NotNull] FAILangParser.WhereContext context)
         {
-            if (context.WHERE() != null)
+            if (context.WHERE() != null || context.LET() != null)
             {
                 var defPairs = context.def().Select(ctx => VisitDef(ctx));
                 var errors = defPairs.Where(x => x.value is Error);

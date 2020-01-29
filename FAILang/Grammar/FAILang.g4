@@ -81,6 +81,7 @@ expression
 
 where
 	: boolean (WHERE (def COMMA)* def)?
+	| (LET (def COMMA)* def IN)? boolean
 	;
 
 boolean
@@ -185,183 +186,66 @@ end
  * Lexer Rules
  */
 
-fragment UPPERCASE
-	: [A-Z]
-	;
-fragment LOWERCASE
-	: [a-z]
-	;
-fragment DIGIT
-	: [0-9]
-	;
-fragment STRING_CHAR
-	: ~'\\'
-	;
-fragment ESC
-	: '\\' 
-		( 'b' 
-		| 'f' 
-		| 'n' 
-		| 'r' 
-		| 't' 
-		| 'v' 
-		| '\\' 
-		| '"'
-		)
-	;
-fragment E
-	: 'e'
-	| 'E'
-	;
+fragment UPPERCASE	: [A-Z]														;
+fragment LOWERCASE	: [a-z]														;
+fragment DIGIT		: [0-9]														;
+fragment STRING_CHAR: ~'\\' 													;
+fragment ESC		: '\\' ( 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | '"' )	;
+fragment E			: 'e' | 'E'													;
 
-PLUS
-	: '+'
-	;
-SUBTRACT
-	: '-'
-	;
-PLUS_MINUS
-	: '+-'
-	;
-MULTIPLY
-	: '*'
-	;
-DIVIDE
-	: '/'
-	;
-EXPONENT
-	: '^'
-	;
-CONCAT
-	: '||'
-	;
-EQ
-	: '='
-	;
-NE
-	: '~='
-	;
-R_ARR
-	: '>'
-	;
-L_ARR
-	: '<'
-	;
-GE
-	: '>='
-	;
-LE
-	: '<='
-	;
+PLUS		: '+'	;
+SUBTRACT	: '-'	;
+PLUS_MINUS	: '+-'	;
+MULTIPLY	: '*'	;
+DIVIDE		: '/'	;
+EXPONENT	: '^'	;
+CONCAT		: '||'	;
+EQ			: '='	;
+NE			: '~='	;
+R_ARR		: '>'	;
+L_ARR		: '<'	;
+GE			: '>='	;
+LE			: '<='	;
 
-AND
-	: 'and'
-	;
-OR	
-	: 'or'
-	;
+AND : 'and' ;
+OR  : 'or'  ;
+NOT : '~'   ;
 
-NOT
-	: '~'
-	;
+L_PAREN : '('	;
+R_PAREN : ')'	;
+L_CURL  : '{'	;
+R_CURL  : '}'	;
+L_BRAC  : '['	;
+R_BRAC  : ']'	;
 
-L_PAREN
-	: '('
-	;
-R_PAREN
-	: ')'
-	;
-L_CURL
-	: '{'
-	;
-R_CURL
-	: '}'
-	;
-L_BRAC
-	: '['
-	;
-R_BRAC
-	: ']'
-	;
-COMMA
-	: ','
-	;
-DOT
-	: '.'
-	;
-SEMI_COLON
-	: ';'
-	;
-PIPE
-	: '|'
-	;
-ELIPSIS
-	: '...'
-	| '..'
-	;
-ARROW
-	: '->'
-	;
+COMMA		: ','			;
+DOT 		: '.'			;
+SEMI_COLON	: ';'			;
+PIPE		: '|'			;
+ELIPSIS 	: '...' | '..'	;
+ARROW		: '->'			;
 
 NUMBER
 	: DIGIT* '.' DIGIT+ (E '-'? DIGIT+)?
 	| DIGIT+ ('.' DIGIT+)? (E '-'? DIGIT+)?
 	;
-STRING
-	: '"'
-		( ESC
-		| STRING_CHAR
-		)*? '"'
-	;
-BOOLEAN
-	: 'true'
-	| 'false'
-	;
-UNDEFINED
-	: 'undefined'
-	;
 
-IF
-	: 'if'
-	;
-OTHERWISE
-	: 'otherwise'
-	;
+STRING		: '"' ( ESC | STRING_CHAR )*? '"'	;
+BOOLEAN 	: 'true' | 'false'					;
+UNDEFINED	: 'undefined'						;
 
-IS
-	: 'is'
-	;
+IF			: 'if'			;
+OTHERWISE	: 'otherwise'	;
 
-WHERE
-	: 'where'
-	;
+IS	: 'is'	;
 
-NAME
-	:
-		( UPPERCASE
-		| LOWERCASE
-		| '_'
-		)
-		( UPPERCASE
-		| LOWERCASE
-		| '_'
-		| DIGIT
-		)*
-	;
+WHERE	: 'where'	;
+LET 	: 'let'		;
+IN		: 'in'		;
 
-COMMENT
-	: ('//' .*? EOF) -> channel(HIDDEN)
-	;
+NAME:	( UPPERCASE | LOWERCASE | '_' )
+		( UPPERCASE | LOWERCASE | '_' | DIGIT )*	;
 
-MULTILINE_COMMENT
-	: ('/*' .*? '*/') -> channel(HIDDEN)
-	;
-
-WS
-	:
-		( ' '
-		| '\t'
-		| '\r'
-		| '\n'
-		) -> channel(HIDDEN)
-	;
+COMMENT 			: ('//' .*? EOF)				-> channel(HIDDEN)	;
+MULTILINE_COMMENT	: ('/*' .*? '*/')				-> channel(HIDDEN)	;
+WS					: ( ' ' | '\t' | '\r' | '\n' )	-> channel(HIDDEN)	;
