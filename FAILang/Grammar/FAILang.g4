@@ -1,4 +1,4 @@
-grammar FAILang;
+﻿grammar FAILang;
 
 /*
  * Parser Rules
@@ -43,7 +43,7 @@ namespaceStatement
 
 defStatement
 	: update='update'? def
-	| update='update' memoize=MEMO name
+	| update='update' memoize='memo' name
 	;
 
 def
@@ -80,8 +80,9 @@ expression
 	;
 
 where
-	: boolean (WHERE (def COMMA)* def)?
-	| (LET (def COMMA)* def IN)? boolean
+	: boolean
+	| where (WHERE (def COMMA)* def) SEMICOLON?
+	| (LET (def COMMA)* def IN) where
 	;
 
 boolean
@@ -104,7 +105,7 @@ prefix
 	;
 
 multiplier
-	: t_number=NUMBER exponent?
+	: t_number=NUMBER exponent
 	| exponent
 	;
 
@@ -156,11 +157,11 @@ indexer
 	;
 
 piecewise
-	: L_CURL condition+ (expression OTHERWISE SEMI_COLON?)?
+	: L_CURL condition+ (expression OTHERWISE SEMICOLON?)?
 	;
 
 condition
-	: expr=expression IF cond=expression SEMI_COLON
+	: expr=expression IF cond=expression SEMICOLON
 	;
 
 union
@@ -220,7 +221,7 @@ R_BRAC  : ']'	;
 
 COMMA		: ','			;
 DOT 		: '.'			;
-SEMI_COLON	: ';'			;
+SEMICOLON	: ';'			;
 PIPE		: '|'			;
 ELIPSIS 	: '...' | '..'	;
 ARROW		: '->'			;
@@ -244,7 +245,7 @@ LET 	: 'let'		;
 IN		: 'in'		;
 
 NAME:	( UPPERCASE | LOWERCASE | '_' )
-		( UPPERCASE | LOWERCASE | '_' | DIGIT )*	;
+		( UPPERCASE | LOWERCASE | '_' | DIGIT )* '\''?	;
 
 COMMENT 			: ('//' .*? EOF)				-> channel(HIDDEN)	;
 MULTILINE_COMMENT	: ('/*' .*? '*/')				-> channel(HIDDEN)	;

@@ -32,20 +32,20 @@ namespace FAILang.Types.Unevaluated
                 List<IType> args = new List<IType>();
                 for (int i = 0; i < this.args.Length; i++)
                 {
-                    var arg = this.args[i].Item1;
+                    var arg = this.args[i].argument;
                     while (arg is IUnevaluated uneval)
                     {
                         arg = uneval.Evaluate(scope);
                     }
                     if (arg is Union un)
-                    {
+                    {   
                         return un.Apply(x => new FunctionExpression(func,
                             args.Select(x => (x, false))
-                                .Concat(new[] { (x, this.args[i].Item2) })
+                                .Concat(new[] { (x, this.args[i].spread) })
                                 .Concat(this.args[(i + 1)..])
                                 .ToArray()));
                     }
-                    if (this.args[i].Item2)
+                    if (this.args[i].spread)
                     {
                         if (arg is Tuple tu)
                         {
@@ -73,7 +73,7 @@ namespace FAILang.Types.Unevaluated
                 return new BakedExpression(new FunctionExpression(func, args), scope);
             }
             else if (func is Number n1 && args.Length == 1)
-                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].Item1).Evaluate(scope);
+                return new BinaryOperatorExpression(BinaryOperator.MULTIPLY, n1, args[0].argument).Evaluate(scope);
             return new Error("SyntaxError", $"You can't call an object of type {func.TypeName}.");
         }
 

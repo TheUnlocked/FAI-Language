@@ -21,7 +21,13 @@ namespace FAILang.Types.Unevaluated.Passthrough
         {
             if (PassthroughExpression is IUnevaluated u)
             {
-                var newScope = new Scope(scope, lookups);
+                var lookupClones = new Dictionary<string, IType>(lookups);
+                var newScope = new Scope(scope, lookupClones);
+                foreach (var key in lookupClones.Keys.ToArray())
+                {
+                    lookupClones[key] = new BakedExpression(lookupClones[key], newScope);
+                }
+                
                 return u.Evaluate(newScope);
             }
             return PassthroughExpression;

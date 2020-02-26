@@ -42,5 +42,21 @@ namespace FAILang.Tests
             Assert.IsType<Number>(result);
             Assert.Equal(expected, ((Number)result).value);
         }
+
+        public static IEnumerable<object[]> AdjacentMultiplyData()
+        {
+            yield return new object[] { "2 2", (Complex)2 };
+            yield return new object[] { "2x", (Complex)20 };
+            yield return new object[] { "x x", (Complex)10 };
+        }
+
+        [Theory]
+        [MemberData(nameof(AdjacentMultiplyData))]
+        public void AdjacentMultiply(string input, Complex expected)
+        {
+            var result = FAI.Instance.InterpretLines(env, input)[^1];
+            Assert.IsType<Number>(result);
+            Assert.Equal(expected, ((Number)result).value);
+        }
     }
 }

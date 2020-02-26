@@ -240,7 +240,7 @@ namespace FAILang
 
         public override IType VisitWhere([NotNull] FAILangParser.WhereContext context)
         {
-            if (context.WHERE() != null || context.LET() != null)
+            if (context.where() != null)
             {
                 var defPairs = context.def().Select(ctx => VisitDef(ctx));
                 var errors = defPairs.Where(x => x.value is Error);
@@ -248,7 +248,7 @@ namespace FAILang
                 {
                     return errors.First().value;
                 }
-                return new WhereExpression(VisitBoolean(context.boolean()),
+                return new WhereExpression(VisitWhere(context.where()),
                     new Dictionary<string, IType>(defPairs.Select(t => new KeyValuePair<string, IType>(t.name, t.value))));
             }
             return VisitBoolean(context.boolean());

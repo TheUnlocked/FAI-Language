@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FAILang.Types.Unevaluated.Passthrough;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,6 +38,10 @@ namespace FAILang.Types.Unevaluated
             if (result is Error)
             {
                 return globalEnvironment.GlobalScope?[name];
+            }
+            if (result is IUnevaluated)
+            {
+                return new BakedExpression(result, scope);
             }
             return result;
         }

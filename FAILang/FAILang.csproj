@@ -19,12 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Antlr4" Version="4.6.5" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Antlr4 Update="Grammar\FAILang.g4">
       <Listener>false</Listener>
     </Antlr4>
+    <PackageReference Include="Antlr4" Version="4.6.5" />
   </ItemGroup>
 </Project>
